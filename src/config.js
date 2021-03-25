@@ -1,5 +1,4 @@
 export const PROJECT_NAME = 'NPMRDS';
-export const PROJECT_THEME = 'TEST_THEME';
 
 let API_HOST = 'https://graph.availabs.org';
 let AUTH_HOST = 'https://availauth.availabs.org';
