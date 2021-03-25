@@ -6,7 +6,7 @@ import AuthMenu from 'pages/auth/components/AuthMenu'
 const navItems = [
   {
     name: 'TIG Data Map',
-    path: `/map/`,
+    path: `/maptest/`,
     //icon: 'fa fa-home',
     className: 'font-medium text-lg'
     
