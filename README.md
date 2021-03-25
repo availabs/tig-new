@@ -1,1 +1,1 @@
-Template for AVAIL apps.
+TIG maps new repository 
