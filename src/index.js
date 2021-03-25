@@ -9,8 +9,10 @@ import get from "lodash.get"
 
 import { Provider } from 'react-redux';
 import store from 'store';
+
+import TDS_Theme from "./theme"
 import {
-  Themes,
+
   FalcorProvider,
   ThemeContext,
   falcorGraph,
@@ -43,7 +45,7 @@ ReactDOM.render(
   <React.StrictMode>
    	<Provider store={ store }>
   		<FalcorProvider falcor={ falcorGraph(API_HOST) }>
-        <ThemeContext.Provider value={ get(Themes, PROJECT_THEME, Themes["light"]) }>
+        <ThemeContext.Provider value={TDS_Theme }>
           <AuthEnabledApp />
         </ThemeContext.Provider>
       </FalcorProvider>

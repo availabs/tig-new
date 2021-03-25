@@ -1,17 +1,15 @@
 import React from "react"
 
-import get from "lodash.get"
-
 import { AvlMap } from "@availabs/avl-map"
 
 import config from "config.json"
 
 import { withAuth } from '@availabs/avl-components'
 
-import layer from "../../layers/index";
+import {TestTipLayerFactory} from "../../layers/tipLayer";
 
+const Map = withAuth(({ mapOptions,layers}) => {
 
-const Map = withAuth(({ mapOptions, layers, falcor, user }) => {
 
     return (
         <div className='h-screen  h-full flex-1 flex flex-col text-white'>
@@ -49,7 +47,7 @@ const MapPage = {
                 zoom: 6.6
             },
             layers: [
-
+                TestTipLayerFactory()
             ]
         },
         wrappers: [
