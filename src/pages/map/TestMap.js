@@ -6,7 +6,7 @@ import config from "config.json"
 
 import { withAuth } from '@availabs/avl-components'
 
-import {TestTipLayerFactory} from "../../layers/tipLayer";
+import {layers} from "./layers";
 
 const Map = withAuth(({ mapOptions,layers}) => {
 
@@ -20,7 +20,8 @@ const Map = withAuth(({ mapOptions,layers}) => {
                 sidebar={{
                     title: "Map Test",
                     tabs: ["layers", "styles"],
-                    open: false
+                    open: true
+
                 }}/>
         </div>
     )
@@ -44,10 +45,14 @@ const MapPage = {
         type: Map,
         props: {
             mapOptions: {
-                zoom: 6.6
+                zoom: 6.6,
+                styles: [{name: "Light",
+                    style: 'mapbox://styles/am3081/ckm86j4bw11tj18o5zf8y9pou' }]
             },
             layers: [
-                TestTipLayerFactory()
+                layers.sed_county_2040(),
+                layers.tig()
+
             ]
         },
         wrappers: [

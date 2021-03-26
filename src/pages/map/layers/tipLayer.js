@@ -3,6 +3,7 @@ import { LayerContainer } from "@availabs/avl-map"
 var WKT = require('terraformer-wkt-parser');
 
 class TestTipLayer extends LayerContainer {
+    setActive = false
     name = 'TIP Mappable Projects'
     filters = {
         dataset: {
@@ -12,9 +13,12 @@ class TestTipLayer extends LayerContainer {
                 {value:'64', name:'2017-2021 TIP Mappable Projects'},
                 {value:'131', name:'2014-2018 TIP Mappable Projects'}
             ],
-            value: 131
+            value: 131,
+            accessor: d => d.name,
+            valueAccessor: d => d.value,
         }
     }
+
 
     fetchData() {
         return fetch(`${HOST}views/${this.filters.dataset.value}/data_overlay`)

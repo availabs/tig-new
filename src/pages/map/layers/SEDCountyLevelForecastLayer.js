@@ -1,0 +1,203 @@
+import { LayerContainer } from "@availabs/avl-map"
+import {HOST} from "./layerHost";
+import counties from '../wrappers/counties.json'
+import { getColorRange} from "@availabs/avl-components"
+import {
+    scaleLinear,
+    scaleQuantile,
+    scaleQuantize,
+    scaleThreshold,
+    scaleOrdinal
+} from "d3-scale"
+import { extent } from "d3-array"
+class SEDCountyLevelForecastLayer extends LayerContainer {
+    name = '2040 SED County Level Forecast'
+    filters = {
+        dataset: {
+            name: 'Dataset',
+            type: 'dropdown',
+            domain: [
+                {value: '49', name: '2000-2040 Employment Labor Force(current: 2000)'},
+                {value: '46', name: '2000-2040 Group Quarters Population (current: 2000)'},
+                {value: '45', name: '2000-2040 Household Population (current: 2000)'},
+                {value: '47', name: '2000-2040 Households (current: 2000)'},
+                {value: '48', name: '2000-2040 Household Size (current: 2000)'},
+                {value: '50', name: '2000-2040 Labor Force (current: 2000)'},
+                {value: '43', name: '2000-2040 Payroll Employment - QCEW Based (current: 2000)'},
+                {value: '44', name: '2000-2040 Proprietors Employment (current: 2000)'},
+                {value: '42', name: '2000-2040 Total Employment (current: 2000)'},
+                {value: '41', name: '2000-2040 Total Population (current: 2000)'}
+            ],
+            value: '49',
+            accessor: d => d.name,
+            valueAccessor: d => d.value,
+            multi:false
+        },
+        year: {
+            name: 'Year',
+            type: 'select',
+            domain: [2000,2005,2010,2015,2020,2025,2030,2035,2040],
+            value: 2000,
+            multi: false
+        }
+    }
+    sources = [
+        {
+            id: "counties",
+            source: {
+                type: "vector",
+                url: "mapbox://am3081.a8ndgl5n"
+            }
+        }
+    ]
+    layers = [
+        {
+            id: "Counties",
+            filter: false,
+            "source-layer": "counties",
+            source: "counties",
+            type: "fill",
+            paint: {
+                "fill-color": [
+                    "case",
+                    ["boolean", ["feature-state", "hover"], false],
+                    "#090",
+                    "#900"
+                ],
+                "fill-opacity": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    5, 1.0,
+                    20, 0.1
+                ]
+            }
+        }
+    ]
+    legend = {
+        // types: ["quantile", "linear", "quantize", "ordinal"],
+        // type: "linear",
+        // domain: [0, 50, 100],
+        // range: getColorRange(3, "BrBG", true),
+
+        // type: "ordinal",
+        // domain: ["One", "Two", "Three", "Four", "Five"],
+        // range: getColorRange(5, "Set3", true),
+        // height: 2,
+        // width: 320,
+        // direction: "horizontal",
+
+        // type: "quantize",
+        // domain: [0, 15000],
+        // range: getColorRange(5, "BrBG", true),
+        // format: ",d",
+
+        type: "ordinal",
+        domain: [0,100,200,300,400,500],
+        range: getColorRange(7, "YlOrRd", true),
+        show: true,
+        title: "2000-2040 Employment Labor Force(current: 2000)",
+
+    }
+
+
+    fetchData() {
+        return fetch(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
+            .then(response => response.json())
+            .then(response => {
+                this.data = response
+            })
+    }
+
+    getColorScale(data) {
+        const { type, range, domain } = this.legend;
+        switch (type) {
+            case "quantile": {
+                const domain = data.map(d => d.value).filter(d => d).sort();
+                this.legend.domain = domain;
+                return scaleQuantile()
+                    .domain(domain)
+                    .range(range);
+            }
+            case "quantize": {
+                const domain = extent(data, d => d.value);
+                this.legend.domain = domain;
+                return scaleQuantize()
+                    .domain(domain)
+                    .range(range);
+            }
+            case "threshold": {
+                return scaleThreshold()
+                    .domain(domain)
+                    .range(range)
+            }
+            case "linear":{
+                return scaleLinear()
+                    .domain(domain)
+                    .range(range)
+            }
+            case "ordinal":{
+                return scaleOrdinal()
+                    .domain(domain)
+                    .range(range)
+
+            }
+        }
+    }
+
+    render(map) {
+
+        const data_counties = this.data.data.map(item =>{
+            return counties.reduce((a,c) =>{
+               if(item.area === c.name){
+                   a['name'] = c.name
+                   a['geoid'] = c.geoid
+               }
+               return a
+            },{})
+        })
+
+        if (data_counties.length) {
+            map.setFilter("Counties", ["in", ["get", "geoid"], ["literal", data_counties.map(d => d.geoid)]]);
+        }
+        else {
+            map.setFilter("Counties", false);
+        }
+        this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
+            if(c.value === this.filters.dataset.value){
+                a = c.name + '-' + this.filters.year.value
+            }
+            return a
+        },'')
+        const processedData = this.data.data.reduce((acc,curr) =>{
+            data_counties.forEach(data_county =>{
+                if(curr.area === data_county.name){
+                    acc.push({
+                        id: data_county.geoid,
+                        value: curr[this.filters.year.value]
+                    })
+                }
+            })
+            return acc
+        },[])
+
+        const colorScale = this.getColorScale(processedData),
+            colors = processedData.reduce((a,c) =>{
+                if(c.value !== 0){
+                    a[c.id] = colorScale(c.value)
+                }
+                return a
+            },{});
+
+        map.setPaintProperty("Counties", "fill-color", [
+            "case",
+            ["boolean", ["feature-state", "hover"], false],
+            "#090",
+            ["get", ["get", "geoid"], ["literal", colors]]
+        ])
+
+
+    }
+}
+
+export const SEDCountyLevelForecastLayerFactory = (options = {}) => new SEDCountyLevelForecastLayer(options);
