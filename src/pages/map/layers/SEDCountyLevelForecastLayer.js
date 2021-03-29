@@ -2,6 +2,8 @@ import { LayerContainer } from "@availabs/avl-map"
 import {HOST} from "./layerHost";
 import counties from '../wrappers/counties.json'
 import { getColorRange} from "@availabs/avl-components"
+import get from "lodash.get"
+
 import {
     scaleLinear,
     scaleQuantile,
@@ -41,6 +43,30 @@ class SEDCountyLevelForecastLayer extends LayerContainer {
             multi: false
         }
     }
+    onHover = {
+        layers: ["Counties"],
+        callback: (layerId, features, lngLat) => {
+            const geoid = features.reduce((a,c) => {
+                a = get(c,['properties','geoid'],'')
+                return a
+            },'')
+            const graph = counties.reduce((a,c) =>{
+                if (c.geoid === geoid ){
+                    a = c
+                }
+                return a
+            },{})
+            return this.data.data.reduce((a,c) =>{
+                if(c.area === graph['name']){
+                    a.push(['County',c.area],["Value:",c[this.filters.year.value]])
+                }
+                return a
+            },[])
+
+
+
+        }
+    }
     sources = [
         {
             id: "counties",
@@ -68,7 +94,7 @@ class SEDCountyLevelForecastLayer extends LayerContainer {
                     "interpolate",
                     ["linear"],
                     ["zoom"],
-                    5, 1.0,
+                    5, 0.5,
                     20, 0.1
                 ]
             }
@@ -92,9 +118,9 @@ class SEDCountyLevelForecastLayer extends LayerContainer {
         // range: getColorRange(5, "BrBG", true),
         // format: ",d",
 
-        type: "ordinal",
+        type: "quantile",
         domain: [0,100,200,300,400,500],
-        range: getColorRange(7, "YlOrRd", true),
+        range: getColorRange(6, "YlOrRd", true),
         show: true,
         title: "2000-2040 Employment Labor Force(current: 2000)",
 
