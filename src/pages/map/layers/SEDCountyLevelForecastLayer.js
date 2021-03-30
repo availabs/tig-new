@@ -64,7 +64,7 @@ class SEDCountyLevelForecastLayer extends LayerContainer {
 
         type: "quantile",
         range: getColorRange(5, "YlOrRd", true),
-        domain: [0,101,206,308,453,1008],
+        domain: [0,100,200,300,400,500],
         show: true,
         title: "2000-2040 Employment Labor Force(current: 2000)",
 
