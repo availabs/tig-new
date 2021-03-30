@@ -58,12 +58,10 @@ class SEDCountyLevelForecastLayer extends LayerContainer {
             },{})
             return this.data.data.reduce((a,c) =>{
                 if(c.area === graph['name']){
-                    a.push(['County',c.area],["Value:",c[this.filters.year.value]])
+                    a.push(['County',`${c.area}-${graph['state_code']}`],["Value:",c[this.filters.year.value]])
                 }
                 return a
             },[])
-
-
 
         }
     }
