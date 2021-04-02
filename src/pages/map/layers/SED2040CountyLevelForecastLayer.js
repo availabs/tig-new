@@ -12,7 +12,7 @@ import {
     scaleOrdinal
 } from "d3-scale"
 import { extent } from "d3-array"
-class SEDCountyLevelForecastLayer extends LayerContainer {
+class SED2040CountyLevelForecastLayer extends LayerContainer {
     setActive = false
     name = '2040 SED County Level Forecast'
     filters = {
@@ -38,7 +38,7 @@ class SEDCountyLevelForecastLayer extends LayerContainer {
         },
         year: {
             name: 'Year',
-            type: 'select',
+            type: 'dropdown',
             domain: [2000,2005,2010,2015,2020,2025,2030,2035,2040],
             value: 2000,
             multi: false
@@ -64,9 +64,9 @@ class SEDCountyLevelForecastLayer extends LayerContainer {
 
         type: "quantile",
         range: getColorRange(5, "YlOrRd", true),
-        domain: [0,100,200,300,400,500],
+        domain: [],
         show: true,
-        title: "2000-2040 Employment Labor Force(current: 2000)",
+        title: "",
 
     }
 
@@ -88,7 +88,7 @@ class SEDCountyLevelForecastLayer extends LayerContainer {
                     a.push(['County',`${c.area}-${graph['state_code']}`],["Value:",c[this.filters.year.value]])
                 }
                 return a
-            },[])
+            },[]).sort()
 
         }
     }
@@ -128,15 +128,29 @@ class SEDCountyLevelForecastLayer extends LayerContainer {
     ]
 
 
-    init(map){
 
+    init(map){
         return fetch(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response => response.json())
             .then(response => {
                 this.data = response
+                this.legend.title = `2000-2040 Employment Labor Force(current: 2000)-${this.filters.year.value}`
+                this.data_counties = this.data.data.map(item =>{
+                    return counties.reduce((a,c) =>{
+                        if(item.area === c.name){
+                            a['name'] = c.name
+                            a['geoid'] = c.geoid
+                        }
+                        return a
+                    },{})
+                })
+                this.legend.domain = this.data.data.reduce((a,c) =>{
+                    a.push(c[this.filters.year.value])
+                    return a
+                },[])
+
             })
     }
-
 
     fetchData() {
 
@@ -147,8 +161,38 @@ class SEDCountyLevelForecastLayer extends LayerContainer {
                     this.data = response
                     setTimeout(resolve,1000)
                 },)
-            );
+        );
     }
+
+
+    onFilterChange(filterName,value,preValue){
+
+        switch (filterName){
+            case "year" : {
+                this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
+                    if (c.value === this.filters.dataset.value){
+                        a = `${c.name}-${value}`
+                    }
+                    return a
+                },'')
+                this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
+                break;
+            }
+            case "dataset":{
+                this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
+                    if (c.value === value){
+                        a = `${c.name}-${this.filters.year.value}`
+                    }
+                    return a
+                },'')
+                this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
+                break;
+            }
+            case "default":{}
+        }
+    }
+
+
 
     getColorScale(data) {
 
@@ -190,31 +234,15 @@ class SEDCountyLevelForecastLayer extends LayerContainer {
 
     render(map) {
 
-        const data_counties = this.data.data.map(item =>{
-            return counties.reduce((a,c) =>{
-                if(item.area === c.name){
-                    a['name'] = c.name
-                    a['geoid'] = c.geoid
-                }
-                return a
-            },{})
-        })
-
-        if (data_counties.length) {
-            map.setFilter("Counties", ["in", ["get", "geoid"], ["literal", data_counties.map(d => d.geoid)]]);
+        if (this.data_counties.length) {
+            map.setFilter("Counties", ["in", ["get", "geoid"], ["literal", this.data_counties.map(d => d.geoid)]]);
         }
         else {
             map.setFilter("Counties", false);
         }
-        this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
-            if(c.value === this.filters.dataset.value){
-                a = c.name + '-' + this.filters.year.value
-            }
-            return a
-        },'')
 
-        const processedData = this.data.data.reduce((acc,curr) =>{
-            data_counties.forEach(data_county =>{
+        this.processedData = this.data.data.reduce((acc,curr) =>{
+            this.data_counties.forEach(data_county =>{
                 if(curr.area === data_county.name){
                     acc.push({
                         id: data_county.geoid,
@@ -225,17 +253,14 @@ class SEDCountyLevelForecastLayer extends LayerContainer {
             return acc
         },[])
 
-        this.legend.domain = processedData.map(d => d.value).filter(d => d).sort()
 
-        const colorScale = this.getColorScale(processedData),
-            colors = processedData.reduce((a,c) =>{
+        const colorScale = this.getColorScale(this.processedData),
+            colors = this.processedData.reduce((a,c) =>{
                 if(c.value !== 0){
                     a[c.id] = colorScale(c.value)
                 }
                 return a
             },{});
-
-
 
         map.setPaintProperty("Counties", "fill-color", [
             "case",
@@ -248,4 +273,4 @@ class SEDCountyLevelForecastLayer extends LayerContainer {
 
 }
 
-export const SEDCountyLevelForecastLayerFactory = (options = {}) => new SEDCountyLevelForecastLayer(options);
+export const SED2040CountyLevelForecastLayerFactory = (options = {}) => new SED2040CountyLevelForecastLayer(options);

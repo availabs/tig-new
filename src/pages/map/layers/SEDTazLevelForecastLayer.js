@@ -13,7 +13,7 @@ import {
 } from "d3-scale"
 import { extent } from "d3-array"
 class SEDTazLevelForecastLayer extends LayerContainer {
-    setActive = true
+    setActive = false
     name = '2040 SED TAZ Level Forecast'
     filters = {
         dataset: {
@@ -123,21 +123,65 @@ class SEDTazLevelForecastLayer extends LayerContainer {
         // range: getColorRange(5, "BrBG", true),
         // format: ",d",
 
-        type: "quantile",
-        domain: [0,100,200,300,400,500],
+        type: "quantize",
+        domain: [0,100000],
         range: getColorRange(6, "YlOrRd", true),
         show: true,
-        title: "2010-2040 Earnings (Held constant in $2010) (current: 2000)",
+        title: "",
 
     }
 
 
-    fetchData() {
+    init(map){
+
         return fetch(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response => response.json())
             .then(response => {
                 this.data = response
+                this.legend.title = `2010-2040 Earnings (Held constant in $2010) (current: 2000)-${this.filters.year.value}`
+                this.data_areas = this.data.data.reduce((a,c) =>{
+                    a.push(c.area)
+                    return a
+                },[])
             })
+    }
+
+    onFilterChange(filterName,value,preValue){
+
+        switch (filterName){
+            case "year" : {
+                this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
+                    if (c.value === this.filters.dataset.value){
+                        a = `${c.name}-${value}`
+                    }
+                    return a
+                },'')
+                this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
+                break;
+            }
+            case "dataset":{
+                this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
+                    if (c.value === value){
+                        a = `${c.name}-${this.filters.year.value}`
+                    }
+                    return a
+                },'')
+                this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
+                break;
+            }
+        }
+    }
+
+    fetchData() {
+
+        return new Promise(resolve =>
+            fetch(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
+                .then(response => response.json())
+                .then(response =>{
+                    this.data = response
+                    setTimeout(resolve,1000)
+                },)
+        );
     }
 
     getColorScale(data) {
@@ -177,56 +221,52 @@ class SEDTazLevelForecastLayer extends LayerContainer {
     }
 
     render(map) {
-        console.log('data',this.data)
-        // const data_counties = this.data.data.map(item =>{
-        //     return counties.reduce((a,c) =>{
-        //         if(item.area === c.name){
-        //             a['name'] = c.name
-        //             a['geoid'] = c.geoid
-        //         }
-        //         return a
-        //     },{})
-        // })
-        //
-        // if (data_counties.length) {
-        //     map.setFilter("Counties", ["in", ["get", "geoid"], ["literal", data_counties.map(d => d.geoid)]]);
-        // }
-        // else {
-        //     map.setFilter("Counties", false);
-        // }
-        // this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
-        //     if(c.value === this.filters.dataset.value){
-        //         a = c.name + '-' + this.filters.year.value
-        //     }
-        //     return a
-        // },'')
-        // const processedData = this.data.data.reduce((acc,curr) =>{
-        //     data_counties.forEach(data_county =>{
-        //         if(curr.area === data_county.name){
-        //             acc.push({
-        //                 id: data_county.geoid,
-        //                 value: curr[this.filters.year.value]
-        //             })
-        //         }
-        //     })
-        //     return acc
-        // },[])
-        //
-        // const colorScale = this.getColorScale(processedData),
-        //     colors = processedData.reduce((a,c) =>{
-        //         if(c.value !== 0){
-        //             a[c.id] = colorScale(c.value)
-        //         }
-        //         return a
-        //     },{});
-        //
-        // map.setPaintProperty("Counties", "fill-color", [
-        //     "case",
-        //     ["boolean", ["feature-state", "hover"], false],
-        //     "#090",
-        //     ["get", ["get", "geoid"], ["literal", colors]]
-        // ])
 
+
+        if (this.data_areas.length) {
+            map.setFilter("Taz", ["in", ["get", "id"], ["literal", this.data_areas]]);
+        }
+        else {
+            map.setFilter("Taz", false);
+        }
+
+        this.processedData = this.data.data.reduce((acc,curr) =>{
+            this.data_areas.forEach(data_area =>{
+                if(curr.area === data_area){
+                    acc.push({
+                        id: data_area,
+                        value: curr[this.filters.year.value]
+                    })
+                }
+            })
+            return acc
+        },[])
+
+        const colorScale = this.getColorScale(this.processedData),
+            colors = this.processedData.reduce((a,c) =>{
+                if(c.value !== 0){
+                    a[c.id] = colorScale(c.value)
+                }
+                return a
+            },{});
+
+        const sorted = this.processedData.map(d => d.id).sort((a,b) => b - a)
+        let count = 0
+        for (let i = 0; i < sorted.length - 1; i++){
+
+            if(sorted[i] - sorted[i+1] !== 1){
+                count++
+            }
+        }
+        console.log('check',this.data)
+        console.log('count',count)
+
+        map.setPaintProperty("Taz", "fill-color", [
+            "case",
+            ["boolean", ["feature-state", "hover"], false],
+            "#090",
+            ["get", ["get", "id"], ["literal", colors]]
+        ])
 
     }
 }
