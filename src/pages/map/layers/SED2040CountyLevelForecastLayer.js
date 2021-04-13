@@ -1,6 +1,6 @@
 import { LayerContainer } from "@availabs/avl-map"
 import {HOST} from "./layerHost";
-import counties from '../wrappers/counties.json'
+import counties from '../config/counties.json'
 import { getColorRange} from "@availabs/avl-components"
 import get from "lodash.get"
 
@@ -12,6 +12,7 @@ import {
     scaleOrdinal
 } from "d3-scale"
 import { extent } from "d3-array"
+
 class SED2040CountyLevelForecastLayer extends LayerContainer {
     setActive = false
     name = '2040 SED County Level Forecast'
@@ -188,8 +189,11 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
                 break;
             }
-            case "default":{}
+            default:{
+                //do nothing
+            }
         }
+
     }
 
 
@@ -228,6 +232,9 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                     .domain(domain)
                     .range(range)
 
+            }
+            default:{
+                //do nothing
             }
         }
     }

@@ -36,11 +36,11 @@ export default countiesWrapper;
 const getCountiesFromCache = falcorCache => {
     const graph = get(falcorCache,['geo'],{})
     return Object.keys(graph).map(geoid => {
-        if(geoid.length === 5){
-            const name = get(graph, [geoid, "name"],'');
-            return { geoid, name };
+        let name = ''
+        if (geoid.length === 5) {
+            name = get(graph, [geoid, "name"], '');
         }
+        return {geoid, name};
 
-    }).sort((a, b) => a.name.localeCompare(b.name)).filter(d => d);
-
+    }).sort((a, b) => a.name.localeCompare(b.name)).filter(d => d)
 }

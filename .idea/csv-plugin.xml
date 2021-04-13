@@ -17,6 +17,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/tasks/taz_tig/convertJsontoGeoJson.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
       </map>
     </option>
   </component>

@@ -1,6 +1,6 @@
 import {TestTipLayerFactory} from "./tipLayer";
 import {SED2040CountyLevelForecastLayerFactory} from "./SED2040CountyLevelForecastLayer";
-import {SEDTazLevelForecastLayerFactory} from "./SEDTazLevelForecastLayer";
+import {SEDTazLevelForecastLayerFactory} from "./SED2040TazLevelForecastLayer";
 import {SED2050CountyLevelForecastLayerFactory} from "./SED2050CountyLevelForecastLayer";
 
 export const layers = {
