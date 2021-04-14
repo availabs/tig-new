@@ -67,7 +67,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         range: getColorRange(5, "YlOrRd", true),
         domain: [],
         show: true,
-        title: "",
+        title: `2000-2040 Employment Labor Force(current: 2000)-${this.filters.year.value}`,
 
     }
 
@@ -129,30 +129,6 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
     ]
 
 
-
-    init(map){
-        return fetch(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
-            .then(response => response.json())
-            .then(response => {
-                this.data = response
-                this.legend.title = `2000-2040 Employment Labor Force(current: 2000)-${this.filters.year.value}`
-                this.data_counties = this.data.data.map(item =>{
-                    return counties.reduce((a,c) =>{
-                        if(item.area === c.name){
-                            a['name'] = c.name
-                            a['geoid'] = c.geoid
-                        }
-                        return a
-                    },{})
-                })
-                this.legend.domain = this.data.data.reduce((a,c) =>{
-                    a.push(c[this.filters.year.value])
-                    return a
-                },[])
-
-            })
-    }
-
     fetchData() {
 
         return new Promise(resolve =>
@@ -160,6 +136,15 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 .then(response => response.json())
                 .then(response =>{
                     this.data = response
+                    this.data_counties = this.data.data.map(item =>{
+                        return counties.reduce((a,c) =>{
+                            if(item.area === c.name){
+                                a['name'] = c.name
+                                a['geoid'] = c.geoid
+                            }
+                            return a
+                        },{})
+                    })
                     setTimeout(resolve,1000)
                 },)
         );
