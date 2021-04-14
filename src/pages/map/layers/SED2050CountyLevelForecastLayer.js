@@ -20,16 +20,16 @@ class SED2050CountyLevelForecastLayer extends LayerContainer {
             name: 'Dataset',
             type: 'dropdown',
             domain: [
-                {value: '113', name: '2010-2050 Employed Labor Force (current: 2010)'},
-                {value: '110', name: '2010-2050 Group Quarters Population (current: 2010)'},
-                {value: '109', name: '2010-2050 Household Population (current: 2010)'},
-                {value: '111', name: '2010-2050 Households (current: 2010)'},
-                {value: '112', name: '2010-2050 Household Size (current: 2010)'},
-                {value: '114', name: '2010-2050 Labor Force (current: 2010)'},
-                {value: '107', name: '2010-2050 Payroll Employment (current: 2010)'},
-                {value: '108', name: '2010-2050 Proprietors Employment (current: 2010)'},
-                {value: '106', name: '2010-2050 Total Employment (current: 2010)'},
-                {value: '105', name: '2010-2050 Total Population (current: 2010)'}
+                {value: '113', name: '2010-2050 Employed Labor Force'},
+                {value: '110', name: '2010-2050 Group Quarters Population'},
+                {value: '109', name: '2010-2050 Household Population'},
+                {value: '111', name: '2010-2050 Households'},
+                {value: '112', name: '2010-2050 Household Size'},
+                {value: '114', name: '2010-2050 Labor Force'},
+                {value: '107', name: '2010-2050 Payroll Employment'},
+                {value: '108', name: '2010-2050 Proprietors Employment'},
+                {value: '106', name: '2010-2050 Total Employment'},
+                {value: '105', name: '2010-2050 Total Population'}
             ],
             value: '113',
             accessor: d => d.name,
@@ -92,6 +92,7 @@ class SED2050CountyLevelForecastLayer extends LayerContainer {
                             }
                             return a
                         },'')],
+                        ["Year:", this.filters.year.value],
                         ['County:',`${c.area}-${graph['state_code']}`],
                         ["Value:",c[this.filters.year.value]])
                 }
@@ -142,7 +143,7 @@ class SED2050CountyLevelForecastLayer extends LayerContainer {
             .then(response => response.json())
             .then(response => {
                 this.data = response
-                this.legend.title = `2010-2050 Employed Labor Force (current: 2010)-${this.filters.year.value}`
+                this.legend.title = `2010-2050 Employed Labor Force-${this.filters.year.value}`
                 this.data_counties = this.data.data.map(item =>{
                     return counties.reduce((a,c) =>{
                         if(item.area === c.name){

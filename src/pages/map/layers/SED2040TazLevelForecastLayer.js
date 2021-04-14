@@ -15,29 +15,29 @@ import {
 import { extent } from "d3-array"
 import counties from "../config/counties.json";
 class SED2040TazLevelForecastLayer extends LayerContainer {
-    setActive = true
+    setActive = false
     name = '2040 SED TAZ Level Forecast'
     filters = {
         dataset: {
             name: 'Dataset',
             type: 'dropdown',
             domain: [
-                {value: '37', name: '2010-2040 Earnings (Held constant in $ 2010) (current: 2000)'},
-                {value: '34', name: '2010-2040 Employed Labor Force (current: 2000)'},
-                {value: '30', name: '2010-2040 Group Quarters Homeless Population (current: 2000)'},
-                {value: '29', name: '2010-2040 Group Quarters Institutional Population (current: 2000)'},
-                {value: '31', name: '2010-2040 Group Quarters Other Population (current: 2000)'},
-                {value: '28', name: '2010-2040 Group Quarters Population (current: 2000)'},
-                {value: '26', name: '2010-2040 Household Income (Held constant in $ 2010) (current: 2000)'},
-                {value: '27', name: '2010-2040 Household Population (current: 2000)'},
-                {value: '32', name: '2010-2040 Households (current: 2000)'},
-                {value: '33', name: '2010-2040 Household Size (current: 2000)'},
-                {value: '36',name: '2010-2040 Office Employment (current: 2000)'},
-                {value: '35',name: '2010-2040 Retail Employment (current: 2000)'},
-                {value: '13',name: '2010-2040 School Enrollment (current: 2000)'},
-                {value: '25',name: '2010-2040 Total Employment (current: 2000)'},
-                {value: '24',name: '2010-2040 Total Population (current: 2000)'},
-                {value: '38',name: '2010-2040 University Enrollment (current: 2000)'}
+                {value: '37', name: '2010-2040 Earnings (Held constant in $ 2010)'},
+                {value: '34', name: '2010-2040 Employed Labor Force'},
+                {value: '30', name: '2010-2040 Group Quarters Homeless Population'},
+                {value: '29', name: '2010-2040 Group Quarters Institutional Population'},
+                {value: '31', name: '2010-2040 Group Quarters Other Population'},
+                {value: '28', name: '2010-2040 Group Quarters Population'},
+                {value: '26', name: '2010-2040 Household Income (Held constant in $ 2010)'},
+                {value: '27', name: '2010-2040 Household Population '},
+                {value: '32', name: '2010-2040 Households'},
+                {value: '33', name: '2010-2040 Household Size'},
+                {value: '36',name: '2010-2040 Office Employment'},
+                {value: '35',name: '2010-2040 Retail Employment'},
+                {value: '13',name: '2010-2040 School Enrollment'},
+                {value: '25',name: '2010-2040 Total Employment'},
+                {value: '24',name: '2010-2040 Total Population'},
+                {value: '38',name: '2010-2040 University Enrollment'}
             ],
             value: '37',
             accessor: d => d.name,
@@ -71,6 +71,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                             }
                             return a
                         },'')],
+                        ["Year:", this.filters.year.value],
                         ["Taz id:",c.area],["Value:",c[this.filters.year.value]]
                     )
                 }
@@ -146,7 +147,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
             .then(response => response.json())
             .then(response => {
                 this.data = response
-                this.legend.title = `2010-2040 Earnings (Held constant in $2010) (current: 2000)-${this.filters.year.value}`
+                this.legend.title = `2010-2040 Earnings (Held constant in $2010)-${this.filters.year.value}`
                 this.taz_ids = this.data.data.map(d => d.area).filter(d => d)
             })
     }
@@ -265,4 +266,4 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     }
 }
 
-export const SEDTazLevelForecastLayerFactory = (options = {}) => new SED2040TazLevelForecastLayer(options);
+export const SED2040TazLevelForecastLayerFactory = (options = {}) => new SED2040TazLevelForecastLayer(options);
