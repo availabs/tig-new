@@ -19,16 +19,11 @@ def fetchTazData(cursor, item):
     taz_table = "public." + "tl_2011_" + item["fips"] + "_taz10"
 
     sql = """
-    SELECT name, d.geoid10 as taz_geoid,
-    c.geoid as county_geoid,
+    SELECT name,type,year
     St_AsGeoJSON(st_makevalid(b.geom)) as base_geom
     FROM public.areas as a
     join public.base_geometries as b on a.base_geometry_id = b.id
-    join public.us_county as c on ST_CONTAINS(c.the_geom,b.geom)
-    JOIN """ + taz_table + """ as d on ST_intersects(st_makevalid(d.geom),st_makevalid(b.geom))
-    where a.type = 'taz' and a.year = '2005' and c.geoid::INTEGER = """ + item["geoid"] + """
-    and
-    (st_area(st_intersection(st_makevalid(d.geom),st_makevalid(b.geom)))/st_area(b.geom)) > .51
+    where a.type = 'taz' and a.year = '2005'
     """
 
     cursor.execute(sql)

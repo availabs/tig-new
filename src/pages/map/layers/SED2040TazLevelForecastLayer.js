@@ -13,8 +13,9 @@ import {
     scaleOrdinal
 } from "d3-scale"
 import { extent } from "d3-array"
+import counties from "../config/counties.json";
 class SED2040TazLevelForecastLayer extends LayerContainer {
-    setActive = false
+    setActive = true
     name = '2040 SED TAZ Level Forecast'
     filters = {
         dataset: {
@@ -54,8 +55,28 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     onHover = {
         layers: ["nymtc_taz_2005"],
         callback: (layerId, features, lngLat) => {
-            console.log('on hover',features)
 
+            const area_id = features.reduce((a,c) => {
+                a = get(c,['properties','name'],'')
+                return a
+            },'')
+
+            return this.data.data.reduce((a,c) =>{
+                if(c.area === area_id){
+
+                    a.push(
+                        [this.filters.dataset.domain.reduce((a,c) => {
+                            if(c.value === this.filters.dataset.value){
+                                a = c.name
+                            }
+                            return a
+                        },'')],
+                        ["Taz id:",c.area],["Value:",c[this.filters.year.value]]
+                    )
+                }
+
+                return a
+            },[])
         }
     }
     sources = [
@@ -65,8 +86,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                 type: "vector",
                 url: "mapbox://am3081.dgujwhsd"
             }
-        },
-
+        }
     ]
     layers = [
         {
@@ -90,8 +110,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     20, 0.1
                 ]
             }
-        },
-
+        }
     ]
     legend = {
         // types: ["quantile", "linear", "quantize", "ordinal"],
@@ -115,11 +134,22 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         domain: [],
         range: getColorRange(5, "YlOrRd", true),
         show: true,
-        title:  `2010-2040 Earnings (Held constant in $2010) (current: 2000)-${this.filters.year.value}`,
+        title: "",
         format: ",d",
 
     }
 
+
+    init(map){
+
+        return fetch(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
+            .then(response => response.json())
+            .then(response => {
+                this.data = response
+                this.legend.title = `2010-2040 Earnings (Held constant in $2010) (current: 2000)-${this.filters.year.value}`
+                this.taz_ids = this.data.data.map(d => d.area).filter(d => d)
+            })
+    }
 
     onFilterChange(filterName,value,preValue){
 
@@ -158,7 +188,6 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                 .then(response => response.json())
                 .then(response =>{
                     this.data = response
-                    this.taz_ids = this.data.data.map(d => d.area).filter(d => d)
                     setTimeout(resolve,1000)
                 },)
         );
@@ -204,35 +233,34 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     }
 
     render(map) {
-        console.log('ids',this.taz_ids)
-        console.log('data',this.data)
-        // if (this.taz_ids && this.taz_ids.length) {
-        //     map.setFilter("nymtc_taz_2005", ["in", ["get", "name"], ["literal", this.taz_ids]]);
-        // }
-        // else {
-        //     map.setFilter("nymtc_taz_2005", false);
-        // }
-        // this.processedData = this.data && this.data.data.reduce((acc,curr) =>{
-        //     acc.push({
-        //         'id': curr['area'] || '',
-        //         'value': curr[this.filters.year.value]
-        //     })
-        //     return acc
-        // },[])
-        // console.log('prcessed',this.processedData)
-        // const colorScale = this.getColorScale(this.processedData),
-        //     colors = this.processedData.reduce((a,c) =>{
-        //         a[c.id] = colorScale(c.value)
-        //         return a
-        //     },{})
-        //
-        //
-        // map.setPaintProperty("nymtc_taz_2005", "fill-color", [
-        //     "case",
-        //     ["boolean", ["feature-state", "hover"], false],
-        //     "#090",
-        //     ["get", ["get", "name"], ["literal", colors]]
-        // ])
+
+        if (this.taz_ids.length) {
+            map.setFilter("nymtc_taz_2005", ["in", ["get", "name"], ["literal", this.taz_ids]]);
+        }
+        else {
+            map.setFilter("nymtc_taz_2005", false);
+        }
+        this.processedData = this.data.data.reduce((acc,curr) =>{
+            acc.push({
+                'id': curr['area'] || '',
+                'value': curr[this.filters.year.value]
+            })
+            return acc
+        },[])
+
+        const colorScale = this.getColorScale(this.processedData),
+            colors = this.processedData.reduce((a,c) =>{
+                a[c.id] = colorScale(c.value)
+                return a
+            },{})
+
+
+        map.setPaintProperty("nymtc_taz_2005", "fill-color", [
+            "case",
+            ["boolean", ["feature-state", "hover"], false],
+            "#090",
+            ["get", ["get", "name"], ["literal", colors]]
+        ])
 
     }
 }
