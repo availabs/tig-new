@@ -1,6 +1,5 @@
 import { LayerContainer } from "@availabs/avl-map"
 import {HOST} from "./layerHost";
-import taz from '../config/taz.json'
 import { getColorRange} from "@availabs/avl-components"
 import get from "lodash.get"
 
