@@ -53,7 +53,7 @@ class SED2055TazLevelForecastLayer extends LayerContainer {
         }
     }
     onHover = {
-        layers: ["nymtc_taz_2010"],
+        layers: ["nymtc_taz_2005"],
         callback: (layerId, features, lngLat) => {
 
             const area_id = features.reduce((a,c) => {
