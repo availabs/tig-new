@@ -1,17 +1,11 @@
-import { LayerContainer } from "@availabs/avl-map"
+import {LayerContainer} from "@availabs/avl-map"
 import {HOST} from "./layerHost";
 import tracts from '../config/tracts.json'
-import { getColorRange} from "@availabs/avl-components"
+import {getColorRange} from "@availabs/avl-components"
 import get from "lodash.get"
 import {acsCensusCategoryMappings} from "../config/acsCensusCategoryMappings";
-import {
-    scaleLinear,
-    scaleQuantile,
-    scaleQuantize,
-    scaleThreshold,
-    scaleOrdinal
-} from "d3-scale"
-import { extent } from "d3-array"
+import {scaleLinear, scaleOrdinal, scaleQuantile, scaleQuantize, scaleThreshold} from "d3-scale"
+import {extent} from "d3-array"
 import fetcher from "../wrappers/fetcher";
 
 class ACSCensusLayer extends LayerContainer {
@@ -35,6 +29,18 @@ class ACSCensusLayer extends LayerContainer {
             ],
             value: 2013,
             multi: false
+        },
+        column:{
+            name: 'Column',
+            type: 'dropdown',
+            domain: [
+                {name: 'Minority Population',value:'value'},
+                {name: 'Percentage Minority', value:'percent'}
+            ],
+            value: 'value',
+            accessor: d => d.name,
+            valueAccessor: d => d.value,
+            multi:false
         }
     }
     legend = {
@@ -60,7 +66,7 @@ class ACSCensusLayer extends LayerContainer {
         domain: [],
         show: true,
         title: "",
-        format: ",d",
+        format: ',d',
 
     }
 
@@ -68,7 +74,7 @@ class ACSCensusLayer extends LayerContainer {
         layers: ["tracts"],
         callback: (layerId, features, lngLat) => {
             const geoid = features.reduce((a,c) => {
-                a = get(c,['properties','geoid'],'')
+                a = get(c,['properties','GEOID'],'')
                 return a
             },'')
             const graph = tracts.reduce((a,c) =>{
@@ -80,10 +86,10 @@ class ACSCensusLayer extends LayerContainer {
             return this.data.data.reduce((a,c) =>{
                 if(c.area === graph['name']){
                     a.push(
-                        [this.filters.dataset.value],
+                        [`${this.filters.dataset.value}${this.filters.column.value === 'percent' ? 'in %': null}`],
                         ["Year:", this.filters.year.value],
                         ['Tract:',`${c.area}-${graph['state_code']}`],
-                        ["Value:",c.value])
+                        ["Value:",c[this.filters.column.value]])
                 }
                 return a
             },[]).sort()
@@ -93,10 +99,10 @@ class ACSCensusLayer extends LayerContainer {
 
     sources = [
         {
-            id: "tracts",
+            id: "nymtc_census_tracts",
             source: {
                 type: "vector",
-                url: "mapbox://am3081.2x2v9z60"
+                url: "mapbox://am3081.3galhyzy"
             }
         }
     ]
@@ -104,8 +110,8 @@ class ACSCensusLayer extends LayerContainer {
         {
             id: "tracts",
             filter: false,
-            "source-layer": "tracts",
-            source: "tracts",
+            "source-layer": "census_tracts",
+            source: "nymtc_census_tracts",
             type: "fill",
             paint: {
                 "fill-color": [
@@ -188,6 +194,16 @@ class ACSCensusLayer extends LayerContainer {
                 this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
                 break;
             }
+            case "column": {
+
+                this.legend.title = `${this.filters.dataset.value} in %-${this.filters.year.value}`
+                this.processedData.map(d => d.value).filter(d => d).sort()
+                if(value === 'percent'){
+                    this.legend.format = ',f'
+                }else{
+                    this.legend.format = ',d'
+                }
+            }
             default:{
                 //do nothing
             }
@@ -195,7 +211,9 @@ class ACSCensusLayer extends LayerContainer {
 
     }
 
-
+    getFormat(column){
+        return ',d' ? column === 'value' : ',f'
+    }
 
     getColorScale(data) {
 
@@ -241,7 +259,7 @@ class ACSCensusLayer extends LayerContainer {
     render(map) {
 
         if (this.data_tracts.length) {
-            map.setFilter("tracts", ["in", ["get", "geoid"], ["literal", this.data_tracts.map(d => d.geoid)]]);
+            map.setFilter("tracts", ["in", ["get", "GEOID"], ["literal", this.data_tracts.map(d => d.geoid)]]);
         }
         else {
             map.setFilter("tracts", false);
@@ -252,7 +270,7 @@ class ACSCensusLayer extends LayerContainer {
                 if(curr.area === data_tract.name){
                     acc.push({
                         id: data_tract.geoid,
-                        value: curr.value
+                        value: curr[this.filters.column.value]
                     })
                 }
             })
@@ -269,7 +287,7 @@ class ACSCensusLayer extends LayerContainer {
             "case",
             ["boolean", ["feature-state", "hover"], false],
             "#090",
-            ["get", ["get", "geoid"], ["literal", colors]]
+            ["get", ["get", "GEOID"], ["literal", colors]]
         ])
     }
 
