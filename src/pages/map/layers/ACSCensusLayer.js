@@ -12,6 +12,7 @@ import {
     scaleOrdinal
 } from "d3-scale"
 import { extent } from "d3-array"
+import fetcher from "../wrappers/fetcher";
 
 class ACSCensusLayer extends LayerContainer {
     setActive = true
@@ -133,9 +134,8 @@ class ACSCensusLayer extends LayerContainer {
             }
             return a
         },'')
-        return fetch(`${HOST}views/${categoryValue}/data_overlay`)
-            .then(response => response.json())
-            .then(response => {
+        return fetcher(`${HOST}views/${categoryValue}/data_overlay`)
+            .then(response =>{
                 this.data = response
                 this.legend.title = `${this.filters.dataset.value}-${this.filters.year.value}`
                 this.data_tracts = this.data.data.map(item =>{
@@ -153,6 +153,7 @@ class ACSCensusLayer extends LayerContainer {
                 },[])
                 return response
             })
+
     }
 
     fetchData() {
@@ -162,9 +163,10 @@ class ACSCensusLayer extends LayerContainer {
             }
             return a
         },'')
+
+
         return new Promise(resolve =>
-            fetch(`${HOST}views/${categoryValue}/data_overlay`)
-                .then(response => response.json())
+            fetcher(`${HOST}views/${categoryValue}/data_overlay`)
                 .then(response =>{
                     this.data = response
                     setTimeout(resolve,1000)

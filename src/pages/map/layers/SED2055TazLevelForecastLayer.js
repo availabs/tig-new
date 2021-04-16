@@ -12,7 +12,8 @@ import {
     scaleOrdinal
 } from "d3-scale"
 import { extent } from "d3-array"
-import counties from "../config/counties.json";
+import fetcher from "../wrappers/fetcher";
+
 class SED2055TazLevelForecastLayer extends LayerContainer {
     setActive = false
     name = '2055 SED TAZ Level Forecast'
@@ -142,8 +143,7 @@ class SED2055TazLevelForecastLayer extends LayerContainer {
 
     init(map){
 
-        return fetch(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
-            .then(response => response.json())
+        return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response => {
                 this.data = response
                 this.legend.title = `2010-2055 Earnings in $-${this.filters.year.value}`
@@ -184,8 +184,7 @@ class SED2055TazLevelForecastLayer extends LayerContainer {
     fetchData() {
 
         return new Promise(resolve =>
-            fetch(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
-                .then(response => response.json())
+            fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
                 .then(response =>{
                     this.data = response
                     setTimeout(resolve,1000)

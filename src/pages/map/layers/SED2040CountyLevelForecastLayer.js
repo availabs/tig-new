@@ -12,6 +12,7 @@ import {
     scaleOrdinal
 } from "d3-scale"
 import { extent } from "d3-array"
+import fetcher from "../wrappers/fetcher";
 
 class SED2040CountyLevelForecastLayer extends LayerContainer {
     setActive = false
@@ -140,8 +141,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
 
     init(map){
-        return fetch(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
-            .then(response => response.json())
+        return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response => {
                 this.data = response
                 this.legend.title = `2000-2040 Employment Labor Force-${this.filters.year.value}`
@@ -165,8 +165,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
     fetchData() {
 
         return new Promise(resolve =>
-            fetch(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
-                .then(response => response.json())
+            fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
                 .then(response =>{
                     this.data = response
                     setTimeout(resolve,1000)
