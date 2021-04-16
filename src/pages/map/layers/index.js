@@ -4,6 +4,7 @@ import {SED2040TazLevelForecastLayerFactory} from "./SED2040TazLevelForecastLaye
 import {SED2050CountyLevelForecastLayerFactory} from "./SED2050CountyLevelForecastLayer";
 import {SED2055CountyLevelForecastLayerFactory} from "./SED2055CountyLevelForecastLayer";
 import {SED2055TazLevelForecastLayerFactory} from "./SED2055TazLevelForecastLayer";
+import {ACSCensusLayerFactory} from "./ACSCensusLayer";
 
 export const layers = {
     "tig": TestTipLayerFactory,
@@ -11,6 +12,7 @@ export const layers = {
     "sed_county_2050": SED2050CountyLevelForecastLayerFactory,
     "sed_taz_2040": SED2040TazLevelForecastLayerFactory,
     "sed_county_2055": SED2055CountyLevelForecastLayerFactory,
-    "sed_taz_2055": SED2055TazLevelForecastLayerFactory
+    "sed_taz_2055": SED2055TazLevelForecastLayerFactory,
+    "acs_census": ACSCensusLayerFactory
 }
 

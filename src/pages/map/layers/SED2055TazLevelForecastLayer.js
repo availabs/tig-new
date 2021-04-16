@@ -14,7 +14,7 @@ import {
 import { extent } from "d3-array"
 import counties from "../config/counties.json";
 class SED2055TazLevelForecastLayer extends LayerContainer {
-    setActive = true
+    setActive = false
     name = '2055 SED TAZ Level Forecast'
     filters = {
         dataset: {
