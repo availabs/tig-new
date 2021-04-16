@@ -17,6 +17,20 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/src/pages/map/layers/ACSCensusLayer.js">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/tasks/census_tracts/fetchCensusTracts.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/tasks/taz_tig/convertJsontoGeoJson.py">
           <value>
             <Attribute>
