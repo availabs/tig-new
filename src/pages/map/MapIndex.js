@@ -50,6 +50,7 @@ const MapPage = {
                     style: 'mapbox://styles/am3081/ckm86j4bw11tj18o5zf8y9pou' }]
             },
             layers: [
+                layers.bpm_performance(),
                 layers.acs_census(),
                 layers.sed_taz_2055(),
                 layers.sed_county_2055(),
