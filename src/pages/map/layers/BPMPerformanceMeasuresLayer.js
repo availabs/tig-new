@@ -15,8 +15,8 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
             name: 'Dataset',
             type: 'dropdown',
             domain: [
-                {value:'58',name:'2010 Base'},
-                {value:'62',name:'2040 Future'}],
+                {value:'58',name:'2010 Base - Time period: All Day'},
+                {value:'62',name:'2040 Future - Time period: All Day'}],
             value: '58',
             accessor: d => d.name,
             valueAccessor: d => d.value,
@@ -140,7 +140,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response =>{
                 this.data = response
-                this.legend.title = '2010 Base-VMT (in Thousands)'
+                this.legend.title = '2010 Base-Time period: All Day-VMT (in Thousands)'
                 this.data_counties = this.data.data.map(item =>{
                     return counties.reduce((a,c) =>{
                         if(item.area === c.name){
