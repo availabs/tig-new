@@ -1,43 +1,36 @@
 import {LayerContainer} from "@availabs/avl-map"
 import {HOST} from "./layerHost";
-import tracts from '../config/tracts.json'
 import {getColorRange} from "@availabs/avl-components"
 import get from "lodash.get"
-import {acsCensusCategoryMappings} from "../config/acsCensusCategoryMappings";
 import {scaleLinear, scaleOrdinal, scaleQuantile, scaleQuantize, scaleThreshold} from "d3-scale"
 import {extent} from "d3-array"
 import fetcher from "../wrappers/fetcher";
+import counties from "../config/counties.json";
 
-class ACSCensusLayer extends LayerContainer {
-    setActive = false
-    name = 'ACS Census Layer'
+class BPMPerformanceMeasuresLayer extends LayerContainer {
+    setActive = true
+    name = 'BPM Performance Measures'
     filters = {
         dataset: {
             name: 'Dataset',
             type: 'dropdown',
             domain: [
-                'Absolute and Relative Minority Population data',
-                'Absolute and Relative Population Below Poverty'],
-            value: 'Absolute and Relative Minority Population data',
+                {value:'58',name:'2010 Base - Time period: All Day'},
+                {value:'62',name:'2040 Future - Time period: All Day'}],
+            value: '58',
+            accessor: d => d.name,
+            valueAccessor: d => d.value,
             multi:false
-        },
-        year: {
-            name: 'Year',
-            type: 'dropdown',
-            domain: [
-                2013,2014,2015,2016,2017,2018
-            ],
-            value: 2013,
-            multi: false
         },
         column:{
             name: 'Column',
             type: 'dropdown',
             domain: [
-                {name: 'Minority Population',value:'value'},
-                {name: 'Percentage Minority', value:'percent'}
+                {name: 'VMT (in Thousands)',value:'vehicle_miles_traveled'},
+                {name: 'VHT (in Thousands)', value:'vehicle_hours_traveled'},
+                {name: 'Avg Speed (Miles/Hr)',value:'avg_speed'},
             ],
-            value: 'value',
+            value: 'vehicle_miles_traveled',
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false
@@ -71,13 +64,13 @@ class ACSCensusLayer extends LayerContainer {
     }
 
     onHover = {
-        layers: ["tracts"],
+        layers: ["Counties"],
         callback: (layerId, features, lngLat) => {
             const geoid = features.reduce((a,c) => {
-                a = get(c,['properties','GEOID'],'')
+                a = get(c,['properties','geoid'],'')
                 return a
             },'')
-            const graph = tracts.reduce((a,c) =>{
+            const graph = counties.reduce((a,c) =>{
                 if (c.geoid === geoid ){
                     a = c
                 }
@@ -86,9 +79,18 @@ class ACSCensusLayer extends LayerContainer {
             return this.data.data.reduce((a,c) =>{
                 if(c.area === graph['name']){
                     a.push(
-                        [`${this.filters.dataset.value}${this.filters.column.value === 'percent' ? 'in %': null}`],
-                        ["Year:", this.filters.year.value],
-                        ['Tract:',`${c.area}-${graph['state_code']}`],
+                        [`${this.filters.dataset.domain.reduce((a,c) => {
+                            if(c.value === this.filters.dataset.value){
+                                a = c.name
+                            }
+                            return a
+                        },'')}-${this.filters.column.domain.reduce((a,c) => {
+                           if(c.value === this.filters.column.value){
+                               a = c.name
+                           } 
+                           return a 
+                        },'')}`],
+                        ['County:',`${c.area}-${graph['state_code']}`],
                         ["Value:",c[this.filters.column.value]])
                 }
                 return a
@@ -99,19 +101,19 @@ class ACSCensusLayer extends LayerContainer {
 
     sources = [
         {
-            id: "nymtc_census_tracts",
+            id: "counties",
             source: {
                 type: "vector",
-                url: "mapbox://am3081.3galhyzy"
+                url: "mapbox://am3081.a8ndgl5n"
             }
         }
     ]
     layers = [
         {
-            id: "tracts",
+            id: "Counties",
             filter: false,
-            "source-layer": "census_tracts",
-            source: "nymtc_census_tracts",
+            "source-layer": "counties",
+            source: "counties",
             type: "fill",
             paint: {
                 "fill-color": [
@@ -134,18 +136,13 @@ class ACSCensusLayer extends LayerContainer {
 
 
     init(map){
-        const categoryValue = acsCensusCategoryMappings.reduce((a,c ) =>{
-            if(c.name === this.filters.dataset.value && c.year === this.filters.year.value){
-                a = c.value
-            }
-            return a
-        },'')
-        return fetcher(`${HOST}views/${categoryValue}/data_overlay`)
+
+        return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response =>{
                 this.data = response
-                this.legend.title = `${this.filters.dataset.value}-${this.filters.year.value}`
-                this.data_tracts = this.data.data.map(item =>{
-                    return tracts.reduce((a,c) =>{
+                this.legend.title = '2010 Base-Time period: All Day-VMT (in Thousands)'
+                this.data_counties = this.data.data.map(item =>{
+                    return counties.reduce((a,c) =>{
                         if(item.area === c.name){
                             a['name'] = c.name
                             a['geoid'] = c.geoid
@@ -154,7 +151,7 @@ class ACSCensusLayer extends LayerContainer {
                     },{})
                 })
                 this.legend.domain = this.data.data.reduce((a,c) =>{
-                    a.push(c.value)
+                    a.push(c[this.filters.column.value])
                     return a
                 },[])
                 return response
@@ -163,16 +160,8 @@ class ACSCensusLayer extends LayerContainer {
     }
 
     fetchData() {
-        const categoryValue = acsCensusCategoryMappings.reduce((a,c ) =>{
-            if(c.name === this.filters.dataset.value && c.year === this.filters.year.value){
-                a = c.value
-            }
-            return a
-        },'')
-
-
         return new Promise(resolve =>
-            fetcher(`${HOST}views/${categoryValue}/data_overlay`)
+            fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
                 .then(response =>{
                     this.data = response
                     setTimeout(resolve,1000)
@@ -184,21 +173,35 @@ class ACSCensusLayer extends LayerContainer {
     onFilterChange(filterName,value,preValue){
 
         switch (filterName){
-            case "year" : {
-                this.legend.title = `${this.filters.dataset.value}-${value}`
-                this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
-                break;
-            }
             case "dataset":{
-                this.legend.title = `${value}-${this.filters.year.value}`
+                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                    if (c.value === value){
+                        a = c.name
+                    }
+                    return a
+                },'')}-${this.filters.column.domain.reduce((a,c) => {
+                    if(c.value === this.filters.column.value){
+                        a = c.name
+                    }
+                    return a
+                },'')}`
                 this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
                 break;
             }
             case "column": {
-
-                this.legend.title = `${this.filters.dataset.value} in %-${this.filters.year.value}`
+                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                    if (c.value === this.filters.dataset.value){
+                        a = c.name
+                    }
+                    return a
+                },'')}-${this.filters.column.domain.reduce((a,c) => {
+                    if(c.value === value){
+                        a = c.name
+                    }
+                    return a
+                },'')}`
                 this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
-                if(value === 'percent'){
+                if(value === 'avg_speed'){
                     this.legend.format = ',f'
                 }else{
                     this.legend.format = ',d'
@@ -259,18 +262,18 @@ class ACSCensusLayer extends LayerContainer {
 
     render(map) {
 
-        if (this.data_tracts.length) {
-            map.setFilter("tracts", ["in", ["get", "GEOID"], ["literal", this.data_tracts.map(d => d.geoid)]]);
+        if (this.data_counties.length) {
+            map.setFilter("Counties", ["in", ["get", "geoid"], ["literal", this.data_counties.map(d => d.geoid)]]);
         }
         else {
-            map.setFilter("tracts", false);
+            map.setFilter("Counties", false);
         }
-    //
+        //
         this.processedData = this.data.data.reduce((acc,curr) =>{
-            this.data_tracts.forEach(data_tract =>{
-                if(curr.area === data_tract.name){
+            this.data_counties.forEach(data_county =>{
+                if(curr.area === data_county.name){
                     acc.push({
-                        id: data_tract.geoid,
+                        id: data_county.geoid,
                         value: curr[this.filters.column.value]
                     })
                 }
@@ -280,18 +283,20 @@ class ACSCensusLayer extends LayerContainer {
 
         const colorScale = this.getColorScale(this.processedData),
             colors = this.processedData.reduce((a,c) =>{
-                a[c.id] = colorScale(c.value)
+                if(c.value !== 0){
+                    a[c.id] = colorScale(c.value)
+                }
                 return a
             },{});
 
-        map.setPaintProperty("tracts", "fill-color", [
+        map.setPaintProperty("Counties", "fill-color", [
             "case",
             ["boolean", ["feature-state", "hover"], false],
             "#090",
-            ["get", ["get", "GEOID"], ["literal", colors]]
+            ["get", ["get", "geoid"], ["literal", colors]]
         ])
     }
 
 }
 
-export const ACSCensusLayerFactory = (options = {}) => new ACSCensusLayer(options);
+export const BPMPerformanceMeasuresLayerFactory = (options = {}) => new BPMPerformanceMeasuresLayer(options);
