@@ -6,6 +6,7 @@ import {SED2055CountyLevelForecastLayerFactory} from "./SED2055CountyLevelForeca
 import {SED2055TazLevelForecastLayerFactory} from "./SED2055TazLevelForecastLayer";
 import {ACSCensusLayerFactory} from "./ACSCensusLayer";
 import {BPMPerformanceMeasuresLayerFactory} from "./BPMPerformanceMeasuresLayer";
+import {HubBoundTravelDataLayerFactory} from "./HubBoundTravelDataLayer";
 
 export const layers = {
     "tig": TestTipLayerFactory,
@@ -15,6 +16,7 @@ export const layers = {
     "sed_county_2055": SED2055CountyLevelForecastLayerFactory,
     "sed_taz_2055": SED2055TazLevelForecastLayerFactory,
     "acs_census": ACSCensusLayerFactory,
-    'bpm_performance': BPMPerformanceMeasuresLayerFactory
+    'bpm_performance': BPMPerformanceMeasuresLayerFactory,
+    'hub_bound_travel_data': HubBoundTravelDataLayerFactory
 }
 

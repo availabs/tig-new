@@ -24,6 +24,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/src/pages/map/layers/HubBoundTravelDataLayer.js">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/src/pages/map/layers/SED2040CountyLevelForecastLayer.js">
           <value>
             <Attribute>

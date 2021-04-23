@@ -8,10 +8,10 @@ const ss = require("simple-statistics");
 
 const { format } = require("d3-format");
 
-const LimitedAttributes = {
-    num_events: "Occurances",
-    property_damage: "Property Damage $"
-}
+// const LimitedAttributes = {
+//     num_events: "Occurances",
+//     property_damage: "Property Damage $"
+// }
 
 const sheldusAttributes = {
     num_events: "Occurances",
@@ -242,7 +242,7 @@ module.exports = {
         for (const geoid in rawData) {
             if (!geoids.includes(geoid)) continue;
             for (const hazardid in rawData[geoid]) {
-                if (hazard && (hazardid != hazard)) continue;
+                if (hazard && (hazardid !== hazard)) continue;
 
                 if (!(hazardid in keys)) {
                     keys[hazardid] = true;
