@@ -7,6 +7,7 @@ import {SED2055TazLevelForecastLayerFactory} from "./SED2055TazLevelForecastLaye
 import {ACSCensusLayerFactory} from "./ACSCensusLayer";
 import {BPMPerformanceMeasuresLayerFactory} from "./BPMPerformanceMeasuresLayer";
 import {HubBoundTravelDataLayerFactory} from "./HubBoundTravelDataLayer";
+import {RTPProjectDataLayerFactory} from "./RTPProjectDataLayer";
 
 export const layers = {
     "tig": TestTipLayerFactory,
@@ -17,6 +18,7 @@ export const layers = {
     "sed_taz_2055": SED2055TazLevelForecastLayerFactory,
     "acs_census": ACSCensusLayerFactory,
     'bpm_performance': BPMPerformanceMeasuresLayerFactory,
-    'hub_bound_travel_data': HubBoundTravelDataLayerFactory
+    'hub_bound_travel_data': HubBoundTravelDataLayerFactory,
+    'rtp_project_data': RTPProjectDataLayerFactory
 }
 

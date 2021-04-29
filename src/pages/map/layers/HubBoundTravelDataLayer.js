@@ -7,7 +7,7 @@ import mapboxgl from 'mapbox-gl';
 
 
 class HubBoundTravelDataLayer extends LayerContainer {
-    setActive = true
+    setActive = false
     name = 'Hub Bound Travel Data'
     filters = {
         year: {
@@ -138,13 +138,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                 },'')},
                 Year:${this.filters.year.value},From:${this.filters.from.value} to ${this.filters.to.value}, 
                 Direction: ${this.filters.direction.value}`
-                let coordinates = hub_bound.features[0].geometry.coordinates[0];
-                let bounds =coordinates.reduce(function (bounds, coord) {
-                    return bounds.extend(coord);
-                }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
-                map.fitBounds(bounds,{
-                    padding: 10
-                })
+
             })
 
     }
@@ -162,6 +156,26 @@ class HubBoundTravelDataLayer extends LayerContainer {
             })
     }
 
+    onAdd(mapboxMap, falcor) {
+        let coordinates = hub_bound.features[0].geometry.coordinates[0];
+        let bounds =coordinates.reduce(function (bounds, coord) {
+            return bounds.extend(coord);
+        }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+        mapboxMap.fitBounds(bounds,{
+            padding: 10
+        })
+        return Promise.resolve();
+    }
+
+    onRemove(mapboxMap){
+
+        mapboxMap.removeLayer('counties')
+        mapboxMap.removeSource('counties')
+        mapboxMap.fitBounds([
+            [-70.12161387603946,45.142811053355814],
+            [-78.23968012395866,39.90735688410206]
+        ])
+    }
     onFilterChange(filterName,value,preValue){
 
         switch (filterName){
@@ -290,23 +304,19 @@ class HubBoundTravelDataLayer extends LayerContainer {
         })
 
 
-
-        map.on('render',function(source){
-            if(!map.getSource('counties') && !map.getLayer('counties')){
-                map.addSource('counties', line_geojson)
-                map.addLayer({
-                    id: "counties",
-                    source:'counties',
-                    type: 'line',
-                    paint:{
-                        'line-color': 'black',
-                        'line-width':1,
-                        'line-dasharray':[10,5]
-                    }
-                })
-            }
-
-        })
+        if(!map.getSource('counties') && !map.getLayer('counties')){
+            map.addSource('counties', line_geojson)
+            map.addLayer({
+                id: "counties",
+                source:'counties',
+                type: 'line',
+                paint:{
+                    'line-color': 'black',
+                    'line-width':1,
+                    'line-dasharray':[10,5]
+                }
+            })
+        }
         if(map.getSource('county_points')){
             map.getSource('county_points').setData(geojson)
         }
