@@ -51,15 +51,15 @@ const MapPage = {
             },
             layers: [
                 layers.rtp_project_data(),
-                //layers.hub_bound_travel_data(),
-                // layers.bpm_performance(),
-                // layers.acs_census(),
-                // layers.sed_taz_2055(),
-                // layers.sed_county_2055(),
-                // layers.sed_taz_2040(),
-                // layers.sed_county_2040(),
-                // layers.sed_county_2050(),
-                // layers.tig()
+                layers.hub_bound_travel_data(),
+                layers.bpm_performance(),
+                layers.acs_census(),
+                layers.sed_taz_2055(),
+                layers.sed_county_2055(),
+                layers.sed_taz_2040(),
+                layers.sed_county_2040(),
+                layers.sed_county_2050(),
+                layers.tig()
 
             ]
         },
