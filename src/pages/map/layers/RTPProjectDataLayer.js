@@ -82,6 +82,15 @@ class RTPProjectDataLayer extends LayerContainer {
             multi: false
         }
     }
+    legend = {
+        type: "ordinal",
+        domain: [],
+        range: [],
+        height: 5,
+        width: 320,
+        direction: "vertical",
+        show:true
+    }
     sources = [
         {
             id: 'county_symbols',
@@ -148,6 +157,8 @@ class RTPProjectDataLayer extends LayerContainer {
     }
 
 
+
+
     init(map) {
 
         const url = `${HOST}/views/${this.filters.dataset.value}/data_overlay`
@@ -158,6 +169,35 @@ class RTPProjectDataLayer extends LayerContainer {
         return fetcher(url + params)
             .then(response => {
                 this.data = response
+                this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
+                this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
+                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.dataset.value){
+                        a = c.name
+                    }
+                    return a
+                },'')}
+               Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
+                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
+                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.project_type.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.plan_portion.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.sponsor.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')}
+                `
             })
     }
 
@@ -169,9 +209,227 @@ class RTPProjectDataLayer extends LayerContainer {
 
         return fetcher(url + params)
             .then(response => {
-
                 this.data = response
+                this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
+                this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
+                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.dataset.value){
+                        a = c.name
+                    }
+                    return a 
+                },'')}
+                Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
+                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
+                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.project_type.value){
+                        a = c.name === 'Select All' ? 'All': c.name 
+                    }
+                    return a
+                },'')},
+                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.plan_portion.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.sponsor.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')}
+                `
             })
+    }
+
+    onFilterChange(filterName,value,preValue){
+
+        switch (filterName){
+            case "dataset" : {
+                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                    if(c.value === value){
+                        a = c.name
+                    }
+                    return a
+                },'')}
+                Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
+                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
+                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.project_type.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.plan_portion.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.sponsor.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')}
+                `
+                break;
+            }
+            case "year":{
+                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.dataset.value){
+                        a = c.name
+                    }
+                    return a
+                },'')}
+                Year: ${value === 'Select All'? 'All':value}, 
+                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
+                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.project_type.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.plan_portion.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.sponsor.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')}
+                `
+                break;
+            }
+            case "rtp_id":{
+                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.dataset.value){
+                        a = c.name
+                    }
+                    return a
+                },'')}
+                Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
+                RTP Id: ${value === 'Select All'? 'All':value},
+                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.project_type.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.plan_portion.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.sponsor.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')}
+                `
+                break;
+            }
+            case "project_type":{
+                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.dataset.value){
+                        a = c.name
+                    }
+                    return a
+                },'')}
+                Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
+                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
+                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
+                    if(c.value === value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.plan_portion.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.sponsor.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')}
+                `
+                break;
+            }
+            case "plan_portion":{
+                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.dataset.value){
+                        a = c.name
+                    }
+                    return a
+                },'')}
+                Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
+                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
+                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.project_type.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
+                    if(c.value === value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.sponsor.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')}
+                `
+                break;
+            }
+            case "sponsor": {
+                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.dataset.value){
+                        a = c.name
+                    }
+                    return a
+                },'')}
+                Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
+                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
+                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.project_type.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
+                    if(c.value === this.filters.plan_portion.value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')},
+               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
+                    if(c.value === value){
+                        a = c.name === 'Select All' ? 'All': c.name
+                    }
+                    return a
+                },'')}
+                `
+                break;
+            }
+            default:{
+                //do nothing
+            }
+        }
+
     }
 
     onRemove(mapboxMap) {
