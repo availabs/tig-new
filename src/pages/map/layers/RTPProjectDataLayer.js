@@ -7,7 +7,7 @@ var parse = require('wellknown');
 
 
 class RTPProjectDataLayer extends LayerContainer {
-    setActive = true
+    setActive = false
     name = 'RTP Project Data'
     filters = {
         dataset: {
