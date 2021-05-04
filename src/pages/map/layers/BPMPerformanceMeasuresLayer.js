@@ -8,7 +8,7 @@ import fetcher from "../wrappers/fetcher";
 import counties from "../config/counties.json";
 
 class BPMPerformanceMeasuresLayer extends LayerContainer {
-    setActive = true
+    setActive = false
     name = 'BPM Performance Measures'
     filters = {
         dataset: {
