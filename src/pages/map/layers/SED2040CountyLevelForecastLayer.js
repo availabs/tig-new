@@ -15,7 +15,8 @@ import { extent } from "d3-array"
 import fetcher from "../wrappers/fetcher";
 
 class SED2040CountyLevelForecastLayer extends LayerContainer {
-    setActive = false
+    id = '1'
+    setActive = true
     name = '2040 SED County Level Forecast'
     filters = {
         dataset: {
@@ -139,9 +140,16 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         }
     ]
 
+    receiveProps(props,mapboxMap,falcor) {
+        if(this.filters.dataset.value !== props.viewId){
+            this.filters.dataset.value = props.viewId
+            //this.init(mapboxMap).then(res => res)
+        }
+    }
 
 
     init(map){
+
         return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response => {
                 this.data = response
@@ -163,14 +171,21 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
             })
     }
 
-    fetchData() {
 
-        return new Promise(resolve =>
-            fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
-                .then(response =>{
-                    this.data = response
-                    setTimeout(resolve,1000)
-                },)
+
+    fetchData() {
+        console.log('in fetch data',this.filters.dataset.value)
+        return new Promise(resolve =>{
+            if(this.viewId){
+                fetcher(`${HOST}views/${this.viewId}/data_overlay`)
+                    .then(response =>{
+                        this.data = response
+                        setTimeout(resolve,1000)
+                    },)
+            }
+            }
+
+
         );
     }
 

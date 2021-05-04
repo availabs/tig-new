@@ -1,0 +1,13 @@
+[
+  {"value": "49", "layer": "sed_county_2040"},
+  {"value": "46", "layer": "sed_county_2040"},
+  {"value": "45", "name": "2000-2040 Household Population"},
+  {"value": "47", "name": "2000-2040 Households"},
+  {"value": "48", "name": "2000-2040 Household Size"},
+  {"value": "50", "name": "2000-2040 Labor Force"},
+  {"value": "43", "name": "2000-2040 Payroll Employment - QCEW Based"},
+  {"value": "44", "name": "2000-2040 Proprietors Employment"},
+  {"value": "42", "name": "2000-2040 Total Employment"},
+  {"value": "41", "name": "2000-2040 Total Population"}
+
+]
