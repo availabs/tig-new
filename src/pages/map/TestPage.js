@@ -1,4 +1,4 @@
-import React from "react"
+import React,{useMemo} from "react"
 import { AvlMap } from "@availabs/avl-map"
 import config from "config.json"
 import { withAuth } from '@availabs/avl-components'
@@ -8,14 +8,16 @@ import routingConfig from './routing-config/routingConfig.json'
 
 const Map = withAuth(({ mapOptions,layers,views}) => {
     const {viewId} = useParams()
-    const layer = routingConfig.reduce((a,c) => {
-        if(c.value === viewId){
 
-            a = [layers[0][c.layer]()]
-        }
+    const layer = useMemo(() => {
+        return routingConfig.reduce((a, c) => {
+            if (c.value === viewId) {
+                a = [layers[0][c.layer]({name:c.name,viewId:viewId})]
+            }
+            return a
+        }, '')
+    }, [viewId])
 
-        return a
-    },'')
 
     return (
         <div className='h-screen  h-full flex-1 flex flex-col text-white'>
@@ -30,11 +32,7 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
                     open: true
 
                 }}
-                layerProps={{
-                    ['1']: {
-                        viewId : viewId
-                    }
-                }}
+
             />
         </div>
     )

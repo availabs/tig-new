@@ -7,7 +7,12 @@ var parse = require('wellknown');
 
 
 class RTPProjectDataLayer extends LayerContainer {
-    setActive = false
+    constructor(props) {
+        super(props);
+        this.viewId = props.viewId
+    }
+
+    setActive = true
     name = 'RTP Project Data'
     filters = {
         dataset: {
@@ -17,7 +22,7 @@ class RTPProjectDataLayer extends LayerContainer {
                 {name: '2040 RTP Projects', value: '53'},
                 {name: '2045 RTP Projects', value: '141'}
             ],
-            value: '53',
+            value: this.viewId,
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi: false

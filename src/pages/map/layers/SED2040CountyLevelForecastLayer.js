@@ -15,7 +15,11 @@ import { extent } from "d3-array"
 import fetcher from "../wrappers/fetcher";
 
 class SED2040CountyLevelForecastLayer extends LayerContainer {
-    id = '1'
+    constructor(props) {
+        super(props);
+        this.viewId = props.viewId
+    }
+
     setActive = true
     name = '2040 SED County Level Forecast'
     filters = {
@@ -34,7 +38,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 {value: '42', name: '2000-2040 Total Employment'},
                 {value: '41', name: '2000-2040 Total Population'}
             ],
-            value: '49',
+            value: this.viewId,
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false
@@ -153,7 +157,12 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response => {
                 this.data = response
-                this.legend.title = `2000-2040 Employment Labor Force-${this.filters.year.value}`
+                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                    if (c.value === this.filters.dataset.value){
+                        a = c.name 
+                    }
+                    return a 
+                },'')}-${this.filters.year.value}`
                 this.data_counties = this.data.data.map(item =>{
                     return counties.reduce((a,c) =>{
                         if(item.area === c.name){
@@ -174,7 +183,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
 
     fetchData() {
-        console.log('in fetch data',this.filters.dataset.value)
+
         return new Promise(resolve =>{
             if(this.viewId){
                 fetcher(`${HOST}views/${this.viewId}/data_overlay`)

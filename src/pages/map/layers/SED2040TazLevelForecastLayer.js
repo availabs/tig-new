@@ -13,7 +13,11 @@ import { extent } from "d3-array"
 import fetcher from "../wrappers/fetcher";
 
 class SED2040TazLevelForecastLayer extends LayerContainer {
-    setActive = false
+    constructor(props) {
+        super(props);
+        this.viewId = props.viewId
+    }
+    setActive = true
     name = '2040 SED TAZ Level Forecast'
     filters = {
         dataset: {
@@ -37,7 +41,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                 {value: '24',name: '2010-2040 Total Population'},
                 {value: '38',name: '2010-2040 University Enrollment'}
             ],
-            value: '37',
+            value: this.viewId,
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false
@@ -144,7 +148,12 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response => {
                 this.data = response
-                this.legend.title = `2010-2040 Earnings (Held constant in $2010)-${this.filters.year.value}`
+                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                    if (c.value === this.filters.dataset.value){
+                        a = c.name
+                    }
+                    return a
+                },'')}-${this.filters.year.value}`
                 this.taz_ids = this.data.data.map(d => d.area).filter(d => d)
             })
     }

@@ -14,7 +14,12 @@ import { extent } from "d3-array"
 import fetcher from "../wrappers/fetcher";
 
 class SED2050CountyLevelForecastLayer extends LayerContainer {
-    setActive = false
+    constructor(props) {
+        super(props);
+        this.viewId = props.viewId
+    }
+
+    setActive = true
     name = '2050 SED County Level Forecast'
     filters = {
         dataset: {
@@ -32,7 +37,7 @@ class SED2050CountyLevelForecastLayer extends LayerContainer {
                 {value: '106', name: '2010-2050 Total Employment'},
                 {value: '105', name: '2010-2050 Total Population'}
             ],
-            value: '113',
+            value: this.viewId,
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false
@@ -143,7 +148,12 @@ class SED2050CountyLevelForecastLayer extends LayerContainer {
         return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response => {
                 this.data = response
-                this.legend.title = `2010-2050 Employed Labor Force-${this.filters.year.value}`
+                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                    if (c.value === this.filters.dataset.value){
+                        a = c.name
+                    }
+                    return a
+                },'')}-${this.filters.year.value}`
                 this.data_counties = this.data.data.map(item =>{
                     return counties.reduce((a,c) =>{
                         if(item.area === c.name){
