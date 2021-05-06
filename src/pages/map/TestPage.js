@@ -1,10 +1,22 @@
-import React from "react"
+import React,{useMemo} from "react"
 import { AvlMap } from "@availabs/avl-map"
 import config from "config.json"
 import { withAuth } from '@availabs/avl-components'
 import {layers} from "./layers";
+import {useParams} from 'react-router-dom'
+import routingConfig from './routing-config/routingConfig.json'
 
-const Map = withAuth(({ mapOptions,layers}) => {
+const Map = withAuth(({ mapOptions,layers,views}) => {
+    const {viewId} = useParams()
+
+    const layer = useMemo(() => {
+        return routingConfig.reduce((a, c) => {
+            if (c.value === viewId) {
+                a = [layers[0][c.layer]({name:c.name,viewId:viewId})]
+            }
+            return a
+        }, '')
+    }, [viewId])
 
 
     return (
@@ -13,13 +25,15 @@ const Map = withAuth(({ mapOptions,layers}) => {
             <AvlMap
                 accessToken={ config.MAPBOX_TOKEN }
                 mapOptions={ mapOptions }
-                layers={ layers }
+                layers={layer}
                 sidebar={{
                     title: "Map Test",
                     tabs: ["layers", "styles"],
                     open: true
 
-                }}/>
+                }}
+
+            />
         </div>
     )
 })
@@ -27,7 +41,7 @@ const Map = withAuth(({ mapOptions,layers}) => {
 
 
 const MapPage = {
-    path: "/map",
+    path: "/views/:viewId/map",
     mainNav: false,
     name: "TIG Map",
     exact: true,
@@ -47,17 +61,7 @@ const MapPage = {
                     style: 'mapbox://styles/am3081/ckm86j4bw11tj18o5zf8y9pou' }]
             },
             layers: [
-                layers.rtp_project_data(),
-                layers.hub_bound_travel_data(),
-                layers.bpm_performance(),
-                layers.acs_census(),
-                layers.sed_taz_2055(),
-                layers.sed_county_2055(),
-                layers.sed_taz_2040(),
-                layers.sed_county_2040(),
-                layers.sed_county_2050(),
-                layers.tig()
-
+               layers
             ]
         },
         wrappers: [

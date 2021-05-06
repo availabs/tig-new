@@ -17,6 +17,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/src/pages/map/MapIndex.js">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/src/pages/map/layers/ACSCensusLayer.js">
           <value>
             <Attribute>
@@ -39,6 +46,13 @@
           </value>
         </entry>
         <entry key="/src/pages/map/layers/SED2040CountyLevelForecastLayer.js">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/src/pages/map/layers/SED2040TazLevelForecastLayer.js">
           <value>
             <Attribute>
               <option name="separator" value="," />

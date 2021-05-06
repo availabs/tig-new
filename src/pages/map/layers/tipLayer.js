@@ -6,6 +6,11 @@ import fetcher from "../wrappers/fetcher";
 var parse = require('wellknown');
 
 class TestTipLayer extends LayerContainer {
+    constructor(props) {
+        super(props);
+        this.viewId = props.viewId
+    }
+
     setActive = true
     name = 'TIP Mappable Projects'
     filters = {
@@ -17,7 +22,7 @@ class TestTipLayer extends LayerContainer {
                 {value:'64', name:'2017-2021 TIP Mappable Projects'},
                 {value:'187',name:'2020-2024 TIP Mappable Projects'}
             ],
-            value: '131',
+            value: this.viewId,
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false

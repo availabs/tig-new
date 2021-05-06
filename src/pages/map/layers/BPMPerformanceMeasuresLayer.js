@@ -8,7 +8,12 @@ import fetcher from "../wrappers/fetcher";
 import counties from "../config/counties.json";
 
 class BPMPerformanceMeasuresLayer extends LayerContainer {
-    setActive = false
+    constructor(props) {
+        super(props);
+        this.viewId = props.viewId
+    }
+
+    setActive = true
     name = 'BPM Performance Measures'
     filters = {
         dataset: {
@@ -16,8 +21,9 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
             type: 'dropdown',
             domain: [
                 {value:'58',name:'2010 Base - Time period: All Day'},
-                {value:'62',name:'2040 Future - Time period: All Day'}],
-            value: '58',
+                {value:'62',name:'2040 Future - Time period: All Day'}
+            ],
+            value: this.viewId,
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false
@@ -140,7 +146,17 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response =>{
                 this.data = response
-                this.legend.title = '2010 Base-Time period: All Day-VMT (in Thousands)'
+                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                    if (c.value === this.filters.dataset.value){
+                        a = c.name
+                    }
+                    return a
+                },'')}-${this.filters.column.domain.reduce((a,c) =>{
+                   if(c.value === this.filters.column.value){
+                       a = c.name
+                   } 
+                   return a 
+                },'')}`
                 this.data_counties = this.data.data.map(item =>{
                     return counties.reduce((a,c) =>{
                         if(item.area === c.name){

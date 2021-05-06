@@ -9,7 +9,14 @@ import {extent} from "d3-array"
 import fetcher from "../wrappers/fetcher";
 
 class ACSCensusLayer extends LayerContainer {
-    setActive = false
+    constructor(props) {
+        super(props);
+        this.categoryName = props.name
+        this.viewid = props.viewId
+
+    }
+
+    setActive = true
     name = 'ACS Census Layer'
     filters = {
         dataset: {
@@ -18,7 +25,7 @@ class ACSCensusLayer extends LayerContainer {
             domain: [
                 'Absolute and Relative Minority Population data',
                 'Absolute and Relative Population Below Poverty'],
-            value: 'Absolute and Relative Minority Population data',
+            value:this.categoryName,
             multi:false
         },
         year: {
@@ -86,7 +93,7 @@ class ACSCensusLayer extends LayerContainer {
             return this.data.data.reduce((a,c) =>{
                 if(c.area === graph['name']){
                     a.push(
-                        [`${this.filters.dataset.value}${this.filters.column.value === 'percent' ? 'in %': null}`],
+                        [`${this.filters.dataset.value || this.categoryName}${this.filters.column.value === 'percent' ? 'in %': ''}`],
                         ["Year:", this.filters.year.value],
                         ['Tract:',`${c.area}-${graph['state_code']}`],
                         ["Value:",c[this.filters.column.value]])
@@ -134,50 +141,59 @@ class ACSCensusLayer extends LayerContainer {
 
 
     init(map){
+
         const categoryValue = acsCensusCategoryMappings.reduce((a,c ) =>{
-            if(c.name === this.filters.dataset.value && c.year === this.filters.year.value){
+            if((c.name === this.categoryName || c.name === this.filters.dataset.value) && c.year === this.filters.year.value){
                 a = c.value
             }
             return a
-        },'')
-        return fetcher(`${HOST}views/${categoryValue}/data_overlay`)
-            .then(response =>{
-                this.data = response
-                this.legend.title = `${this.filters.dataset.value}-${this.filters.year.value}`
-                this.data_tracts = this.data.data.map(item =>{
-                    return tracts.reduce((a,c) =>{
-                        if(item.area === c.name){
-                            a['name'] = c.name
-                            a['geoid'] = c.geoid
-                        }
+        },null)
+
+        if(categoryValue){
+            this.filters.dataset.value = this.categoryName ? this.categoryName : this.filters.dataset.value
+            return fetcher(`${HOST}views/${categoryValue}/data_overlay`)
+                .then(response =>{
+                    this.data = response
+                    this.legend.title = `${this.filters.dataset.value || this.categoryName}-${this.filters.year.value}`
+                    this.data_tracts = this.data.data.map(item =>{
+                        return tracts.reduce((a,c) =>{
+                            if(item.area === c.name){
+                                a['name'] = c.name
+                                a['geoid'] = c.geoid
+                            }
+                            return a
+                        },{})
+                    })
+                    this.legend.domain = this.data.data.reduce((a,c) =>{
+                        a.push(c.value)
                         return a
-                    },{})
+                    },[])
+                    return response
                 })
-                this.legend.domain = this.data.data.reduce((a,c) =>{
-                    a.push(c.value)
-                    return a
-                },[])
-                return response
-            })
+        }
+
+
 
     }
 
     fetchData() {
         const categoryValue = acsCensusCategoryMappings.reduce((a,c ) =>{
-            if(c.name === this.filters.dataset.value && c.year === this.filters.year.value){
+            if(c.name === this.categoryName && c.year === this.filters.year.value){
                 a = c.value
             }
             return a
-        },'')
+        },null)
+        if(categoryValue){
+            return new Promise(resolve =>
+                fetcher(`${HOST}views/${categoryValue}/data_overlay`)
+                    .then(response =>{
+                        this.data = response
+                        setTimeout(resolve,1000)
+                    })
+            );
+        }
 
 
-        return new Promise(resolve =>
-            fetcher(`${HOST}views/${categoryValue}/data_overlay`)
-                .then(response =>{
-                    this.data = response
-                    setTimeout(resolve,1000)
-                })
-        );
     }
 
 
