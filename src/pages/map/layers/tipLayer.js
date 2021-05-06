@@ -9,9 +9,10 @@ class TestTipLayer extends LayerContainer {
     constructor(props) {
         super(props);
         this.viewId = props.viewId
+
     }
 
-    setActive = true
+    setActive = !!this.viewId
     name = 'TIP Mappable Projects'
     filters = {
         dataset: {
@@ -22,7 +23,7 @@ class TestTipLayer extends LayerContainer {
                 {value:'64', name:'2017-2021 TIP Mappable Projects'},
                 {value:'187',name:'2020-2024 TIP Mappable Projects'}
             ],
-            value: this.viewId,
+            value: this.viewId || '131',
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false

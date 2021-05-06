@@ -12,7 +12,7 @@ class RTPProjectDataLayer extends LayerContainer {
         this.viewId = props.viewId
     }
 
-    setActive = true
+    setActive = !!this.viewId
     name = 'RTP Project Data'
     filters = {
         dataset: {
@@ -22,7 +22,7 @@ class RTPProjectDataLayer extends LayerContainer {
                 {name: '2040 RTP Projects', value: '53'},
                 {name: '2045 RTP Projects', value: '141'}
             ],
-            value: this.viewId,
+            value: this.viewId || '53',
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi: false

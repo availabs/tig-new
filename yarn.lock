@@ -42,9 +42,9 @@
     "tlds" "^1.218.0"
 
 "@availabs/avl-map@^1.0.5":
-  "integrity" "sha512-xFcPxUUd9DKqmDMz+Dv1Ey/EwSRC0/OpH/PTyIT7AdBAKx0WgRhFx5GonZyiOgw596RUtRbWVzuW/gYPsVKK8w=="
-  "resolved" "https://registry.npmjs.org/@availabs/avl-map/-/avl-map-1.0.5.tgz"
-  "version" "1.0.5"
+  "integrity" "sha512-fvhQrNffxB8wkxS9Zzs9tWrJnnmB0XRtnPnbRGpbDYN4gsMr1MHgOcZYbVDyOJ9oswJWT81snqnLl188LWKNCQ=="
+  "resolved" "https://registry.npmjs.org/@availabs/avl-map/-/avl-map-1.0.7.tgz"
+  "version" "1.0.7"
   dependencies:
     "@availabs/avl-components" "^1.0.38"
     "mapbox-gl" "^2.1.1"

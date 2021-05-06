@@ -19,7 +19,7 @@ class SED2055TazLevelForecastLayer extends LayerContainer {
         super(props);
         this.viewId = props.viewId
     }
-    setActive = true
+    setActive = !!this.viewId
     name = '2055 SED TAZ Level Forecast'
     filters = {
         dataset: {
@@ -43,7 +43,7 @@ class SED2055TazLevelForecastLayer extends LayerContainer {
                 {value: '156',name: '2010-2055 Total Population'},
                 {value: '170',name: '2010-2055 University Enrollment'}
             ],
-            value: this.viewId,
+            value: this.viewId || '169',
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false

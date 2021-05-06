@@ -16,10 +16,12 @@ import fetcher from "../wrappers/fetcher";
 class SED2050CountyLevelForecastLayer extends LayerContainer {
     constructor(props) {
         super(props);
+        //console.log('id in 2040 ',id)
         this.viewId = props.viewId
+        //this.id = id
     }
 
-    setActive = true
+    setActive = !!this.viewId
     name = '2050 SED County Level Forecast'
     filters = {
         dataset: {
@@ -37,7 +39,7 @@ class SED2050CountyLevelForecastLayer extends LayerContainer {
                 {value: '106', name: '2010-2050 Total Employment'},
                 {value: '105', name: '2010-2050 Total Population'}
             ],
-            value: this.viewId,
+            value: this.viewId || '113',
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false

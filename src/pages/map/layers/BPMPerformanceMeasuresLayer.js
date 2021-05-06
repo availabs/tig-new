@@ -13,7 +13,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         this.viewId = props.viewId
     }
 
-    setActive = true
+    setActive = !!this.viewId
     name = 'BPM Performance Measures'
     filters = {
         dataset: {
@@ -23,7 +23,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                 {value:'58',name:'2010 Base - Time period: All Day'},
                 {value:'62',name:'2040 Future - Time period: All Day'}
             ],
-            value: this.viewId,
+            value: this.viewId || '58',
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false

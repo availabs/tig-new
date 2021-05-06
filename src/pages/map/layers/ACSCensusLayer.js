@@ -16,7 +16,7 @@ class ACSCensusLayer extends LayerContainer {
 
     }
 
-    setActive = true
+    setActive = !!this.viewId
     name = 'ACS Census Layer'
     filters = {
         dataset: {
@@ -25,7 +25,7 @@ class ACSCensusLayer extends LayerContainer {
             domain: [
                 'Absolute and Relative Minority Population data',
                 'Absolute and Relative Population Below Poverty'],
-            value:this.categoryName,
+            value:this.categoryName || 'Absolute and Relative Minority Population data',
             multi:false
         },
         year: {

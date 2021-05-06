@@ -18,6 +18,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
     constructor(props) {
         super(props);
         this.viewId = props.viewId
+        //this.id = id
     }
 
     setActive = true
@@ -38,7 +39,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 {value: '42', name: '2000-2040 Total Employment'},
                 {value: '41', name: '2000-2040 Total Population'}
             ],
-            value: this.viewId,
+            value: this.viewId || '49',
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false
@@ -144,12 +145,6 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         }
     ]
 
-    receiveProps(props,mapboxMap,falcor) {
-        if(this.filters.dataset.value !== props.viewId){
-            this.filters.dataset.value = props.viewId
-            //this.init(mapboxMap).then(res => res)
-        }
-    }
 
 
     init(map){
@@ -185,13 +180,11 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
     fetchData() {
 
         return new Promise(resolve =>{
-            if(this.viewId){
-                fetcher(`${HOST}views/${this.viewId}/data_overlay`)
-                    .then(response =>{
-                        this.data = response
-                        setTimeout(resolve,1000)
-                    },)
-            }
+            fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
+                .then(response =>{
+                    this.data = response
+                    setTimeout(resolve,1000)
+                },)
             }
 
 

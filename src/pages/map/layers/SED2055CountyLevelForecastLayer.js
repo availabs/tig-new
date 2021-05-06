@@ -19,7 +19,7 @@ class SED2055CountyLevelForecastLayer extends LayerContainer {
         super(props);
         this.viewId = props.viewId
     }
-    setActive = true
+    setActive = !!this.viewId
     name = '2055 SED County Level Forecast'
     filters = {
         dataset: {
@@ -37,7 +37,7 @@ class SED2055CountyLevelForecastLayer extends LayerContainer {
                 {value: '200', name: '2010-2055 Total Employment'},
                 {value: '199', name: '2010-2055 Total Population'}
             ],
-            value: this.viewId,
+            value: this.viewId || '207',
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false

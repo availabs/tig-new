@@ -12,7 +12,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
         this.viewId = props.viewId
     }
 
-    setActive = true
+    setActive = !!this.viewId
     name = 'Hub Bound Travel Data'
     filters = {
         year: {
@@ -127,7 +127,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
     init(map) {
         const from = this.convertTime(this.filters.from.value)
         const to = this.convertTime(this.filters.to.value)
-        const url = `${HOST}/views/${this.viewId}/data_overlay?utf8=%E2%9C%93&`
+        const url = `${HOST}/views/${this.viewId || '23'}/data_overlay?utf8=%E2%9C%93&`
         const params = `year=${this.filters.year.value}&hour=${from}&upper_hour=${to}&transit_mode=${this.filters.mode.value}&transit_direction=${this.filters.direction.value}&lower=&upper=&commit=Filter`
 
         return fetcher(url+params)
