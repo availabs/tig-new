@@ -16,7 +16,7 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
             }
             return a
         }, '')
-    }, [viewId])
+    }, [viewId,layers])
 
 
     return (

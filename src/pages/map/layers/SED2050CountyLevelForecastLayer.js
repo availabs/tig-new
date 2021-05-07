@@ -74,7 +74,7 @@ class SED2050CountyLevelForecastLayer extends LayerContainer {
         range: getColorRange(5, "YlOrRd", true),
         domain: [],
         show: true,
-        title: "",
+        Title: "",
 
     }
 
@@ -150,7 +150,7 @@ class SED2050CountyLevelForecastLayer extends LayerContainer {
         return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response => {
                 this.data = response
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -189,7 +189,7 @@ class SED2050CountyLevelForecastLayer extends LayerContainer {
 
         switch (filterName){
             case "year" : {
-                this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === this.filters.dataset.value){
                         a = `${c.name}-${value}`
                     }
@@ -199,7 +199,7 @@ class SED2050CountyLevelForecastLayer extends LayerContainer {
                 break;
             }
             case "dataset":{
-                this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === value){
                         a = `${c.name}-${this.filters.year.value}`
                     }

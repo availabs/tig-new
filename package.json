@@ -5,7 +5,7 @@
   "dependencies": {
     "@availabs/ams": "^1.0.5",
     "@availabs/avl-components": "^1.0.23",
-    "@availabs/avl-map": "^1.0.5",
+    "@availabs/avl-map": "^1.0.8",
     "@draft-js-plugins/editor": "^4.0.0-beta4",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.2.2",

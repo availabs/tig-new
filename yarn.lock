@@ -41,10 +41,10 @@
     "styled-components" "^5.2.1"
     "tlds" "^1.218.0"
 
-"@availabs/avl-map@^1.0.5":
-  "integrity" "sha512-fvhQrNffxB8wkxS9Zzs9tWrJnnmB0XRtnPnbRGpbDYN4gsMr1MHgOcZYbVDyOJ9oswJWT81snqnLl188LWKNCQ=="
-  "resolved" "https://registry.npmjs.org/@availabs/avl-map/-/avl-map-1.0.7.tgz"
-  "version" "1.0.7"
+"@availabs/avl-map@^1.0.8":
+  "integrity" "sha512-x+CEOIs5eH4GLxA/aMU7nDkVCLiWJCjg10tFj+wobauucpeH3Aw5RtevEyOhzoCJEbOj44g7BfreDry8J2mbwA=="
+  "resolved" "https://registry.npmjs.org/@availabs/avl-map/-/avl-map-1.0.8.tgz"
+  "version" "1.0.8"
   dependencies:
     "@availabs/avl-components" "^1.0.38"
     "mapbox-gl" "^2.1.1"
