@@ -94,7 +94,8 @@ class RTPProjectDataLayer extends LayerContainer {
         height: 5,
         width: 320,
         direction: "vertical",
-        show:true
+        show:true,
+        Title:""
     }
     sources = [
         {
@@ -176,7 +177,7 @@ class RTPProjectDataLayer extends LayerContainer {
                 this.data = response
                 this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
                 this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -217,7 +218,7 @@ class RTPProjectDataLayer extends LayerContainer {
                 this.data = response
                 this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
                 this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -251,7 +252,7 @@ class RTPProjectDataLayer extends LayerContainer {
 
         switch (filterName){
             case "dataset" : {
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === value){
                         a = c.name
                     }
@@ -281,7 +282,7 @@ class RTPProjectDataLayer extends LayerContainer {
                 break;
             }
             case "year":{
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -311,7 +312,7 @@ class RTPProjectDataLayer extends LayerContainer {
                 break;
             }
             case "rtp_id":{
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -341,7 +342,7 @@ class RTPProjectDataLayer extends LayerContainer {
                 break;
             }
             case "project_type":{
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -371,7 +372,7 @@ class RTPProjectDataLayer extends LayerContainer {
                 break;
             }
             case "plan_portion":{
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -401,7 +402,7 @@ class RTPProjectDataLayer extends LayerContainer {
                 break;
             }
             case "sponsor": {
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }

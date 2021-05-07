@@ -97,7 +97,8 @@ class HubBoundTravelDataLayer extends LayerContainer {
         height: 5,
         width: 320,
         direction: "vertical",
-        show:true
+        show:true,
+        Title:""
     }
     sources = [
         {
@@ -135,7 +136,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                 this.data = response
                 this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
                 this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-                this.legend.title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
+                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
                     if(c.value === this.filters.mode.value){
                         a = c.name
                     }
@@ -185,7 +186,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
 
         switch (filterName){
             case "year" : {
-                this.legend.title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
+                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
                         if(c.value === this.filters.mode.value){
                             a = c.name 
                         }
@@ -196,7 +197,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                 break;
             }
             case "from":{
-                this.legend.title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
+                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
                     if(c.value === this.filters.mode.value){
                         a = c.name
                     }
@@ -207,7 +208,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                 break;
             }
             case "to":{
-                this.legend.title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
+                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
                     if(c.value === this.filters.mode.value){
                         a = c.name
                     }
@@ -218,7 +219,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                 break;
             }
             case "mode":{
-                this.legend.title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
+                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
                     if(c.value === value){
                         a = c.name
                     }
@@ -229,7 +230,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                 break;
             }
             case "direction":{
-                this.legend.title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
+                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
                     if(c.value === this.filters.mode.value){
                         a = c.name
                     }

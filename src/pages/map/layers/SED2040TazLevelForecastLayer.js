@@ -137,7 +137,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         domain: [],
         range: getColorRange(5, "YlOrRd", true),
         show: true,
-        title: "",
+        Title: "",
         format: ",d",
 
     }
@@ -148,7 +148,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response => {
                 this.data = response
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -161,7 +161,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     onFilterChange(filterName,value,preValue){
         switch (filterName){
             case "year" : {
-                this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === this.filters.dataset.value){
                         a = `${c.name}-${value}`
                     }
@@ -171,7 +171,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                 break;
             }
             case "dataset":{
-                this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === value){
                         a = `${c.name}-${this.filters.year.value}`
                     }

@@ -74,7 +74,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         range: getColorRange(5, "YlOrRd", true),
         domain: [],
         show: true,
-        Title: "Example title",
+        Title: "",
 
     }
 

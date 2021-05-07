@@ -64,7 +64,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         range: getColorRange(5, "YlOrRd", true),
         domain: [],
         show: true,
-        title: "",
+        Title: "",
         format: ',d',
 
     }
@@ -146,7 +146,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response =>{
                 this.data = response
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -190,7 +190,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
 
         switch (filterName){
             case "dataset":{
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === value){
                         a = c.name
                     }
@@ -205,7 +205,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                 break;
             }
             case "column": {
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === this.filters.dataset.value){
                         a = c.name
                     }

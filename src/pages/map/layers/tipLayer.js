@@ -83,7 +83,8 @@ class TestTipLayer extends LayerContainer {
         height: 5,
         width: 350,
         direction: "vertical",
-        show:true
+        show:true,
+        Title:""
     }
     onHover = {
         layers: ["tip_lines", "tip_symbols", 'tip-rail', 'tip-rail-metro', 'tip-bus', 'tip-bicycle-share', 'tip-ferry', 'tip-au-national-highway-3', 'tip-pitch-11', 'tip-college-11','tip-parking-11'],
@@ -150,7 +151,7 @@ class TestTipLayer extends LayerContainer {
                 this.data = response
                 this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
                 this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -184,7 +185,7 @@ class TestTipLayer extends LayerContainer {
                 this.data = response
                 this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
                 this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -211,7 +212,7 @@ class TestTipLayer extends LayerContainer {
 
         switch (filterName){
             case "dataset" : {
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === value){
                         a = c.name
                     }
@@ -235,7 +236,7 @@ class TestTipLayer extends LayerContainer {
                 break;
             }
             case "tip_id":{
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -259,7 +260,7 @@ class TestTipLayer extends LayerContainer {
                 break;
             }
             case "project_type":{
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -283,7 +284,7 @@ class TestTipLayer extends LayerContainer {
                 break;
             }
             case "mpo_name":{
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -307,7 +308,7 @@ class TestTipLayer extends LayerContainer {
                 break;
             }
             case "agency": {
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }

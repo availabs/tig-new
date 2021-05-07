@@ -72,7 +72,7 @@ class ACSCensusLayer extends LayerContainer {
         range: getColorRange(5, "YlOrRd", true),
         domain: [],
         show: true,
-        title: "",
+        Title: "",
         format: ',d',
 
     }
@@ -154,7 +154,7 @@ class ACSCensusLayer extends LayerContainer {
             return fetcher(`${HOST}views/${categoryValue}/data_overlay`)
                 .then(response =>{
                     this.data = response
-                    this.legend.title = `${this.filters.dataset.value || this.categoryName}-${this.filters.year.value}`
+                    this.legend.Title = `${this.filters.dataset.value || this.categoryName}-${this.filters.year.value}`
                     this.data_tracts = this.data.data.map(item =>{
                         return tracts.reduce((a,c) =>{
                             if(item.area === c.name){
@@ -201,18 +201,18 @@ class ACSCensusLayer extends LayerContainer {
 
         switch (filterName){
             case "year" : {
-                this.legend.title = `${this.filters.dataset.value}-${value}`
+                this.legend.Title = `${this.filters.dataset.value}-${value}`
                 this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
                 break;
             }
             case "dataset":{
-                this.legend.title = `${value}-${this.filters.year.value}`
+                this.legend.Title = `${value}-${this.filters.year.value}`
                 this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
                 break;
             }
             case "column": {
 
-                this.legend.title = `${this.filters.dataset.value} in %-${this.filters.year.value}`
+                this.legend.Title = `${this.filters.dataset.value} in %-${this.filters.year.value}`
                 this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
                 if(value === 'percent'){
                     this.legend.format = ',f'
