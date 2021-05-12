@@ -13,7 +13,7 @@ import {
 class App extends React.Component {
   render() {
     return (
-      <BrowserRouter>
+      <BrowserRouter basename={process.env.REACT_APP_PUBLIC_URL}>
         <ScrollToTop />
         <Switch>
           { Routes.map((route, i) =>
@@ -22,7 +22,7 @@ class App extends React.Component {
             )
           }
         </Switch>
-        <Messages />
+        <Messages/>
       </BrowserRouter>
     );
   }

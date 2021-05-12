@@ -1,4 +1,4 @@
-import { LayerContainer } from "@availabs/avl-map"
+import {LayerContainer} from "components/avl-map/src"
 import {HOST} from "./layerHost";
 import { getColorRange} from "@availabs/avl-components"
 import get from "lodash.get"

@@ -1,10 +1,9 @@
-import {LayerContainer} from "@availabs/avl-map"
+import {LayerContainer} from "components/avl-map/src"
 import {HOST} from "./layerHost";
 import get from "lodash.get"
 import fetcher from "../wrappers/fetcher";
 import hub_bound from '../config/hub_bound.json'
-import mapboxgl from 'mapbox-gl';
-
+import mapboxgl from 'mapbox-gl'
 
 class HubBoundTravelDataLayer extends LayerContainer {
     constructor(props) {

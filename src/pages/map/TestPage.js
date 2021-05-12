@@ -1,5 +1,5 @@
 import React,{useMemo} from "react"
-import { AvlMap } from "@availabs/avl-map"
+import { AvlMap } from "../../components/avl-map/src"
 import config from "config.json"
 import { withAuth } from '@availabs/avl-components'
 import {layers} from "./layers";
@@ -41,7 +41,7 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
 
 
 const MapPage = {
-    path: "/views/:viewId/map",
+    path: `/views/:viewId/map`,
     mainNav: false,
     name: "TIG Map",
     exact: true,

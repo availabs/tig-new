@@ -1,4 +1,4 @@
-import { LayerContainer } from "@availabs/avl-map"
+import {LayerContainer} from "components/avl-map/src"
 import {HOST} from "./layerHost";
 import counties from '../config/counties.json'
 import { getColorRange} from "@availabs/avl-components"

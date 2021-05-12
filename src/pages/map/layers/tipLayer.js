@@ -1,5 +1,5 @@
 import {HOST} from './layerHost'
-import { LayerContainer } from "@availabs/avl-map"
+import {LayerContainer} from "components/avl-map/src"
 import tip_ids from '../config/tip_ids.json'
 import tip_mpos from '../config/tip_mpos.json'
 import fetcher from "../wrappers/fetcher";

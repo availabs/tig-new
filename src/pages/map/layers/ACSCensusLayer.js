@@ -1,4 +1,4 @@
-import {LayerContainer} from "@availabs/avl-map"
+import {LayerContainer} from "components/avl-map/src"
 import {HOST} from "./layerHost";
 import tracts from '../config/tracts.json'
 import {getColorRange} from "@availabs/avl-components"

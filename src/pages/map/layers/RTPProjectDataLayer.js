@@ -1,4 +1,4 @@
-import {LayerContainer} from "@availabs/avl-map"
+import {LayerContainer} from "components/avl-map/src"
 import {HOST} from "./layerHost";
 import fetcher from "../wrappers/fetcher";
 import rtp_ids from '../config/rtp_ids.json'
