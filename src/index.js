@@ -19,7 +19,7 @@ import {
 } from "@availabs/avl-components"
 
 import reportWebVitals from './reportWebVitals';
-import { createBrowserHistory } from 'history';
+
 //
 // import DmsComponents from "components/dms"
 // import DmsWrappers from "components/dms/wrappers"

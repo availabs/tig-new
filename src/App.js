@@ -1,14 +1,16 @@
 import React from 'react';
 import { BrowserRouter, Switch } from 'react-router-dom';
-
+import { connect } from 'react-redux';
 import ScrollToTop from 'utils/ScrollToTop'
-
+import { createBrowserHistory } from 'history';
 import Routes from 'Routes';
 
 import {
   DefaultLayout,
   Messages
 } from "@availabs/avl-components"
+
+export const history = createBrowserHistory({basename: process.env.PUBLIC_URL});
 
 class App extends React.Component {
   render() {
@@ -27,4 +29,15 @@ class App extends React.Component {
     );
   }
 }
-export default App
+const mapStateToProps = state => {
+    return ({
+
+    });
+}
+
+const mapDispatchToProps = { createBrowserHistory };
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(App);
