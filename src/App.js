@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Switch } from 'react-router-dom';
-
+import { connect } from 'react-redux';
 import ScrollToTop from 'utils/ScrollToTop'
-
+import { createBrowserHistory } from 'history';
 import Routes from 'Routes';
 
 import {
@@ -10,10 +10,12 @@ import {
   Messages
 } from "@availabs/avl-components"
 
+export const history = createBrowserHistory({basename: process.env.PUBLIC_URL});
+
 class App extends React.Component {
   render() {
     return (
-      <BrowserRouter>
+      <BrowserRouter basename={process.env.REACT_APP_PUBLIC_URL}>
         <ScrollToTop />
         <Switch>
           { Routes.map((route, i) =>
@@ -22,9 +24,20 @@ class App extends React.Component {
             )
           }
         </Switch>
-        <Messages />
+        <Messages/>
       </BrowserRouter>
     );
   }
 }
-export default App
+const mapStateToProps = state => {
+    return ({
+
+    });
+}
+
+const mapDispatchToProps = { createBrowserHistory };
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(App);

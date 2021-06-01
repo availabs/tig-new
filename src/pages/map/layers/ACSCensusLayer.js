@@ -1,4 +1,4 @@
-import {LayerContainer} from "@availabs/avl-map"
+import {LayerContainer} from "components/avl-map/src"
 import {HOST} from "./layerHost";
 import tracts from '../config/tracts.json'
 import {getColorRange} from "@availabs/avl-components"
@@ -16,7 +16,7 @@ class ACSCensusLayer extends LayerContainer {
 
     }
 
-    setActive = true
+    setActive = !!this.viewId
     name = 'ACS Census Layer'
     filters = {
         dataset: {
@@ -25,7 +25,7 @@ class ACSCensusLayer extends LayerContainer {
             domain: [
                 'Absolute and Relative Minority Population data',
                 'Absolute and Relative Population Below Poverty'],
-            value:this.categoryName,
+            value:this.categoryName || 'Absolute and Relative Minority Population data',
             multi:false
         },
         year: {
@@ -72,7 +72,7 @@ class ACSCensusLayer extends LayerContainer {
         range: getColorRange(5, "YlOrRd", true),
         domain: [],
         show: true,
-        title: "",
+        Title: "",
         format: ',d',
 
     }
@@ -154,7 +154,7 @@ class ACSCensusLayer extends LayerContainer {
             return fetcher(`${HOST}views/${categoryValue}/data_overlay`)
                 .then(response =>{
                     this.data = response
-                    this.legend.title = `${this.filters.dataset.value || this.categoryName}-${this.filters.year.value}`
+                    this.legend.Title = `${this.filters.dataset.value || this.categoryName}-${this.filters.year.value}`
                     this.data_tracts = this.data.data.map(item =>{
                         return tracts.reduce((a,c) =>{
                             if(item.area === c.name){
@@ -201,18 +201,18 @@ class ACSCensusLayer extends LayerContainer {
 
         switch (filterName){
             case "year" : {
-                this.legend.title = `${this.filters.dataset.value}-${value}`
+                this.legend.Title = `${this.filters.dataset.value}-${value}`
                 this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
                 break;
             }
             case "dataset":{
-                this.legend.title = `${value}-${this.filters.year.value}`
+                this.legend.Title = `${value}-${this.filters.year.value}`
                 this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
                 break;
             }
             case "column": {
 
-                this.legend.title = `${this.filters.dataset.value} in %-${this.filters.year.value}`
+                this.legend.Title = `${this.filters.dataset.value} in %-${this.filters.year.value}`
                 this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
                 if(value === 'percent'){
                     this.legend.format = ',f'

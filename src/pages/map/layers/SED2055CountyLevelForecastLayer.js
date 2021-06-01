@@ -1,4 +1,4 @@
-import { LayerContainer } from "@availabs/avl-map"
+import {LayerContainer} from "components/avl-map/src"
 import {HOST} from "./layerHost";
 import counties from '../config/counties.json'
 import { getColorRange} from "@availabs/avl-components"
@@ -19,7 +19,7 @@ class SED2055CountyLevelForecastLayer extends LayerContainer {
         super(props);
         this.viewId = props.viewId
     }
-    setActive = true
+    setActive = !!this.viewId
     name = '2055 SED County Level Forecast'
     filters = {
         dataset: {
@@ -37,7 +37,7 @@ class SED2055CountyLevelForecastLayer extends LayerContainer {
                 {value: '200', name: '2010-2055 Total Employment'},
                 {value: '199', name: '2010-2055 Total Population'}
             ],
-            value: this.viewId,
+            value: this.viewId || '207',
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false
@@ -72,7 +72,7 @@ class SED2055CountyLevelForecastLayer extends LayerContainer {
         range: getColorRange(5, "YlOrRd", true),
         domain: [],
         show: true,
-        title: "",
+        Title: "",
 
     }
 
@@ -148,7 +148,7 @@ class SED2055CountyLevelForecastLayer extends LayerContainer {
         return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response => {
                 this.data = response
-                this.legend.title =`${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title =`${this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -187,7 +187,7 @@ class SED2055CountyLevelForecastLayer extends LayerContainer {
 
         switch (filterName){
             case "year" : {
-                this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === this.filters.dataset.value){
                         a = `${c.name}-${value}`
                     }
@@ -197,7 +197,7 @@ class SED2055CountyLevelForecastLayer extends LayerContainer {
                 break;
             }
             case "dataset":{
-                this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === value){
                         a = `${c.name}-${this.filters.year.value}`
                     }

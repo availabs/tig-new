@@ -1,4 +1,4 @@
-import {LayerContainer} from "@availabs/avl-map"
+import {LayerContainer} from "components/avl-map/src"
 import {HOST} from "./layerHost";
 import {getColorRange} from "@availabs/avl-components"
 import get from "lodash.get"
@@ -13,7 +13,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         this.viewId = props.viewId
     }
 
-    setActive = true
+    setActive = !!this.viewId
     name = 'BPM Performance Measures'
     filters = {
         dataset: {
@@ -23,7 +23,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                 {value:'58',name:'2010 Base - Time period: All Day'},
                 {value:'62',name:'2040 Future - Time period: All Day'}
             ],
-            value: this.viewId,
+            value: this.viewId || '58',
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false
@@ -64,7 +64,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         range: getColorRange(5, "YlOrRd", true),
         domain: [],
         show: true,
-        title: "",
+        Title: "",
         format: ',d',
 
     }
@@ -146,7 +146,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response =>{
                 this.data = response
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -190,7 +190,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
 
         switch (filterName){
             case "dataset":{
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === value){
                         a = c.name
                     }
@@ -205,7 +205,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                 break;
             }
             case "column": {
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === this.filters.dataset.value){
                         a = c.name
                     }

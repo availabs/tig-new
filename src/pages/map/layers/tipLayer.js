@@ -1,5 +1,5 @@
 import {HOST} from './layerHost'
-import { LayerContainer } from "@availabs/avl-map"
+import {LayerContainer} from "components/avl-map/src"
 import tip_ids from '../config/tip_ids.json'
 import tip_mpos from '../config/tip_mpos.json'
 import fetcher from "../wrappers/fetcher";
@@ -9,9 +9,10 @@ class TestTipLayer extends LayerContainer {
     constructor(props) {
         super(props);
         this.viewId = props.viewId
+
     }
 
-    setActive = true
+    setActive = !!this.viewId
     name = 'TIP Mappable Projects'
     filters = {
         dataset: {
@@ -22,7 +23,7 @@ class TestTipLayer extends LayerContainer {
                 {value:'64', name:'2017-2021 TIP Mappable Projects'},
                 {value:'187',name:'2020-2024 TIP Mappable Projects'}
             ],
-            value: this.viewId,
+            value: this.viewId || '131',
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false
@@ -82,7 +83,8 @@ class TestTipLayer extends LayerContainer {
         height: 5,
         width: 350,
         direction: "vertical",
-        show:true
+        show:true,
+        Title:""
     }
     onHover = {
         layers: ["tip_lines", "tip_symbols", 'tip-rail', 'tip-rail-metro', 'tip-bus', 'tip-bicycle-share', 'tip-ferry', 'tip-au-national-highway-3', 'tip-pitch-11', 'tip-college-11','tip-parking-11'],
@@ -149,7 +151,7 @@ class TestTipLayer extends LayerContainer {
                 this.data = response
                 this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
                 this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -183,7 +185,7 @@ class TestTipLayer extends LayerContainer {
                 this.data = response
                 this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
                 this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -210,7 +212,7 @@ class TestTipLayer extends LayerContainer {
 
         switch (filterName){
             case "dataset" : {
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === value){
                         a = c.name
                     }
@@ -234,7 +236,7 @@ class TestTipLayer extends LayerContainer {
                 break;
             }
             case "tip_id":{
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -258,7 +260,7 @@ class TestTipLayer extends LayerContainer {
                 break;
             }
             case "project_type":{
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -282,7 +284,7 @@ class TestTipLayer extends LayerContainer {
                 break;
             }
             case "mpo_name":{
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }
@@ -306,7 +308,7 @@ class TestTipLayer extends LayerContainer {
                 break;
             }
             case "agency": {
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if(c.value === this.filters.dataset.value){
                         a = c.name
                     }

@@ -1,4 +1,4 @@
-import { LayerContainer } from "@availabs/avl-map"
+import {LayerContainer} from "components/avl-map/src"
 import {HOST} from "./layerHost";
 import counties from '../config/counties.json'
 import { getColorRange} from "@availabs/avl-components"
@@ -18,6 +18,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
     constructor(props) {
         super(props);
         this.viewId = props.viewId
+        //this.id = id
     }
 
     setActive = true
@@ -38,7 +39,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 {value: '42', name: '2000-2040 Total Employment'},
                 {value: '41', name: '2000-2040 Total Population'}
             ],
-            value: this.viewId,
+            value: this.viewId || '49',
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false
@@ -73,7 +74,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         range: getColorRange(5, "YlOrRd", true),
         domain: [],
         show: true,
-        title: "",
+        Title: "",
 
     }
 
@@ -144,12 +145,6 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         }
     ]
 
-    receiveProps(props,mapboxMap,falcor) {
-        if(this.filters.dataset.value !== props.viewId){
-            this.filters.dataset.value = props.viewId
-            //this.init(mapboxMap).then(res => res)
-        }
-    }
 
 
     init(map){
@@ -157,7 +152,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
             .then(response => {
                 this.data = response
-                this.legend.title = `${this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === this.filters.dataset.value){
                         a = c.name 
                     }
@@ -185,13 +180,11 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
     fetchData() {
 
         return new Promise(resolve =>{
-            if(this.viewId){
-                fetcher(`${HOST}views/${this.viewId}/data_overlay`)
-                    .then(response =>{
-                        this.data = response
-                        setTimeout(resolve,1000)
-                    },)
-            }
+            fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
+                .then(response =>{
+                    this.data = response
+                    setTimeout(resolve,1000)
+                },)
             }
 
 
@@ -203,7 +196,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
         switch (filterName){
             case "year" : {
-                this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === this.filters.dataset.value){
                         a = `${c.name}-${value}`
                     }
@@ -213,7 +206,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 break;
             }
             case "dataset":{
-                this.legend.title = this.filters.dataset.domain.reduce((a,c) =>{
+                this.legend.Title = this.filters.dataset.domain.reduce((a,c) =>{
                     if (c.value === value){
                         a = `${c.name}-${this.filters.year.value}`
                     }

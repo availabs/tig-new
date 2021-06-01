@@ -11,7 +11,7 @@ const Admin = () =>
   </div>
 
 const config = {
-  path: "/admin",
+  path: "/subdir/admin",
   exact: true,
   mainNav: true,
   name: 'Home',

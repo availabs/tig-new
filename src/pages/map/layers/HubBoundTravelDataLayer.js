@@ -1,10 +1,9 @@
-import {LayerContainer} from "@availabs/avl-map"
+import {LayerContainer} from "components/avl-map/src"
 import {HOST} from "./layerHost";
 import get from "lodash.get"
 import fetcher from "../wrappers/fetcher";
 import hub_bound from '../config/hub_bound.json'
-import mapboxgl from 'mapbox-gl';
-
+import mapboxgl from 'mapbox-gl'
 
 class HubBoundTravelDataLayer extends LayerContainer {
     constructor(props) {
@@ -12,7 +11,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
         this.viewId = props.viewId
     }
 
-    setActive = true
+    setActive = !!this.viewId
     name = 'Hub Bound Travel Data'
     filters = {
         year: {
@@ -97,7 +96,8 @@ class HubBoundTravelDataLayer extends LayerContainer {
         height: 5,
         width: 320,
         direction: "vertical",
-        show:true
+        show:true,
+        Title:""
     }
     sources = [
         {
@@ -127,7 +127,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
     init(map) {
         const from = this.convertTime(this.filters.from.value)
         const to = this.convertTime(this.filters.to.value)
-        const url = `${HOST}/views/${this.viewId}/data_overlay?utf8=%E2%9C%93&`
+        const url = `${HOST}/views/${this.viewId || '23'}/data_overlay?utf8=%E2%9C%93&`
         const params = `year=${this.filters.year.value}&hour=${from}&upper_hour=${to}&transit_mode=${this.filters.mode.value}&transit_direction=${this.filters.direction.value}&lower=&upper=&commit=Filter`
 
         return fetcher(url+params)
@@ -135,7 +135,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                 this.data = response
                 this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
                 this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-                this.legend.title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
+                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
                     if(c.value === this.filters.mode.value){
                         a = c.name
                     }
@@ -185,7 +185,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
 
         switch (filterName){
             case "year" : {
-                this.legend.title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
+                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
                         if(c.value === this.filters.mode.value){
                             a = c.name 
                         }
@@ -196,7 +196,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                 break;
             }
             case "from":{
-                this.legend.title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
+                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
                     if(c.value === this.filters.mode.value){
                         a = c.name
                     }
@@ -207,7 +207,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                 break;
             }
             case "to":{
-                this.legend.title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
+                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
                     if(c.value === this.filters.mode.value){
                         a = c.name
                     }
@@ -218,7 +218,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                 break;
             }
             case "mode":{
-                this.legend.title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
+                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
                     if(c.value === value){
                         a = c.name
                     }
@@ -229,7 +229,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                 break;
             }
             case "direction":{
-                this.legend.title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
+                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
                     if(c.value === this.filters.mode.value){
                         a = c.name
                     }

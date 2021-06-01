@@ -19,6 +19,7 @@ import {
 } from "@availabs/avl-components"
 
 import reportWebVitals from './reportWebVitals';
+
 //
 // import DmsComponents from "components/dms"
 // import DmsWrappers from "components/dms/wrappers"
@@ -39,6 +40,7 @@ addWrappers(AmsWrappers);
 
 const AuthEnabledApp = enableAuth(App, { AUTH_HOST, PROJECT_NAME, CLIENT_HOST });
 
+
 ReactDOM.render(
   <React.StrictMode>
    	<Provider store={ store }>
@@ -55,4 +57,5 @@ ReactDOM.render(
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+
 reportWebVitals();

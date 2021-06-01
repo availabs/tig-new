@@ -1,5 +1,5 @@
 import React from "react"
-import { AvlMap } from "@availabs/avl-map"
+import { AvlMap } from "components/avl-map/src"
 import config from "config.json"
 import { withAuth } from '@availabs/avl-components'
 import {layers} from "./layers";
