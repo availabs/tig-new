@@ -1,5 +1,6 @@
 import React from 'react';
-import { PublicNav, Pattern } from 'pages/Landing'
+import { Pattern } from 'pages/Landing'
+import {PublicNav} from "./Landing/NavBar/TopNavBar";
 
 const NoMatch = () =>
   <div className='h-screen flex-1 flex flex-col text-white bg-gray-800'>
