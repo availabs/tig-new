@@ -1,5 +1,5 @@
 import React, {Fragment} from 'react'
-import {CodeIcon, DotsVerticalIcon, FlagIcon, StarIcon} from "@heroicons/react/solid";
+import {DotsVerticalIcon,StarIcon} from "@heroicons/react/solid";
 import {Menu,Transition} from "@headlessui/react";
 
 function classNames(...classes) {

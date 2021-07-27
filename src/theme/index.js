@@ -11,12 +11,14 @@ $compositions.button[2]["Dark"] = "border-blueGray-900";
 $compositions.button[3]["Dark"] = "hover:bg-blueGray-800 hover:border-blueGray-800";
 $compositions.button[4]["Wide"] = "px-6 py-0 @textSmall";
 
-console.log("$compositions",$compositions)
+//console.log("$compositions",$compositions)
 
 const TDS_THEME_BASE = {
 	text: 'text-blueGray-100',
 	textContrast: "text-white",
 	border: "border-blueGray-100",
+
+
 
 	textInfo: "text-cyan-400",
 	bgInfo: "bg-cyan-400",
@@ -42,7 +44,7 @@ const TDS_THEME_BASE = {
 	topMenuBorder: 'border-b border-blueGray-800',
 	headerShadow: '',
 
-	bg: 'bg-blueGray-700',
+	bg: 'bg-white',
 
 	menuBg: 'bg-blueGray-800',
 	menuBgHover: 'hover:bg-blueGray-600',
@@ -53,7 +55,17 @@ const TDS_THEME_BASE = {
 	menuTextActive: "text-cyan-300",
 	menuTextActiveHover: "hover:text-cyan-200",
 
-	topNavHeight: '10',
+	topNavHeight: '14',
+	navMenuItem: 'hover:font-medium cursor-pointer px-1	py-1 text-lg font-semibold',
+	navitemTop: 'px-4 text-sm font-medium tracking-widest uppercase inline-flex items-center  border-transparent  leading-5 text-white hover:text-gray-600 hover:text-darkblue-500 border-gray-200 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out h-full',
+	navitemTopActive: 'px-4 text-sm font-medium tracking-widest uppercase inline-flex items-center leading-5 text-darkblue-500 bg-white focus:outline-none  focus:border-indigo-700 transition duration-150 ease-in-out',
+	scrollBar: 'overflow-auto scrollbar-xsm scrollbar-sm',
+	navMenu: 'h-full relative',
+	navMenuOpen: 'bg-darkblue-500 text-white shadow-lg w-56 rounded-t-lg',
+	navMenuBg: 'bg-darkblue-500 bb-rounded-10 shadow-lg text-white rounded-b-lg',
+	navitemSideChildContainer: 'pl-4',
+	navitemSide: 'font-sans group flex pl-8 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-white hover:text-blue-600 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out',
+	navitemSideActive: 'group flex pl-8 pr-4 py-2 bg-white text-base font-medium text-darkblue-500 focus:outline-none hover:text-indigo-800 focus:text-indigo-800 focus:bg-blue-200 focus:border-indigo-700 transition duration-150 ease-in-out',
 
 	sidebarBg: 'bg-blueGray-900',
 	sidebarBorder: '',
@@ -86,7 +98,7 @@ const TDS_THEME_BASE = {
 	highlight4: "bg-cyan-100",
 
 	contentBg: 'bg-white',
-	contentWidth: 'w-full max-w-7xl mx-auto',
+	contentWidth: 'w-full max-w-7xl',
 	contentPadding: "py-8",
 
 	sidebarW: '56',

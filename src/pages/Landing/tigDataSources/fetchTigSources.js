@@ -24,22 +24,25 @@ const FetchTigSources = () => {
 
     useEffect(() => {
         async function fetchData() {
-            let length = await falcor.get(["tig","datasources","length"])
-            length = get(length,['json','tig','datasources','length'],0)
+            let length = await falcor.get(["tig", "datasources", "length"])
+            length = get(length, ['json', 'tig', 'datasources', 'length'], 0)
 
-            if(length){
-                return await falcor.get(["tig","datasources","byIndex",[{from:0,to:length-1}],SOURCES_ATTRIBUTES])
+            if (length) {
+                return await falcor.get(["tig", "datasources", "byIndex", [{
+                    from: 0,
+                    to: length - 1
+                }], SOURCES_ATTRIBUTES])
 
             }
         }
 
         return fetchData();
-    },[falcor])
+    }, [falcor])
 
-    const processData = () =>{
-        let cache = get(falcorCache,['tig','datasources','byId'],null)
-        let  data = []
-        if(cache){
+    const processData = () => {
+        let cache = get(falcorCache, ['tig', 'datasources', 'byId'], null)
+        let data = []
+        if (cache) {
             data = Object.keys(cache).map(item => cache[item])
         }
         return data
@@ -47,18 +50,20 @@ const FetchTigSources = () => {
     }
 
 
-
     return (
         <div>
 
             {processData() ?
-                <ul className="space-y-5 z-10">
+                <ul className="px-4 py-8 space-y-5 z-10">
                     {processData().map((item) => (
-                        <li key={item.id.value} className="bg-white shadow rounded-md px-4 py-6 sm:px-6">
+                        <li key={item.id.value} className="bg-gray-200 shadow rounded-md px-4 py-6 sm:px-6">
                             <div className="flex space-x-3">
-                                <div className="min-w-0 flex-1">
+                                <div className="min-w-5xl flex-1">
                                     <p className="text-lg font-medium text-gray-900">
-                                        <Link to={{pathname:`/datasource/${item.id.value}`,state:{name:item.name.value,description:item.description.value}}} className="hover:underline">
+                                        <Link to={{
+                                            pathname: `/datasource/${item.id.value}`,
+                                            state: {name: item.name.value, description: item.description.value}
+                                        }} className="hover:underline">
                                             {item.name.value}
                                         </Link>
                                     </p>

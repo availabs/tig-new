@@ -8,7 +8,7 @@ import { AUTH_HOST, PROJECT_NAME, CLIENT_HOST } from 'config'
 import { Provider } from 'react-redux';
 import store from 'store';
 
-import TDS_Theme from "./theme"
+import TDS_THEME from "./theme"
 import {
 
   FalcorProvider,
@@ -45,7 +45,7 @@ ReactDOM.render(
   <React.StrictMode>
    	<Provider store={ store }>
   		<FalcorProvider falcor={ falcorGraph(API_HOST) }>
-        <ThemeContext.Provider value={TDS_Theme }>
+        <ThemeContext.Provider value={TDS_THEME}>
           <AuthEnabledApp />
         </ThemeContext.Provider>
       </FalcorProvider>
