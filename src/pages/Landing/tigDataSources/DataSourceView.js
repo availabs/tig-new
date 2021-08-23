@@ -135,17 +135,17 @@ const Views = () => {
                             <div className="px-6 ">
                                 
                                     {dataSource ?
-                                        <ul className="space-y-4">
+                                        <ul className="pt-4">
                                             {dataSource.map((item) => (
                                                 <li key={item.id.value}
                                                     className={
-                                                        activeId === item.id.value ? '  px-6 py-6 sm:px-6 ring-1 ring-offset-2 ring-indigo-500' :
-                                                            ' px-4 py-6 sm:px-6'
+                                                        activeId === item.id.value ? '  px-6 py-2 sm:px-6 ring-1 ring-offset-2 ring-indigo-500' :
+                                                            ' px-4 py-2 sm:px-6'
                                                     }
 
                                                 >
                                                     <div className="flex">
-                                                        <div className="min-w-0 flex-1">
+                                                        <div className="flex-1">
                                                             <p className="text-lg font-medium text-gray-900">
                                                                 <div className="hover:underline cursor-pointer" onClick={() => onClickView(item)}>
                                                                     {item.name.value}
