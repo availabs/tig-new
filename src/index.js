@@ -10,7 +10,6 @@ import store from 'store';
 
 import TDS_THEME from "./theme"
 import {
-
   FalcorProvider,
   ThemeContext,
   falcorGraph,
@@ -31,6 +30,7 @@ import {
 } from "@availabs/ams"
 
 import 'styles/tailwind.css';
+import 'styles/index.css';
 
 // addComponents(DmsComponents);
 // addWrappers(DmsWrappers);

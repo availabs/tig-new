@@ -1,4 +1,3 @@
-@tailwind base;
 
 .hoverable .show-on-hover {
   display: none;
@@ -38,9 +37,6 @@
 
 }
 
-@tailwind components;
-
-@tailwind utilities;
 
 .custom-bg {
 	background-color: #f2f4f8;
