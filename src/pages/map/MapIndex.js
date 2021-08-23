@@ -4,6 +4,8 @@ import config from "config.json"
 import TigLayout from 'components/tig/TigLayout'
 import {layers} from "./layers";
 
+import { MacroLayerFactory } from "./layers/MacroView/index"
+
 const Map = ({ mapOptions,layers}) => {
 
 
@@ -14,7 +16,7 @@ const Map = ({ mapOptions,layers}) => {
                     <AvlMap
                         accessToken={ config.MAPBOX_TOKEN }
                         mapOptions={ mapOptions }
-                        layers={ layers }
+                        layers={ [MacroLayerFactory()] }
                         sidebar={{
                             title: "Map Test",
                             tabs: ["layers", "styles"],
