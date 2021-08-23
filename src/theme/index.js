@@ -164,7 +164,7 @@ const TDS_THEME_BASE = {
 
   bg: 'bg-white',
 
-  menuBg: 'bg-blueGray-800',
+  menuBg: 'bg-white',
   menuBgHover: 'hover:bg-blueGray-600',
   menuBgActive: 'bg-blueGray-700',
   menuBgActiveHover: 'hover:bg-blueGray-600',
@@ -174,7 +174,7 @@ const TDS_THEME_BASE = {
   menuTextActiveHover: "hover:text-cyan-200",
 
   
-  sidebarBg: 'bg-blueGray-900',
+  sidebarBg: 'bg-white',
   sidebarBorder: '',
 
   headerBg: 'bg-blueGray-900',

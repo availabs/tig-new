@@ -40,7 +40,7 @@
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "npm run build:styles && react-scripts start",
     "build": "react-scripts build",
-    "build:styles": "tailwind build src/styles/index.css -o src/styles/tailwind.css",
+    "build:styles": "tailwind build -o src/styles/tailwind.css",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

@@ -19,7 +19,7 @@ const SOURCES_ATTRIBUTES = [
     'source_type'
 ]
 
-const FetchTigSources = () => {
+const DatasourceList = () => {
     const {falcor, falcorCache} = useFalcor();
 
     useEffect(() => {
@@ -51,15 +51,15 @@ const FetchTigSources = () => {
 
 
     return (
-        <div>
-
+        <div className='border-t-2 border-teal-600'>
+            <div className='bg-teal-600 text-2xl w-28 p-4 text-white mb-2'> Catalog </div>
             {processData() ?
-                <ul className="px-4 py-8 space-y-5 z-10">
+                <ul className="">
                     {processData().map((item) => (
-                        <li key={item.id.value} className="bg-gray-200 shadow rounded-md px-4 py-6 sm:px-6">
+                        <li key={item.id.value} className="border-t py-3">
                             <div className="flex space-x-3">
                                 <div className="min-w-5xl flex-1">
-                                    <p className="text-lg font-medium text-gray-900">
+                                    <p className="text-sm font-bold text-gray-900">
                                         <Link to={{
                                             pathname: `/datasource/${item.id.value}`,
                                             state: {name: item.name.value, description: item.description.value}
@@ -70,9 +70,9 @@ const FetchTigSources = () => {
                                 </div>
                                 <MenuComponent/>
                             </div>
-                            <div className="opacity-50 py-4">
+                            {/*<div className="opacity-50 py-4">
                                 <p>{item.description.value}</p>
-                            </div>
+                            </div>*/}
                         </li>
                     ))}
                 </ul>
@@ -84,4 +84,4 @@ const FetchTigSources = () => {
     )
 }
 
-export default FetchTigSources
+export default DatasourceList

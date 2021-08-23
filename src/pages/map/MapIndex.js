@@ -9,7 +9,7 @@ const Map = ({ mapOptions,layers}) => {
 
     return (
         <TigLayout>
-            <div className='max-w-5xl w-full mx-auto h-[918px]' style={{height: 900}}>
+            <div className='w-full h-[918px]' style={{height: 900}}>
                 <div className='w-full h-full'>
                     <AvlMap
                         accessToken={ config.MAPBOX_TOKEN }

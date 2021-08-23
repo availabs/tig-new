@@ -1,5 +1,5 @@
 import Landing from "pages/Landing"
-import Views from "pages/Landing/tigDataSources/viewsDataSources"
+import Views from "pages/Landing/tigDataSources/DataSourceView"
 import AdminLanding from "pages/Landing/admin"
 import NoMatch from "pages/404"
 import Auth from "pages/auth"
