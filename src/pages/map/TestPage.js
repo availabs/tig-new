@@ -6,6 +6,8 @@ import {layers} from "./layers";
 import {useParams} from 'react-router-dom'
 import routingConfig from './routing-config/routingConfig.json'
 
+import TigLayout from 'components/tig/TigLayout'
+
 const Map = withAuth(({ mapOptions,layers,views}) => {
     const {viewId} = useParams()
 
@@ -20,8 +22,9 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
 
 
     return (
-        <div className='h-screen  h-full flex-1 flex flex-col text-white'>
-
+        <TigLayout>
+            <div className='w-full h-[918px]' style={{height: 900}}>
+                <div className='w-full h-full'>
             <AvlMap
                 accessToken={ config.MAPBOX_TOKEN }
                 mapOptions={ mapOptions }
@@ -35,6 +38,8 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
 
             />
         </div>
+        </div>
+        </TigLayout>
     )
 })
 
