@@ -25,20 +25,21 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
         <TigLayout>
             <div className='w-full h-[918px]' style={{height: 900}}>
                 <div className='w-full h-full'>
-            <AvlMap
-                accessToken={ config.MAPBOX_TOKEN }
-                mapOptions={ mapOptions }
-                layers={layer}
-                sidebar={{
-                    title: "Map Test",
-                    tabs: ["layers", "styles"],
-                    open: true
+                    view id : {viewId}
+                    <AvlMap
+                        accessToken={ config.MAPBOX_TOKEN }
+                        mapOptions={ mapOptions }
+                        layers={layer}
+                        sidebar={{
+                            title: "",
+                            tabs: ["layers", "styles"],
+                            open: true
 
-                }}
+                        }}
 
-            />
-        </div>
-        </div>
+                    />
+                </div>
+            </div>
         </TigLayout>
     )
 })

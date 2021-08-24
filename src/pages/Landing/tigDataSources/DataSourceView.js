@@ -1,10 +1,8 @@
-import React, {useEffect, useState,Fragment, useMemo} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 import {useParams, useLocation} from 'react-router-dom'
 import {useFalcor} from '@availabs/avl-components'
 import get from "lodash.get";
 import MenuComponent from "../card-menu/Menu";
-import {PublicNav} from "../NavBar/TopNavBar";
-import { Dialog, Transition } from '@headlessui/react'
 import {
     MapIcon,
     TableIcon,
@@ -92,7 +90,7 @@ const Views = () => {
     const dataSource = useMemo(() => {
         let cache = get(falcorCache,['tig','datasources','views',"sourceId",dataSourceId,"byId"],null)
         return cache ? Object.keys(cache).map(item => cache[item]).sort(sortIds) : false
-    },[falcorCache])
+    },[falcorCache,dataSourceId])
 
     const onClickView = (item) =>{
         setActiveId(item.id.value)

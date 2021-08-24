@@ -49,8 +49,8 @@ X - All Years Working
    ---------------- */
 
 
-class MacroLayer extends LayerContainer {
-  name = "Macro View"
+class NPMRDSLayer extends LayerContainer {
+  name = "NPMRDS speeds"
   sources = [
     ...NpmrdsSources,
     ...TrafficSignalsSources,
@@ -102,7 +102,7 @@ class MacroLayer extends LayerContainer {
     }
   }
   onHover = {
-    layers: [...NpmrdsLayers.map(d => d.id),"bottlnecks"],
+    layers: [...NpmrdsLayers.map(d => d.id)],
     filterFunc: function(layer, features, point, latlng) {
 
         const key = this.getNetwork(this.filters),
@@ -112,12 +112,12 @@ class MacroLayer extends LayerContainer {
     },
     callback: (layerId, features, lngLat) => {
       let feature = features[0]
-      let dataPath = ["conflation", 
-        this.getNetwork(this.filters), 
-        feature.properties[this.getNetwork(this.filters)], 
-        "data",
-        this.filters.year.value
-      ]
+      // let dataPath = ["conflation", 
+      //   this.getNetwork(this.filters), 
+      //   feature.properties[this.getNetwork(this.filters)], 
+      //   "data",
+      //   this.filters.year.value
+      // ]
       /*
         'TMC_aadt',
         'TMC_miles',
@@ -134,12 +134,12 @@ class MacroLayer extends LayerContainer {
       // }))
       //let featLen = flatten(getFeat).reduce((out,curr) => out+len(curr.geometry,  {units: 'miles'}),0).toFixed(2)
 
-      let v = get(this.falcor.getCache(), dataPath, {})
+      //let v = get(this.falcor.getCache(), dataPath, {})
       
       //console.log('hover', v)
       let data = [
         ...Object.keys(feature.properties).map(k=> [k, feature.properties[k]]),
-        ...Object.keys(v).filter(k=> typeof v[k] !== 'object' ).map(k=> [k, v[k]]),
+        //...Object.keys(v).filter(k=> typeof v[k] !== 'object' ).map(k=> [k, v[k]]),
         
       ]
       data.push(['hoverlayer', layerId])
@@ -147,7 +147,7 @@ class MacroLayer extends LayerContainer {
 
       return data
     },
-    HoverComp
+    //HoverComp
     
   }
   // onClick = {
@@ -411,7 +411,7 @@ class MacroLayer extends LayerContainer {
         //console.log('fetchData gem requests',data)
         const selection = this.getSelectionForGeography();
         const meta = {
-          'tmc': ['TMC_aadt','TMC_miles','RIS_aadt_current_yr_est', 'TMC_frc','pct_bins_reporting_am','pct_bins_reporting_off','pct_bins_reporting_pm'],
+          'tmc': ['TMC_aadt','TMC_miles'],
           'ris': ['RIS_aadt_current_yr_est','RIS_section_length', /*'OSM_replica_aadt'*/],
           'osm': ['RIS_aadt_current_yr_est', /*'OSM_replica_aadt'*/]
         }
@@ -527,4 +527,4 @@ class MacroLayer extends LayerContainer {
 
 }
 
-export const MacroLayerFactory = (options = {}) => new MacroLayer(options);
+export const NPMRDSLayerFactory = (options = {}) => new NPMRDSLayer(options);

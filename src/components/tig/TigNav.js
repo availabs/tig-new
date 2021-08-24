@@ -1,4 +1,4 @@
-import React,{useMemo} from "react"
+import React from "react"
 import { withAuth, TopNav } from '@availabs/avl-components'
 import { Link } from 'react-router-dom'
 
@@ -13,7 +13,7 @@ const TigNav = withAuth(() => {
                 LeftNav={
                     () => (
                         <Link to='/' className='bg-gray-300 hover:bg-gray-100 h-12'>
-                            <img style={{height:50}} src='/images/nymtc_logo.svg'/>
+                            <img alt='NYMTC Logo' style={{height:50}} src='/images/nymtc_logo.svg'/>
                         </Link>
                     )
                 }

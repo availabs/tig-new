@@ -1,4 +1,4 @@
-import React,{useMemo} from "react"
+import React from "react"
 import { withAuth } from '@availabs/avl-components'
 import TigNav from './TigNav'
 import TigBreadcrumbs from './TigBreadcrumbs'

@@ -8,6 +8,7 @@ import {ACSCensusLayerFactory} from "./ACSCensusLayer";
 import {BPMPerformanceMeasuresLayerFactory} from "./BPMPerformanceMeasuresLayer";
 import {HubBoundTravelDataLayerFactory} from "./HubBoundTravelDataLayer";
 import {RTPProjectDataLayerFactory} from "./RTPProjectDataLayer";
+import {NPMRDSLayerFactory} from './npmrds';
 
 export const layers = {
     "tig": TestTipLayerFactory,
@@ -19,6 +20,7 @@ export const layers = {
     "acs_census": ACSCensusLayerFactory,
     'bpm_performance': BPMPerformanceMeasuresLayerFactory,
     'hub_bound_travel_data': HubBoundTravelDataLayerFactory,
-    'rtp_project_data': RTPProjectDataLayerFactory
+    'rtp_project_data': RTPProjectDataLayerFactory,
+    'npmrds': NPMRDSLayerFactory
 }
 
