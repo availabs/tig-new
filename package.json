@@ -2,6 +2,7 @@
   "name": "avl-starter",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "@availabs/ams": "^1.0.5",
     "@availabs/avl-components": "^1.0.78",
