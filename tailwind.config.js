@@ -26,7 +26,15 @@ module.exports = {
             '700': '#1f2534', 
             '800': '#191d29', 
             '900': '#141822'
-        }
+        },
+          tigGray: {
+            '50': '#EEEEEE',
+              '100': '#E6E6E6',
+              '200': '#D2D2D2'
+          },
+          tigGreen: {
+            '100': '#679d89'
+          }
       },
       fontFamily: {
         sans: ['Proxima Nova W01', 'Inter var', ...defaultTheme.fontFamily.sans],
