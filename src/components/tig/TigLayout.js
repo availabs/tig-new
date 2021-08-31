@@ -10,7 +10,7 @@ const TigLayout = withAuth(({children}) => {
                 <TigNav />
             </div>
             <TigBreadcrumbs />
-            <p>
+            <p className={'text-xs text-gray-700 mb-2'}>
                 You are currently viewing x of the y available data sources in the Gateway. Click on one of the following sources and associated views to see the data in Table, Map or Chart form. Create an account or log in to see more.
             </p>
             <div className=''>
