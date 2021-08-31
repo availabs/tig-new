@@ -24,7 +24,7 @@ const Landing = () =>
       <div className='flex-1'>
         <DataSourceList />
       </div>
-      <div className='flex-1' />
+      <div className='flex-1' ></div>
     </div>  
   </TigLayout>
 
