@@ -12,18 +12,20 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
     const {viewId} = useParams()
 
     const layer = useMemo(() => {
-        return routingConfig.reduce((a, c) => {
+        let layerVal = routingConfig.reduce((a, c) => {
             if (c.value === viewId) {
                 a = [layers[0][c.layer]({name:c.name,viewId:viewId})]
             }
             return a
         }, '')
+        console.log('layerVal', layerVal)
+        return layerVal
     }, [viewId,layers])
 
 
     return (
         <TigLayout>
-            <div className='w-full h-[918px]' style={{height: 900}}>
+            <div className='w-full h-[918px]' style={{height: 618}}>
                 <div className='w-full h-full'>
                     view id : {viewId}
                     <AvlMap
@@ -45,7 +47,6 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
 })
 
 
-
 const MapPage = {
     path: `/views/:viewId/map`,
     mainNav: false,
@@ -62,8 +63,12 @@ const MapPage = {
         type: Map,
         props: {
             mapOptions: {
-                zoom: 6.6,
-                styles: [{name: "Light",
+                zoom: 10.6,
+                center: [-73.911895, 40.88],
+                styles: [
+                    {name: "Streets",
+                    style: 'mapbox://styles/am3081/ckt3271or0nnu17oikkvl0eme' },
+                    {name: "Light",
                     style: 'mapbox://styles/am3081/ckm86j4bw11tj18o5zf8y9pou' }]
             },
             layers: [

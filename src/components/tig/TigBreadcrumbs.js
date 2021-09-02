@@ -6,7 +6,7 @@ const TigBreadcrumbs = ({children}) => {
     return (
         <div className='w-full flex justify-between py-6 items-baseline'>
             <div className='flex'>
-                <div className='bg-gray-300 py-1 px-3 text-sm text-gray-600'>
+                <div className='bg-tigGray-100 py-1 px-3 text-sm text-gray-600'>
                     Catalog
                 </div>
             </div>

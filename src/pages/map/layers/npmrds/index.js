@@ -1,10 +1,11 @@
  import React from 'react'
 import get from 'lodash.get'
 
-import { getColorRange, Legend } from "../../utils"
-import { Select, useFalcor } from '@availabs/avl-components'
+import { getColorRange, /*Legend*/ } from "../../utils"
+import { /*Select,*/ useFalcor } from '@availabs/avl-components'
 import mapboxgl from "mapbox-gl"
 import * as d3scale from "d3-scale"
+import flatten from 'lodash.flatten'
 //import len from '@turf/length'
 // import flatten from 'lodash.flatten'
 
@@ -25,17 +26,10 @@ import {
 
 import { 
   filters,
-  updateSubMeasures,
-  getMeasure,
-  getMeasureName,
   updateLegend,
-  getNetwork,
   setActiveLayer
 } from './filters'
-// import MeasureInfoBox from './MeasureInfoBox'
-// import DataDownloader from "./DataDownload"
-// import MeasureVisBox from "./MeasureVisBox"
-// import BottlenecksBox from "./BottlenecksBox"
+
 import HoverComp from './HoverComp'
 import { LayerContainer } from "components/avl-map/src"
 
@@ -67,7 +61,7 @@ class NPMRDSLayer extends LayerContainer {
   layers = [
     // ...ConflationLayerCase,
     ...NpmrdsLayers,
-    ...TrafficSignalsLayers,
+    // ...TrafficSignalsLayers,
     { id: "geo-boundaries",
       type: "line",
       source: "geo-boundaries-source",
@@ -90,6 +84,8 @@ class NPMRDSLayer extends LayerContainer {
   ]
   toolbar = []
   filters = filters
+  updateLegend = updateLegend
+  setActiveLayer = setActiveLayer
   legend = {
     type: "quantile",
     domain: [0, 150],
@@ -98,53 +94,28 @@ class NPMRDSLayer extends LayerContainer {
     show: true,
     Title: ({ layer }) => {
       if(!layer) return
-      return <React.Fragment>{ layer.getMeasureName(layer.falcor,layer.getMeasure(layer.filters)) }</React.Fragment>
+      return <div>Speed (mph)</div>
     }
   }
   onHover = {
     layers: [...NpmrdsLayers.map(d => d.id)],
     filterFunc: function(layer, features, point, latlng) {
 
-        const key = this.getNetwork(this.filters),
+        const key = 'tmc',
           value = get(features, [0, "properties", key], "none"),
           dir = get(features, [0, "properties", "dir"], "none");
         return ["in", key, value] //["all", ["in", key, value], ["in", "dir", dir]];
     },
     callback: (layerId, features, lngLat) => {
       let feature = features[0]
-      // let dataPath = ["conflation", 
-      //   this.getNetwork(this.filters), 
-      //   feature.properties[this.getNetwork(this.filters)], 
-      //   "data",
-      //   this.filters.year.value
-      // ]
-      /*
-        'TMC_aadt',
-        'TMC_miles',
-        'RIS_aadt_current_yr_est',
-        'RIS_section_length'
-      */
-      const key = this.getNetwork(this.filters),
-      value = get(features, [0, "properties", key], "none"),
-      dir = get(features, [0, "properties", "dir"], "none");
-      // let getFeat = ['major','local']
-      // .map(l => this.mapboxMap.querySourceFeatures(ConflationSources[0].id, {
-      //   sourceLayer: l,
-      //   filter: ["all", ["in", key, value], ["in", "dir", dir]]
-      // }))
-      //let featLen = flatten(getFeat).reduce((out,curr) => out+len(curr.geometry,  {units: 'miles'}),0).toFixed(2)
+     
+      const key =  'tmc',
+      value = get(features, [0, "properties", key], "none")
 
-      //let v = get(this.falcor.getCache(), dataPath, {})
-      
-      //console.log('hover', v)
       let data = [
-        ...Object.keys(feature.properties).map(k=> [k, feature.properties[k]]),
-        //...Object.keys(v).filter(k=> typeof v[k] !== 'object' ).map(k=> [k, v[k]]),
-        
+        ...Object.keys(feature.properties).map(k=> [k, feature.properties[k]])        
       ]
       data.push(['hoverlayer', layerId])
-      //data.push([this.getMeasure(this.filters), v])
-
       return data
     },
     //HoverComp
@@ -170,34 +141,7 @@ class NPMRDSLayer extends LayerContainer {
     activeLayers: []
   }
 
-  updateSubMeasures = updateSubMeasures
-  getMeasure = getMeasure
-  getMeasureName = getMeasureName
-  updateLegend = updateLegend
-  getNetwork = getNetwork
-  setActiveLayer= setActiveLayer
-  qaFilter = (d) => Math.max(d.pct_bins_reporting_am,d.pct_bins_reporting_pm, d.pct_bins_reporting_off) > this.state.qaLevel
-
-  onFilterChange(filterName, newValue, prevValue) {
-    
-    switch(filterName) {
-      case 'network': 
-        this.filters.conflation.active = newValue === 'con';
-      break;
-      case 'geography':
-        this.zoomToGeography(newValue)
-        this.saveToLocalStorage()
-      break;
-      case 'measure':
-        this.updateSubMeasures(this.filters.measure.value, this.filters, this.falcor)
-        this.updateLegend(this.filters,this.legend)
-      break;
-      default:
-        console.log('no case for filter', filterName)
-      break;
-    }
-  }
-
+  
   loadFromLocalStorage() {
     return window.localStorage ?
       JSON.parse(window.localStorage.getItem("macro-view-geographies") || "[]")
@@ -267,129 +211,52 @@ class NPMRDSLayer extends LayerContainer {
   
   init(map, falcor) {
 
-    this.updateSubMeasures(this.filters.measure.value, this.filters, falcor)
-    // map.on('zoomend', () => {
-    //  this.updateState({zoom: map.getZoom()})
-    // }) 
-    
-    return falcor.get(['pm3', 'measureIds'])
-      .then(res => {
-        const mIds = get(res, ["json", "pm3", "measureIds"], []);
+    return falcor
+      .get(
+        ["geo", "36", "geoLevels"],
         
-        return falcor.get(
-          ['geo', '36', 'geoLevels'],
-          ['pm3', 'measureInfo', mIds,
-            ['fullname', 'definition', 'equation', 'source']
-          ]
-        )
-        .then(res => {
-          const mInfo = get(res, ["json", "pm3", "measureInfo"], {});
-          // console.log('measureInfo', res)
-          this.filters.measure.domain = mIds
-            .filter(m => !m.includes("_") || ['pct_bins_reporting'].includes(m))
-            .map(id => ({
-              name: get(mInfo, [id, "fullname"], id),
-              value: id
-            }))
-            .sort((a,b) => (a.name - b.name));
-
-          //console.log('measures', this.filters.measure.domain)
-
-
-          this.filters.measure.domain.push(
-            { name: "Percentile Speed",
-              value: "speed" },
-            { name: "Transit AADT",
-              value: "OSM_transit_aadt"},
-            { name: "RIS Attributes",
-              value: "RIS" },
-            { name: "TMC Attributes",
-              value: "TMC" },
-
-          )
-          let risAttributes = mIds.filter(m => /^RIS_/.test(m))
-            .map(id => ({
-              name: get(mInfo, [id, "fullname"], id),
-              value: id.replace("RIS_", "")
-            }));
-          let tmcAttributes = mIds.filter(m => /^TMC_/.test(m))
-            .map(id => ({
-              name: get(mInfo, [id, "fullname"], id),
-              value: id.replace("TMC_", "")
-            }));
-
-          this.updateState({
-            allMeasures: [...mIds],
-            risAttributes,
-            tmcAttributes
-          })
-
-          //console.log('allMeasures', this.state.allMeasures, [...mIds])
-          this.filters.geography.domain = get(res, ["json", "geo", '36', "geoLevels"], [])
-            .map(geo => ({
-              name: `${ geo.geolevel === "STATE" ? geo.geoname.toUpperCase() : geo.geoname } ${ geo.geolevel === "COUNTY" ? "County" : geo.geolevel === "STATE" ? "State" : geo.geolevel }`,
+      )
+      .then((res) => {
+        const mInfo = get(res, ["json", "pm3", "measureInfo"], {});
+        // console.log('measureInfo', res)
+        this.filters.geography.domain = get(
+              res,
+              ["json", "geo", "36", "geoLevels"],
+              []
+            ).map((geo) => ({
+              name: `${
+                geo.geolevel === "STATE"
+                  ? geo.geoname.toUpperCase()
+                  : geo.geoname
+              } ${
+                geo.geolevel === "COUNTY"
+                  ? "County"
+                  : geo.geolevel === "STATE"
+                  ? "State"
+                  : geo.geolevel
+              }`,
               geolevel: geo.geolevel,
               value: geo.geoid,
-              bounds: geo.bounding_box
+              bounds: geo.bounding_box,
             }));
-            //console.log(this.filters.geography)
-
-        })
-      })
-      .then(() => {
-        this.filters.geography.value = this.loadFromLocalStorage();
+        //this.filters.geography.value = this.loadFromLocalStorage();
         //console.log('where am i', this.filters.geography.value)
         this.zoomToGeography();
       })
-
-       
   }
 
-  fetchRequestsForGeography() {
-    const n = this.filters.network.value,
-          year = +this.filters.year.value,
-          geoids = this.filters.geography.value,
-          filtered = this.filters.geography.domain
-        .filter(({ value }) => geoids.includes(value));
-
-    return filtered.reduce((a, c) => {
-      a.push(
-        n === 'tmc' ? 
-        ['tmc', 'identification','type', c.geolevel, 'geoid', c.value, 'year', year] :
-        ["conflation", c.geolevel.toLowerCase(), c.value, year, this.getNetwork(this.filters)]);
-      a.push(["geo", c.geolevel.toLowerCase(), c.value, "geometry"]);
-      return a;
-    }, [])
+  onFilterChange(filterName, newValue, prevValue) {
+    switch (filterName) {
+     
+      case "geography":
+        this.zoomToGeography(newValue);
+        this.saveToLocalStorage();
+        break;
       
-  }
-
-  getSelectionForGeography() {
-    const n = this.filters.network.value,
-      year = +this.filters.year.value,
-      geoids = this.filters.geography.value,
-      filtered = this.filters.geography.domain
-        .filter(({ value }) => geoids.includes(value)),
-      falcorCache = this.falcor.getCache();      
-
-      return [...filtered.reduce((a, c) => {
-        get(falcorCache,
-          n === 'tmc' ? 
-          ['tmc', 'identification','type', c.geolevel, 'geoid', c.value, 'year', year, 'value'] :
-          ["conflation", c.geolevel.toLowerCase(), c.value, year, this.getNetwork(this.filters), "value"]
-        , []).forEach(d => a.add(d))
-        return a;
-      }, new Set())]  
-    
-  }
-
-  getGeomRequest(selection) {
-    switch (this.getNetwork(this.filters)) {
-      case "ris":
-        return ["ris", selection, "meta", this.filters.year.value, "geom"]
-      case "tmc":
-        return ['tmc', selection, 'year', this.filters.year.value, 'geometries']
+      default:
+        console.log("no case for filter", filterName);
+        break;
     }
-    return [];
   }
   
   getColorScale(domain) {
@@ -406,119 +273,85 @@ class NPMRDSLayer extends LayerContainer {
 
   fetchData(falcor) {
     // console.log('fetchData')
-    return falcor.get(...this.fetchRequestsForGeography())
-      .then((data) => {
-        //console.log('fetchData gem requests',data)
-        const selection = this.getSelectionForGeography();
-        const meta = {
-          'tmc': ['TMC_aadt','TMC_miles'],
-          'ris': ['RIS_aadt_current_yr_est','RIS_section_length', /*'OSM_replica_aadt'*/],
-          'osm': ['RIS_aadt_current_yr_est', /*'OSM_replica_aadt'*/]
-        }
-        return selection.length && falcor.chunk(
-          ["conflation",
-            this.getNetwork(this.filters),
-            selection,
-            "data",
-            [this.filters.year.value,this.filters.compareYear.value].filter(y => y !== "none"),
-            [
-              this.getMeasure(this.filters),
-              ...meta[this.getNetwork(this.filters)],
-              this.filters.network.value === 'con' ? 'CON_miles' : null
-            ].filter(d => d)
-          ],
-          { onProgress: (curr, total) => {
-              let progress = ((curr/total) * 100).toFixed(1)
-              if(progress !== this.state.progress){
-                this.updateState({progress})
-              }
-            },
-            chunkSize: 500
-          }
-        )
-      })
-      .then(fullData => this.updateState({progress: 0}))
+    let year = +this.filters.year.value,
+      month = +this.filters.month.value,
+      geoids = this.filters.geography.value,
+      filtered = this.filters.geography.domain
+        .filter(({ value }) => geoids.includes(value));
+    
+   // console.log('request', ['tig','npmrds',`${month}|${year}`,filtered.map(d => `${d.geolevel}|${d.value}`), 'data'])
+
+    let requests = filtered.reduce((a, c) => { 
+      a.push(['tig','npmrds',`${month}|${year}`,`${c.geolevel}|${c.value}`, 'data'])
+      a.push(["geo", c.geolevel.toLowerCase(), c.value, "geometry"]);
+      return a;
+    },[])
+
+    return falcor.get(...requests)
+      // .then((data) => {
+      //   //console.log('fetchData gem requests',data)
+      //   console.log('got data', data)
+      //   return data
+      // })
+        
   }
 
   render(map) {
     // console.log('render', this)
     //console.log('testing', map.getStyle().layers)
-    
-    const falcorCache = this.falcor.getCache()
-    let activeLayers = this.setActiveLayer(this.layers,this.filters,this.mapboxMap)
-
-    // console.log(' sources ',
-    //   map.querySourceFeatures('traffic_signals', {sourceLayer: 'osm_traffic_signals'})
-    // )
-    
-    const { year, compareYear } = this.filters,
-    n = this.getNetwork(this.filters),
-    y = year.value,
-    cy = compareYear.value,
-    m = this.getMeasure(this.filters),
-    selection = this.getSelectionForGeography(),
-    toNaN = v => v === null ? NaN : +v,
-    getValue = id => {
-      const v = toNaN(get(falcorCache, ["conflation", n, id, "data", y,m], null));
-      if (cy === "none") {
-        return v;
-      }
-      const c = toNaN(get(falcorCache, ["conflation", n, id, "data", cy, m], null));
-      return ((v - c) / c);
-    },
-    data = selection
-    .reduce((a, c) => {
-      const v = getValue(c);
-      if (!isNaN(v)) {
-        let meta = get(falcorCache, ["conflation", n, c, "data", y],{})
-        //console.log(meta)
-        a.push({
-          id: c,
-          value: v,
-          ...meta
-        })
-      }
-      return a;
-    }, []),
-    domain = data
-      .filter(d => this.qaFilter(d))
-      .map(d => d.value);
-    // console.log('data', data)
-    this.updateState({currentData: data})
-
-    const scale = this.getColorScale(domain.sort((a,b) => a-b)),
-
-    colors = data.reduce((a, c) => {
-      a[c.id] = this.qaFilter(c) ? scale(c.value) : 'chartreuse';
-      return a;
-    }, {});
-    // console.log('MEASURE', m)
-
-    const geoids = this.filters.geography.value,
+    let year = +this.filters.year.value,
+      month = +this.filters.month.value,
+      geoids = this.filters.geography.value,
+      hour = this.filters.hour.value,
       filtered = this.filters.geography.domain
         .filter(({ value }) => geoids.includes(value));
 
+    this.setActiveLayer(
+      this.layers,
+      this.filters,
+      this.mapboxMap
+    );
+
+    const falcorCache = this.falcor.getCache()
+    let data = filtered.map(d => get(falcorCache, ['tig','npmrds',`${month}|${year}`,`${d.geolevel}|${d.value}`, 'data','value'],[]))
+      .reduce((out,d) => {
+        return {...out, ...d}
+      }, {})
+
+    //console.log('data',data)
+      
+    let domain = Object.values(data).map(d => get(d, `s[${hour}]`, 0))
+    const scale = this.getColorScale(domain.sort((a, b) => a - b));
+    const colors = Object.keys(data).reduce((a, c) => {
+      let val = scale(get(data[c], `s[${hour}]`, 0))
+      a[c] = val ? val : 'hsla(185, 0%, 27%,0.8)'
+      return a;
+    }, {});
+
+    console.log('colors',colors)
+    
+    map.setPaintProperty(`tmc-${year}`, "line-color", [
+      "case",
+      ["has", ["to-string", ["get", 'tmc']], ["literal", colors]],
+      ["get", ["to-string", ["get", 'tmc']], ["literal", colors]],
+      "hsla(185, 0%, 27%,0.0)",
+    ]);
+    
     const collection = {
       type: "FeatureCollection",
-      features: filtered.map(f => ({
-        type: "Feature",
-        properties: { geoid: f.value },
-        geometry: get(falcorCache, ["geo", f.geolevel.toLowerCase(), f.value, "geometry", "value"], null)
-      })).filter(f => Boolean(f.geometry))
-    }
+      features: filtered
+        .map((f) => ({
+          type: "Feature",
+          properties: { geoid: f.value },
+          geometry: get(
+            falcorCache,
+            ["geo", f.geolevel.toLowerCase(), f.value, "geometry", "value"],
+            null
+          ),
+        }))
+        .filter((f) => Boolean(f.geometry)),
+    };
     map.getSource("geo-boundaries-source").setData(collection);
-
-    activeLayers.forEach(l => {
-      //console.log('set paint', l, colors)
-      map.setPaintProperty(l, "line-color",
-        [
-          "case",
-          ["has", ["to-string", ["get", n]], ["literal", colors]],
-          ["get", ["to-string", ["get", n]], ["literal", colors]],
-          'hsla(185, 0%, 27%,0.8)'
-        ]
-      )
-    })
 
   }
 

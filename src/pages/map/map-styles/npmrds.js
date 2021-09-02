@@ -8,7 +8,7 @@ const NpmrdsSources = [
 ]
 
 const npmrdsPaint = {
-  'line-color': '#ccc',
+  'line-color': 'rgba(0,0,0,0)',
   'line-width': [
     "interpolate",
     ["linear"],
@@ -19,7 +19,7 @@ const npmrdsPaint = {
       ["get", "n"],
       [1, 2],
       2,
-      0
+      2
     ],
     13,
     [
@@ -27,7 +27,7 @@ const npmrdsPaint = {
       ["get", "n"],
       [1, 2],
       3,
-      1
+      3
     ],
     18,
     [
@@ -35,7 +35,7 @@ const npmrdsPaint = {
       ["get", "n"],
       [1, 2],
       8,
-      5
+      8
     ]
   ],
   'line-opacity': [

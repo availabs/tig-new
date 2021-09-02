@@ -180,11 +180,11 @@ const TDS_THEME_BASE = {
   headerBg: 'bg-blueGray-900',
   headerBgHover: "hover:bg-blueGray-700",
 
-  inputBg: "bg-blueGray-500 disabled:bg-blueGray-300 cursor-pointer focus:outline-none",
+  inputBg: "bg-white disabled:bg-gray-300 cursor-pointer focus:outline-none",
   inputBorder: "rounded border border-transparent hover:border-blueGray-400 focus:border-blueGray-300 disabled:border-transparent",
   inputBgDisabled: "bg-blueGray-300 cursor-not-allowed focus:outline-none",
   inputBorderDisabled: "rounded border border-blueGray-400 hover:border-blueGray-400",
-  inputBgFocus: "bg-blueGray-500 cursor-pointer focus:outline-none",
+  inputBgFocus: "bg-blue-200 cursor-pointer focus:outline-none",
   inputBorderFocus: "rounded border hover:border-blueGray-300 focus:border-blueGray-300 border-blueGray-300",
 
   textBase: "text-base",
@@ -194,10 +194,10 @@ const TDS_THEME_BASE = {
   paddingSmall: "py-0 px-1",
   paddingLarge: "py-2 px-4",
 
-  accent1: 'bg-blueGray-600',
-  accent2: 'bg-blueGray-500',
-  accent3: 'bg-blueGray-400',
-  accent4: 'bg-blueGray-300',
+  accent1: 'bg-gray-600',
+  accent2: 'bg-gray-500',
+  accent3: 'bg-gray-400',
+  accent4: 'bg-gray-300',
 
   highlight1: "bg-cyan-400",
   highlight2: "bg-cyan-300",

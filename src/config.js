@@ -5,7 +5,7 @@ let AUTH_HOST = 'https://availauth.availabs.org';
 let CLIENT_HOST = 'https://npmrds.availabs.org';
 
 if (process.env.NODE_ENV === 'development') {
-  // API_HOST = 'http://localhost:4444';
+  API_HOST = 'http://localhost:4444';
   // AUTH_HOST = 'http://localhost:3457';
   CLIENT_HOST = 'http://localhost:3000';
 }

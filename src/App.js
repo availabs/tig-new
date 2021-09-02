@@ -10,7 +10,7 @@ import {
   Messages
 } from "@availabs/avl-components"
 
-export const history = createBrowserHistory({basename: process.env.PUBLIC_URL});
+//export const history = createBrowserHistory({basename: process.env.PUBLIC_URL});
 
 class App extends React.Component {
   render() {

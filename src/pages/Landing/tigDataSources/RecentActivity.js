@@ -27,7 +27,6 @@ const DatasourceList = () => {
             let length = await falcor.get(["tig", "datasources", "length"])
             length = get(length, ['json', 'tig', 'datasources', 'length'], 0)
 
-            console.log('length', length)
             if (length) {
                 return await falcor.get(["tig", "datasources", "byIndex", [{
                     from: 0,
@@ -38,45 +37,41 @@ const DatasourceList = () => {
         }
 
         return fetchData();
-    }, [])
+    }, [falcor])
 
-    const sourcesList = React.useMemo(() => {
-        console.log('Data source list process data')
-        let cache = get(falcorCache, ['tig', 'datasources', 'byId'], null)
-        let data = []
-        if (cache) {
-            data = Object.keys(cache).map(item => cache[item])
-        }
-        return data
+    const processData = () => {
+        return ['Activity 1', 'Activity 2'].map((d, dI) => ({id: dI, value: d, name:d, link: '#'}))
 
-    },[falcorCache])
+    }
 
 
     return (
         <div className='border-t-2 border-teal-600'>
-            <div className='bg-tigGreen-100 text-xl w-28 py-3 pl-4 text-white mb-2'> Catalog </div>
-            {sourcesList.length > 0 ?
+            <div className='bg-tigGreen-100 text-l w-36 py-4 px-4 text-white mb-2 '> Recent Activity </div>
+            {processData() ?
                 <ul className="">
-                    {sourcesList.map((item) => (
-                        <li key={item.id.value} className="border-t py-13px">
+                    {processData().map((item) => (
+                        <li key={item.id} className="border-t py-13px">
                             <div className="flex space-x-3">
                                 <div className="min-w-5xl flex-1">
-                                    <p className="text-sm font-bold text-gray-900 mt-10px">
+                                    <p className="text-sm text-gray-700">
                                         <Link to={{
-                                            pathname: `/datasource/${item.id.value}`,
-                                            state: {name: item.name.value, description: item.description.value}
+                                            pathname: `/datasource/${item.value}`,
+                                            state: {name: item.name, description: item.description}
                                         }} className="hover:underline py-6px px-12px border-1">
-                                            {item.name.value}
+                                            {item.name}
                                         </Link>
                                     </p>
                                 </div>
                                 <MenuComponent/>
                             </div>
-                            {/*<div className="opacity-50 py-4">
-                                <p>{item.description.value}</p>
-                            </div>*/}
                         </li>
                     ))}
+                    <li className={'float-right text-sm text-gray-700'}>
+                        <Link to={{
+                            pathname: '#'
+                        }} className="hover:underline py-6px px-12px border-1">Show More</Link>
+                    </li>
                 </ul>
                 :
                 <div>Loading ... </div>

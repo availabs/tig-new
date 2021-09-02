@@ -2,6 +2,7 @@ import React from 'react';
 import {Redirect} from 'react-router-dom'
 import {withAuth} from '@availabs/avl-components'
 import DataSourceList from "./tigDataSources/DatasourceList";
+import RecentActivity from "./tigDataSources/RecentActivity";
 
 
 import TigLayout from 'components/tig/TigLayout'
@@ -24,7 +25,9 @@ const Landing = () =>
       <div className='flex-1'>
         <DataSourceList />
       </div>
-      <div className='flex-1' ></div>
+      <div className='flex-1 pl-10'>
+        <RecentActivity />
+      </div>
     </div>  
   </TigLayout>
 
