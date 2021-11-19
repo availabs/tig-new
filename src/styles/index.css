@@ -59,3 +59,7 @@
 .custom-bg {
 	background-color: #f2f4f8;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

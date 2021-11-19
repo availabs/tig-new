@@ -11,9 +11,6 @@ import flatten from 'lodash.flatten'
 
 import { ckmeans } from 'simple-statistics'
 
-// import { RISSources, RISLayers } from 'pages/map/map-styles/ris'
-
-
 import { 
   NpmrdsSources, 
   NpmrdsLayers
@@ -41,7 +38,12 @@ X - All Years Working
 3 - Overview Graph through time
 4- test measures by geography
    ---------------- */
-
+console.log('what text', getColorRange(6, "RdYlBu") ,getColorRange(6, "RdYlBu").reverse())
+const getMonths = {
+  1 : 'January',
+  2 : 'February',
+  3 : 'March',
+}
 
 class NPMRDSLayer extends LayerContainer {
   name = "NPMRDS speeds"
@@ -88,13 +90,16 @@ class NPMRDSLayer extends LayerContainer {
   setActiveLayer = setActiveLayer
   legend = {
     type: "quantile",
-    domain: [0, 150],
-    range: getColorRange(9, "RdYlBu").reverse(),
+    domain: [10,20,30,40,55],
+    range: ['rgb(255,0,0)', 'rgb(255,100,0)','rgb(255,255,0)','rgb(0,100,255)','rgb(0,0,255)','rgb(0,255,255)','rgb(0,255,0)'],//['#d73027', '#fc8d59', '#fee090', '#e0f3f8', '#91bfdb', '#4575b4'],//['#4575b4', '#91bfdb', '#e0f3f8', '#fee090', '#fc8d59', '#d73027'],
     format: ",.1f",
     show: true,
     Title: ({ layer }) => {
       if(!layer) return
-      return <div>Speed (mph)</div>
+      return (<div className='text-gray-800'>
+        <div>NPMRDS - {this.filters.vehicles.value}</div>
+        <div className='text-sm font-light'> {this.filters.month.value} / {this.filters.year.value} {this.filters.hour.value}:00 - {this.filters.hour.value+1}:00 {this.filters.dow.value}</div> 
+      </div>)
     }
   }
   onHover = {
@@ -161,10 +166,12 @@ class NPMRDSLayer extends LayerContainer {
 
 
 
-  zoomToGeography(geographies = this.filters.geography.value) {
+  zoomToGeography() {
     if (!this.mapboxMap) return;
 
-    const bounds = this.getBounds(geographies);
+    const bounds = this.getBounds();
+
+    console.log('got bounds', bounds)
 
     if (bounds.isEmpty()) return;
 
@@ -199,9 +206,12 @@ class NPMRDSLayer extends LayerContainer {
     this.mapboxMap.easeTo(options);
   }
 
-  getBounds(geographies = this.filters.geography.value) {
-    return this.filters.geography.domain
-      .filter(d => geographies.includes(d.value))
+  getBounds() {
+    let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
+      filtered = this.geographies
+        .filter(({ value }) => geoids.includes(value));
+    
+    return filtered
       .reduce((a, c) => a.extend(c.bounds), new mapboxgl.LngLatBounds())
   }
 
@@ -211,34 +221,25 @@ class NPMRDSLayer extends LayerContainer {
   
   init(map, falcor) {
 
+    let states = ["36","34","09","42"]
     return falcor
       .get(
-        ["geo", "36", "geoLevels"],
+        ["geo", states, "geoLevels"],
         
       )
       .then((res) => {
-        const mInfo = get(res, ["json", "pm3", "measureInfo"], {});
+        // const mInfo = get(res, ["json", "pm3", "measureInfo"], {});
         // console.log('measureInfo', res)
-        this.filters.geography.domain = get(
-              res,
-              ["json", "geo", "36", "geoLevels"],
-              []
-            ).map((geo) => ({
-              name: `${
-                geo.geolevel === "STATE"
-                  ? geo.geoname.toUpperCase()
-                  : geo.geoname
-              } ${
-                geo.geolevel === "COUNTY"
-                  ? "County"
-                  : geo.geolevel === "STATE"
-                  ? "State"
-                  : geo.geolevel
-              }`,
-              geolevel: geo.geolevel,
-              value: geo.geoid,
-              bounds: geo.bounding_box,
-            }));
+        let geo = get(res,'json.geo',{})
+        const geographies = flatten(states.map(s => geo[s].geoLevels));
+
+        this.geographies = 
+         geographies.map(geo => ({
+            name: `${geo.geoname.toUpperCase()} ${geo.geolevel}`,
+            geolevel: geo.geolevel,
+            value: geo.geoid,
+            bounding_box: geo.bounding_box
+        }));
         //this.filters.geography.value = this.loadFromLocalStorage();
         //console.log('where am i', this.filters.geography.value)
         this.zoomToGeography();
@@ -248,7 +249,9 @@ class NPMRDSLayer extends LayerContainer {
   onFilterChange(filterName, newValue, prevValue) {
     switch (filterName) {
      
+
       case "geography":
+        //console.log('new geography', newValue)
         this.zoomToGeography(newValue);
         this.saveToLocalStorage();
         break;
@@ -264,7 +267,8 @@ class NPMRDSLayer extends LayerContainer {
       this.legend.domain  = []
       return false
     }
-    this.legend.domain = ckmeans(domain,this.legend.range.length).map(d => Math.min(...d))
+    this.legend.domain = [0,10,20,30,40,50,55]
+    //ckmeans(domain,this.legend.range.length).map(d => Math.min(...d))
     this.updateLegend(this.filters,this.legend)
     return d3scale.scaleLinear()
       .domain(this.legend.domain)
@@ -275,8 +279,8 @@ class NPMRDSLayer extends LayerContainer {
     // console.log('fetchData')
     let year = +this.filters.year.value,
       month = +this.filters.month.value,
-      geoids = this.filters.geography.value,
-      filtered = this.filters.geography.domain
+      geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
+      filtered = this.geographies
         .filter(({ value }) => geoids.includes(value));
     
    // console.log('request', ['tig','npmrds',`${month}|${year}`,filtered.map(d => `${d.geolevel}|${d.value}`), 'data'])
@@ -301,9 +305,9 @@ class NPMRDSLayer extends LayerContainer {
     //console.log('testing', map.getStyle().layers)
     let year = +this.filters.year.value,
       month = +this.filters.month.value,
-      geoids = this.filters.geography.value,
+      geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
       hour = this.filters.hour.value,
-      filtered = this.filters.geography.domain
+      filtered = this.geographies
         .filter(({ value }) => geoids.includes(value));
 
     this.setActiveLayer(

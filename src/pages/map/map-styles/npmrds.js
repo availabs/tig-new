@@ -1,14 +1,14 @@
 const NpmrdsSources = [
-	{ id: "npmrds",
-	  source: {
-	    type: "vector",
-	    url: "https://tiles.availabs.org/data/npmrds.json"
-	  }
-	}
+  { id: "npmrds",
+    source: {
+      type: "vector",
+      url: "https://tiles.availabs.org/data/npmrds.json"
+    }
+  }
 ]
 
 const npmrdsPaint = {
-  'line-color': 'rgba(0,0,0,0)',
+  'line-color': '#ccc',
   'line-width': [
     "interpolate",
     ["linear"],
@@ -18,16 +18,16 @@ const npmrdsPaint = {
       "match",
       ["get", "n"],
       [1, 2],
-      2,
-      2
+      0.5,
+      0
     ],
     13,
     [
       "match",
       ["get", "n"],
       [1, 2],
-      3,
-      3
+      1.5,
+      1
     ],
     18,
     [
@@ -35,7 +35,7 @@ const npmrdsPaint = {
       ["get", "n"],
       [1, 2],
       8,
-      8
+      5
     ]
   ],
   'line-opacity': [
@@ -56,7 +56,7 @@ const NpmrdsLayers = ['2016','2017','2018','2019','2020','2021']
       id: `tmc-${year}`,
       type: 'line',
       source: 'npmrds',
-      beneath: 'road-label',
+      beneath: 'waterway-label',
       'source-layer': `npmrds_${year}`,
       layout: {
         'visibility': 'visible',
@@ -71,6 +71,6 @@ const NpmrdsLayers = ['2016','2017','2018','2019','2020','2021']
 
 
 export {
-	NpmrdsSources,
-	NpmrdsLayers
+  NpmrdsSources,
+  NpmrdsLayers
 }

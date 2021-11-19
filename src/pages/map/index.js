@@ -8,6 +8,14 @@ import routingConfig from './routing-config/routingConfig.json'
 
 import TigLayout from 'components/tig/TigLayout'
 
+const testComp = () => {
+    return (<div>hello</div>)
+}
+
+const LegendComp = ({activeLayers, ...props}) => {
+    return (<div className='my-4 bg-white w-full'></div>)
+}
+
 const Map = withAuth(({ mapOptions,layers,views}) => {
     const {viewId} = useParams()
 
@@ -25,22 +33,40 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
 
     return (
         <TigLayout>
-            <div className='w-full h-[918px]' style={{height: 618}}>
-                <div className='w-full h-full'>
-                    view id : {viewId}
-                    <AvlMap
-                        accessToken={ config.MAPBOX_TOKEN }
-                        mapOptions={ mapOptions }
-                        layers={layer}
-                        sidebar={{
-                            title: "",
-                            tabs: ["layers", "styles"],
-                            open: true
+            <div className='w-full h-full' style={{height: '800px'}}>   
+                <AvlMap
+                    accessToken={ config.MAPBOX_TOKEN }
+                    mapOptions={ mapOptions }
+                    layers={layer}
+                    sidebarTabPosition='side'
+                    sidebar={{
+                        title: "",
+                        tabs: [
+                            {
+                                icon: "fa fa-bars",
+                                Component: LegendComp
+                            },
+                            "layers", 
+                            "styles",
+                            {
+                                icon: "fa fa-plus",
+                                Component: testComp
+                            },
+                            {
+                                icon: "fa fa-download",
+                                Component: testComp
+                            },
+                            {
+                                icon: "fa fa-info-circle",
+                                Component: testComp
+                            },
+                        ],
+                        open: false
 
-                        }}
+                    }}
 
-                    />
-                </div>
+                />
+               
             </div>
         </TigLayout>
     )
@@ -63,7 +89,7 @@ const MapPage = {
         type: Map,
         props: {
             mapOptions: {
-                zoom: 10.6,
+                zoom: 8.5,
                 center: [-73.911895, 40.88],
                 styles: [
                     {name: "Streets",

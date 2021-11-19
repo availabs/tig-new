@@ -30,6 +30,14 @@ c.geoid as county_geoid,d.geoid10 as taz_geoid
     and
     (st_area(st_intersection(d.geom,b.geom))/st_area(b.geom)) > .9
 
+```
+SELECT a.id, name, type, year, b.geom as base_geometry_geom,
+    FROM public.areas as a
+    join public.base_geometries as b on a.base_geometry_id = b.id
+    where a.type = 'taz' and a.year = '2012' 
+    
+```
+
 4) The name in the area table match with the taz id on the nymtc map only if we filter on the year as 2005
 
 5) Convert taz 36,34,09 fips shape files to geojson

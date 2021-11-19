@@ -14,59 +14,61 @@ def countiesData():
     return data
 
 
-def fetchTazData(cursor, item):
-    print('IN FETCH TAZ DATA', item)
-    taz_table = "public." + "tl_2011_" + item["fips"] + "_taz10"
-
+def fetchTazData(cursor):
     sql = """
-    SELECT name,type,year
-    St_AsGeoJSON(st_makevalid(b.geom)) as base_geom
-    FROM public.areas as a
-    join public.base_geometries as b on a.base_geometry_id = b.id
-    where a.type = 'taz' and a.year = '2005'
+    SELECT row_to_json(f) As feature
+        FROM (
+            SELECT 'Feature' As type,
+                    ST_AsGeoJSON(b.geom)::json As geometry,
+                    row_to_json(
+                        (SELECT l FROM (SELECT a.id AS id, a.name as name, a.type as type, a.year as year) As l)
+                    ) As properties
+            FROM public.areas as a
+            join public.base_geometries as b on a.base_geometry_id = b.id
+            where a.type = 'taz' and a.year = '2020'
+     ) As f
     """
 
     cursor.execute(sql)
-    data = [{"taz_id": t[0], "taz_geoid": t[1], "county_geoid": t[2], "county_name": item["name"],
-             "state_code": item["state_code"], "fips": item["fips"], "geometry": t[3].replace("\"", "")} for t in
-            cursor.fetchall()]
-    print('length of data fetched', item['name'], '->>', len(data))
+    data = cursor.fetchall()
+    print('length of data fetched ->>', len(data))
     if len(data) > 0:
-        if not os.path.isfile('taz.json'):
-            with open('taz.json', mode='w') as f:
-                f.write(json.dumps(data, indent=2))
-        else:
-            with open('taz.json') as existing_data:
-                feeds = json.load(existing_data)
+        if not os.path.isfile('nymtc_taz_2020.ndjson'):
+            with open('nymtc_taz_2020.ndjson', mode='w') as f:
                 for d in data:
-                    if d not in feeds:
-                        feeds.append(d)
-            with open('taz.json', mode='w') as f:
-                f.write(json.dumps(feeds, indent=2))
+                    f.write(json.dumps(d[0]))
+                    f.write('\n')
+                       
+        else:
+            with open('nymtc_taz_2020.ndjson', mode='w') as f:
+                for d in data:
+                    f.write(json.dumps(d[0]))
+                    f.write('\n')
     else:
         return
 
 
 def geo_convert():
-    with open('taz.json') as existing_data:
-        feeds = json.load(existing_data)
-    feat_coll = {'type': 'FeatureCollection',
-                 'features': []}
-
-    for feed in feeds:
-        feat_coll['features'].append(
-            {'type': 'Feature',
-             'geometry': {
+    data = json.load(open('taz_2020.json'))
+    geojson = {
+        "type":"FeatureCollection",
+        "features":[
+            {
+                "type": "Feature",
+                "properties": { "id":d["id"], "name": d["name"], "type": d["type"], "year": d["year"] },
+                'geometry': {
                  'type': 'Polygon',
-                 'coordinates': yaml.load(feed['geometry'],Loader=yaml.FullLoader)['coordinates']
-             }})
+                 'coordinates': yaml.load(d['geometry'],Loader=yaml.FullLoader)['coordinates']
+             }
+            } for d in data]
+    }
 
-    with open('taz.geojson', mode='w') as f:
-        f.write(json.dumps(feat_coll, indent=2))
+    output = open('taz_2020.geojson','w')
+    json.dump(geojson,output)
 
 
 def main():
-    with open('../../config/nymtc.env') as f:
+    with open('../nymtc.env') as f:
         os.environ.update(
             line.replace('export ', '', 1).strip().split('=', 1) for line in f
             if 'export' in line
@@ -79,11 +81,9 @@ def main():
                             password=environ.get('PGPASSWORD'))
     cursor = conn.cursor()
 
-    data = countiesData()
-    for item in data:
-        fetchTazData(cursor, item)
+    fetchTazData(cursor)
 
-    geo_convert()
+    # geo_convert()
 
     conn.commit()
     cursor.close()

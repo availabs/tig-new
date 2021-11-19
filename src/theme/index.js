@@ -166,9 +166,9 @@ const TDS_THEME_BASE = {
 
   menuBg: 'bg-white',
   menuBgHover: 'hover:bg-blueGray-600',
-  menuBgActive: 'bg-blueGray-700',
-  menuBgActiveHover: 'hover:bg-blueGray-600',
-  menuText : "text-blueGray-100",
+  menuBgActive: 'bg-white',
+  menuBgActiveHover: 'hover:bg-blue-500',
+  menuText : "text-gray-700",
   menuTextHover: "hover:text-cyan-300",
   menuTextActive: "text-cyan-300",
   menuTextActiveHover: "hover:text-cyan-200",
@@ -181,7 +181,7 @@ const TDS_THEME_BASE = {
   headerBgHover: "hover:bg-blueGray-700",
 
   inputBg: "bg-white disabled:bg-gray-300 cursor-pointer focus:outline-none",
-  inputBorder: "rounded border border-transparent hover:border-blueGray-400 focus:border-blueGray-300 disabled:border-transparent",
+  inputBorder: "rounded border border-gray-300 hover:border-blueGray-400 focus:border-blueGray-300 disabled:border-transparent",
   inputBgDisabled: "bg-blueGray-300 cursor-not-allowed focus:outline-none",
   inputBorderDisabled: "rounded border border-blueGray-400 hover:border-blueGray-400",
   inputBgFocus: "bg-blue-200 cursor-pointer focus:outline-none",
@@ -194,10 +194,10 @@ const TDS_THEME_BASE = {
   paddingSmall: "py-0 px-1",
   paddingLarge: "py-2 px-4",
 
-  accent1: 'bg-gray-600',
-  accent2: 'bg-gray-500',
-  accent3: 'bg-gray-400',
-  accent4: 'bg-gray-300',
+  accent1: 'bg-gray-100',
+  accent2: 'bg-gray-200',
+  accent3: 'bg-gray-300',
+  accent4: 'bg-gray-400',
 
   highlight1: "bg-cyan-400",
   highlight2: "bg-cyan-300",

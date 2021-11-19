@@ -4,7 +4,6 @@ const colors = require('tailwindcss/colors');
 
 module.exports = {
   theme: {
-    mode: "jit",
     purge: ["./public/**/*.html", "./src/**/*.{js,jsx}"],
     borderColor: theme => ({
       ...theme('colors'),
@@ -29,8 +28,8 @@ module.exports = {
         },
           tigGray: {
             '50': '#EEEEEE',
-              '100': '#E6E6E6',
-              '200': '#D2D2D2'
+            '100': '#E6E6E6',
+            '200': '#D2D2D2'
           },
           tigGreen: {
             '100': '#679d89'
@@ -38,6 +37,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Proxima Nova W01', 'Inter var', ...defaultTheme.fontFamily.sans],
+        serif: ['Alfa Slab One', ...defaultTheme.fontFamily.serif]
       },
     }
   },
