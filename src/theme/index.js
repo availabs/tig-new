@@ -132,13 +132,13 @@ const TDS_THEME_BASE = {
 
   /* ------------------------- */
 
-  text: 'text-blueGray-100',
+  text: 'text-black-100',
   textContrast: "text-white",
   border: "border-blueGray-100",
 
 
 
-  textInfo: "text-cyan-400",
+  textInfo: "text-cyan-300",
   bgInfo: "bg-cyan-400",
   borderInfo: "border-cyan-400",
 
@@ -211,13 +211,13 @@ const TDS_THEME_BASE = {
   sidebarW: '56',
   transition: "transition ease-in-out duration-150",
 
-  tableInfoBar: "bg-blueGray-700",
-  tableRow: 'bg-blueGray-800 hover:bg-blueGray-600 @transition',
-  tableRowStriped: 'bg-blueGray-800 even:bg-blueGray-700 hover:bg-blueGray-600 @transition',
+  tableInfoBar: "bg-white border-2 border-gray-300",
+  tableRow: 'bg-white hover:bg-gray-200 @transition',
+  tableRowStriped: 'odd:bg-white even:bg-gray-200 hover:bg-gray-200 @transition',
 
-  tableCell: 'px-4 py-1 whitespace-no-wrap',
+  tableCell: 'px-4 py-1 whitespace-no-wrap border-2 border-gray-300',
 
-  tableHeader: "px-4 py-2 pb-1 border-b-2 border-blueGray-900 bg-blueGray-900 text-left font-medium @text uppercase first:rounded-tl-md last:rounded-tr-md",
+  tableHeader: "px-4 py-2 pb-1 border-2 border-gray-300 text-left text-black font-medium uppercase first:rounded-tl-md last:rounded-tr-md",
 
   $compositions
 }

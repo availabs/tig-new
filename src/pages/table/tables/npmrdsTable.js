@@ -1,5 +1,5 @@
 import {useState, useMemo, useEffect} from 'react'
-import {Select, Table, useFalcor} from '@availabs/avl-components'
+import {Select, Input, Table, useFalcor} from '@availabs/avl-components'
 import {filters} from 'pages/map/layers/npmrds/filters.js'
 import get from "lodash.get";
 import flatten from "lodash.flatten";
@@ -20,6 +20,7 @@ const fetchData = (falcor, filtered, month, year) => {
     return falcor.get(...requests)
 }
 
+
 const NpmrdsTable = () => {
     const {falcor, falcorCache} = useFalcor();
 
@@ -29,6 +30,9 @@ const NpmrdsTable = () => {
     const [hour, setHour] = useState(15)
     const [dow, setDow] = useState('Thursday')
     const [vehicles, setVehicles] = useState('All Vehicles')
+    const [tableSize, setTableSize] = useState(50)
+    const [speedFrom, setSpeedFrom] = useState(0)
+    const [speedTo, setSpeedTo] = useState(100)
 
     const getterSetters = {
         geography: {get: geography, set: setGeography},
@@ -37,6 +41,9 @@ const NpmrdsTable = () => {
         hour: {get: hour, set: setHour},
         dow: {get: dow, set: setDow},
         vehicles: {get: vehicles, set: setVehicles},
+        tableSize: {get: tableSize, set: setTableSize},
+        speedFrom: {get: speedFrom, set: setSpeedFrom},
+        speedTo: {get: speedTo, set: setSpeedTo},
     }
 
     const states = ["36","34","09","42"];
@@ -67,27 +74,53 @@ const NpmrdsTable = () => {
             .reduce((out,d) => {
                 return [
                     ...out,
-                    ...Object.keys(d).map(d1 => (
-                        {tmc:d1, roadname: d[d1].roadname, length: d[d1].length,
+                    ...Object.keys(d)
+                        .filter(d1 =>
+                            (!speedFrom || d[d1].s.find(s1 => s1 >= speedFrom && (!speedTo || s1 <= speedTo))) &&
+                            (!speedTo || d[d1].s.find(s1 => s1 <= speedTo && (!speedFrom || s1 >= speedFrom)))
+                        )
+                        .map(d1 => (
+                        {
+                            tmc:d1,
+                            roadname: d[d1].roadname,
+                            // length: d[d1].length,
                             ...d[d1].s.reduce((accHours, value, hour) => {
-                                accHours[('0' + hour + ':00').slice(-5)] = value;
+                                if(
+                                    (!speedFrom || (value >= speedFrom && (!speedTo || value <= speedTo))) &&
+                                    (!speedTo || (value <= speedTo && (!speedFrom || value >= speedFrom)))
+                                ){
+                                    accHours[('0' + hour + ':00').slice(-5)] = value;
+                                }else{
+                                    accHours[('0' + hour + ':00').slice(-5)] = null
+                                }
                                 return accHours
                             }, {})
                         }))
                 ]
             }, [])
-    }, [falcorCache, month, year, filtered])
-
+    }, [falcorCache, month, year, filtered, speedFrom, speedTo])
 
     return (
         <div>
             <div> NPMRDS Speed (mph) </div>
-            <div className={'flex flex-row'}>
+
+            <div className={`w-5 flex pb-1`}>
+                <label  className={`self-center px-1 font-bold text-sm`}>Area:</label>
+                <Select
+                    id={'geography'}
+                    {...filters.geography}
+                    onChange={e => getterSetters.geography.set(e)}
+                    value={getterSetters.geography.get}
+                /> <span  className={`self-center px-1 font-bold text-sm`}>Data</span>
+            </div>
+
+            <div className={'flex flex-row pb-5'}>
                 {
                     Object.keys(filters)
+                        .filter(f => f !== 'geography')
                         .map((f, fI) =>
                             <>
-                                <label>{filters[f].name}</label>
+                                <label className={`self-center px-1 font-bold text-sm`}>{filters[f].name}:</label>
                                 <Select
                                     id={f}
                                     {...filters[f]}
@@ -96,6 +129,32 @@ const NpmrdsTable = () => {
                                 />
                             </>)
                 }
+            </div>
+
+            <div className={'flex flex-row pb-5'}>
+                <label  className={`self-center px-1 font-bold text-sm`}>Speed (mph) from</label>
+                <Input
+                    id={'speedFrom'}
+                    value={speedFrom}
+                    onChange={e => getterSetters.speedFrom.set(e)}
+                    large
+                />
+                <label  className={`self-center px-1 font-bold text-sm`}>to</label>
+                <Input
+                    id={'speedTo'}
+                    value={speedTo}
+                    onChange={e => getterSetters.speedTo.set(e)}
+                    large
+                />
+
+                <label  className={`self-center px-1 font-bold text-sm`}>Show:</label>
+                <Select
+                    id={'tableSize'}
+                    domain={[10, 25, 50, 100]}
+                    onChange={e => getterSetters.tableSize.set(e)}
+                    value={tableSize}
+                    multi={false}
+                /><span  className={`self-center px-1 font-bold text-sm`}>entries</span>
             </div>
 
             <Table
@@ -107,8 +166,9 @@ const NpmrdsTable = () => {
                         align: 'center'
                     }))
                 }
-                initialPageSize={50}
-                />
+                initialPageSize={tableSize}
+                striped={true}
+            />
         </div>
     )
 }
