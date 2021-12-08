@@ -169,7 +169,6 @@ const NpmrdsTable = () => {
                     multi={false}
                 /><span  className={`self-center px-1 font-bold text-sm`}>entries</span>
             </div>
-            {pageSize}
             {RenderTable(data, pageSize)}
         </div>
     )
