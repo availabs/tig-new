@@ -20,6 +20,19 @@ const fetchData = (falcor, filtered, month, year) => {
     return falcor.get(...requests)
 }
 
+const RenderTable = (data, pageSize) => useMemo(() =>
+    <Table
+        data={data}
+        columns={
+            Object.keys(data[0] || {}).map(c => ({
+                Header: c,
+                accessor: c,
+                align: 'center'
+            }))
+        }
+        initialPageSize={pageSize}
+        striped={true}
+    />, [data, pageSize])
 
 const NpmrdsTable = () => {
     const {falcor, falcorCache} = useFalcor();
@@ -30,7 +43,7 @@ const NpmrdsTable = () => {
     const [hour, setHour] = useState(15)
     const [dow, setDow] = useState('Thursday')
     const [vehicles, setVehicles] = useState('All Vehicles')
-    const [pageSize, setpageSize] = useState(50)
+    const [pageSize, setPageSize] = useState(50)
     const [speedFrom, setSpeedFrom] = useState(0)
     const [speedTo, setSpeedTo] = useState(100)
 
@@ -41,7 +54,7 @@ const NpmrdsTable = () => {
         hour: {get: hour, set: setHour},
         dow: {get: dow, set: setDow},
         vehicles: {get: vehicles, set: setVehicles},
-        pageSize: {get: pageSize, set: setpageSize},
+        pageSize: {get: pageSize, set: setPageSize},
         speedFrom: {get: speedFrom, set: setSpeedFrom},
         speedTo: {get: speedTo, set: setSpeedTo},
     }
@@ -156,19 +169,8 @@ const NpmrdsTable = () => {
                     multi={false}
                 /><span  className={`self-center px-1 font-bold text-sm`}>entries</span>
             </div>
-
-            <Table
-                data={data}
-                columns={
-                    Object.keys(data[0] || {}).map(c => ({
-                        Header: c,
-                        accessor: c,
-                        align: 'center'
-                    }))
-                }
-                initialPageSize={pageSize}
-                striped={true}
-            />
+            {pageSize}
+            {RenderTable(data, pageSize)}
         </div>
     )
 }
