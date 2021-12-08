@@ -30,7 +30,7 @@ const NpmrdsTable = () => {
     const [hour, setHour] = useState(15)
     const [dow, setDow] = useState('Thursday')
     const [vehicles, setVehicles] = useState('All Vehicles')
-    const [tableSize, setTableSize] = useState(50)
+    const [pageSize, setpageSize] = useState(50)
     const [speedFrom, setSpeedFrom] = useState(0)
     const [speedTo, setSpeedTo] = useState(100)
 
@@ -41,7 +41,7 @@ const NpmrdsTable = () => {
         hour: {get: hour, set: setHour},
         dow: {get: dow, set: setDow},
         vehicles: {get: vehicles, set: setVehicles},
-        tableSize: {get: tableSize, set: setTableSize},
+        pageSize: {get: pageSize, set: setpageSize},
         speedFrom: {get: speedFrom, set: setSpeedFrom},
         speedTo: {get: speedTo, set: setSpeedTo},
     }
@@ -149,10 +149,10 @@ const NpmrdsTable = () => {
 
                 <label  className={`self-center px-1 font-bold text-sm`}>Show:</label>
                 <Select
-                    id={'tableSize'}
+                    id={'pageSize'}
                     domain={[10, 25, 50, 100]}
-                    onChange={e => getterSetters.tableSize.set(e)}
-                    value={tableSize}
+                    onChange={e => getterSetters.pageSize.set(e)}
+                    value={pageSize}
                     multi={false}
                 /><span  className={`self-center px-1 font-bold text-sm`}>entries</span>
             </div>
@@ -166,7 +166,7 @@ const NpmrdsTable = () => {
                         align: 'center'
                     }))
                 }
-                initialPageSize={tableSize}
+                initialPageSize={pageSize}
                 striped={true}
             />
         </div>
