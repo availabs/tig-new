@@ -145,15 +145,15 @@ const NpmrdsTable = () => {
                 }
             </div>
 
-            <div className={'flex flex-row pb-5'}>
-                <label  className={`self-center px-1 font-bold text-sm`}>Speed (mph) from</label>
+            <div className={'flex flex-row pb-5 items-center w-1/2'}>
+                <label  className={`px-1 font-bold text-sm whitespace-nowrap`}>Speed (mph) from</label>
                 <Input
                     id={'speedFrom'}
                     value={speedFrom}
                     onChange={e => getterSetters.speedFrom.set(e)}
                     large
                 />
-                <label  className={`self-center px-1 font-bold text-sm`}>to</label>
+                <label  className={`px-1 font-bold text-sm`}>to</label>
                 <Input
                     id={'speedTo'}
                     value={speedTo}
@@ -161,14 +161,14 @@ const NpmrdsTable = () => {
                     large
                 />
 
-                <label  className={`self-center px-1 font-bold text-sm`}>Show:</label>
+                <label  className={`px-1 font-bold text-sm`}>Show:</label>
                 <Select
                     id={'pageSize'}
                     domain={[10, 25, 50, 100]}
                     onChange={e => getterSetters.pageSize.set(e)}
                     value={pageSize}
                     multi={false}
-                /><span  className={`self-center px-1 font-bold text-sm`}>entries</span>
+                /><span  className={`px-1 font-bold text-sm`}>entries</span>
             </div>
             {RenderTable(data, pageSize)}
         </div>
