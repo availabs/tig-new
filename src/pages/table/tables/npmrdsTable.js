@@ -31,6 +31,7 @@ const RenderTable = (data, pageSize) => useMemo(() =>
             }))
         }
         initialPageSize={pageSize}
+        pageSize={pageSize}
         striped={true}
     />, [data, pageSize])
 
