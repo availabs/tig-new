@@ -21,7 +21,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         //this.id = id
     }
 
-    setActive = true
+    
     name = '2040 SED County Level Forecast'
     filters = {
         dataset: {
@@ -149,30 +149,30 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
     init(map){
 
-        return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
-            .then(response => {
-                this.data = response
-                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-                    if (c.value === this.filters.dataset.value){
-                        a = c.name 
-                    }
-                    return a 
-                },'')}-${this.filters.year.value}`
-                this.data_counties = this.data.data.map(item =>{
-                    return counties.reduce((a,c) =>{
-                        if(item.area === c.name){
-                            a['name'] = c.name
-                            a['geoid'] = c.geoid
-                        }
-                        return a
-                    },{})
-                })
-                this.legend.domain = this.data.data.reduce((a,c) =>{
-                    a.push(c[this.filters.year.value])
-                    return a
-                },[])
+        // return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
+        //     .then(response => {
+        //         this.data = response
+        //         this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
+        //             if (c.value === this.filters.dataset.value){
+        //                 a = c.name 
+        //             }
+        //             return a 
+        //         },'')}-${this.filters.year.value}`
+        //         this.data_counties = this.data.data.map(item =>{
+        //             return counties.reduce((a,c) =>{
+        //                 if(item.area === c.name){
+        //                     a['name'] = c.name
+        //                     a['geoid'] = c.geoid
+        //                 }
+        //                 return a
+        //             },{})
+        //         })
+        //         this.legend.domain = this.data.data.reduce((a,c) =>{
+        //             a.push(c[this.filters.year.value])
+        //             return a
+        //         },[])
 
-            })
+        //     })
     }
 
 

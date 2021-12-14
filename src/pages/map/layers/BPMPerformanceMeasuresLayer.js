@@ -143,35 +143,35 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
 
     init(map){
 
-        return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
-            .then(response =>{
-                this.data = response
-                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-                    if (c.value === this.filters.dataset.value){
-                        a = c.name
-                    }
-                    return a
-                },'')}-${this.filters.column.domain.reduce((a,c) =>{
-                   if(c.value === this.filters.column.value){
-                       a = c.name
-                   } 
-                   return a 
-                },'')}`
-                this.data_counties = this.data.data.map(item =>{
-                    return counties.reduce((a,c) =>{
-                        if(item.area === c.name){
-                            a['name'] = c.name
-                            a['geoid'] = c.geoid
-                        }
-                        return a
-                    },{})
-                })
-                this.legend.domain = this.data.data.reduce((a,c) =>{
-                    a.push(c[this.filters.column.value])
-                    return a
-                },[])
-                return response
-            })
+        // return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
+        //     .then(response =>{
+        //         this.data = response
+        //         this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
+        //             if (c.value === this.filters.dataset.value){
+        //                 a = c.name
+        //             }
+        //             return a
+        //         },'')}-${this.filters.column.domain.reduce((a,c) =>{
+        //            if(c.value === this.filters.column.value){
+        //                a = c.name
+        //            } 
+        //            return a 
+        //         },'')}`
+        //         this.data_counties = this.data.data.map(item =>{
+        //             return counties.reduce((a,c) =>{
+        //                 if(item.area === c.name){
+        //                     a['name'] = c.name
+        //                     a['geoid'] = c.geoid
+        //                 }
+        //                 return a
+        //             },{})
+        //         })
+        //         this.legend.domain = this.data.data.reduce((a,c) =>{
+        //             a.push(c[this.filters.column.value])
+        //             return a
+        //         },[])
+        //         return response
+        //     })
 
     }
 

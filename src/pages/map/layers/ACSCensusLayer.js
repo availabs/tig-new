@@ -142,6 +142,13 @@ class ACSCensusLayer extends LayerContainer {
 
     init(map){
 
+        
+
+
+
+    }
+
+    fetchData() {
         const categoryValue = acsCensusCategoryMappings.reduce((a,c ) =>{
             if((c.name === this.categoryName || c.name === this.filters.dataset.value) && c.year === this.filters.year.value){
                 a = c.value
@@ -168,29 +175,9 @@ class ACSCensusLayer extends LayerContainer {
                         a.push(c.value)
                         return a
                     },[])
+                    this.render()
                     return response
                 })
-        }
-
-
-
-    }
-
-    fetchData() {
-        const categoryValue = acsCensusCategoryMappings.reduce((a,c ) =>{
-            if(c.name === this.categoryName && c.year === this.filters.year.value){
-                a = c.value
-            }
-            return a
-        },null)
-        if(categoryValue){
-            return new Promise(resolve =>
-                fetcher(`${HOST}views/${categoryValue}/data_overlay`)
-                    .then(response =>{
-                        this.data = response
-                        setTimeout(resolve,1000)
-                    })
-            );
         }
 
 
@@ -198,7 +185,9 @@ class ACSCensusLayer extends LayerContainer {
 
 
     onFilterChange(filterName,value,preValue){
-
+        if(!this.processedData) {
+            return
+        }
         switch (filterName){
             case "year" : {
                 this.legend.Title = `${this.filters.dataset.value}-${value}`
@@ -275,6 +264,9 @@ class ACSCensusLayer extends LayerContainer {
 
     render(map) {
 
+        if(!this.data) {
+            return this.fetchData()
+        }
         if (this.data_tracts.length) {
             map.setFilter("tracts", ["in", ["get", "GEOID"], ["literal", this.data_tracts.map(d => d.geoid)]]);
         }

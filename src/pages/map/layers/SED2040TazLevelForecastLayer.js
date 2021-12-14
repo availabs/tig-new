@@ -145,17 +145,17 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
 
     init(map){
 
-        return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
-            .then(response => {
-                this.data = response
-                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-                    if (c.value === this.filters.dataset.value){
-                        a = c.name
-                    }
-                    return a
-                },'')}-${this.filters.year.value}`
-                this.taz_ids = this.data.data.map(d => d.area).filter(d => d)
-            })
+        // return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
+        //     .then(response => {
+        //         this.data = response
+        //         this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
+        //             if (c.value === this.filters.dataset.value){
+        //                 a = c.name
+        //             }
+        //             return a
+        //         },'')}-${this.filters.year.value}`
+        //         this.taz_ids = this.data.data.map(d => d.area).filter(d => d)
+        //     })
     }
 
     onFilterChange(filterName,value,preValue){

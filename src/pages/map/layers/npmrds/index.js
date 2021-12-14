@@ -47,6 +47,7 @@ const getMonths = {
 
 class NPMRDSLayer extends LayerContainer {
   name = "NPMRDS speeds"
+  attribution = "TMC map data © HERE"
   sources = [
     ...NpmrdsSources,
     ...TrafficSignalsSources,
@@ -76,11 +77,11 @@ class NPMRDSLayer extends LayerContainer {
   infoBoxes = [
     {
       Component: ({layer}) => (
-        <div className='w-full bg-npmrds-600 text-npmrds-100'>
+        <div className='w-full bg-npmrds-600 w-full text-npmrds-100'>
           
         </div>
       ),
-      show: true
+      show: false
     },
     
   ]
@@ -89,10 +90,11 @@ class NPMRDSLayer extends LayerContainer {
   updateLegend = updateLegend
   setActiveLayer = setActiveLayer
   legend = {
-    type: "quantile",
+    type: "threshold",
     domain: [10,20,30,40,55],
     range: ['rgb(255,0,0)', 'rgb(255,100,0)','rgb(255,255,0)','rgb(0,100,255)','rgb(0,0,255)','rgb(0,255,255)','rgb(0,255,0)'],//['#d73027', '#fc8d59', '#fee090', '#e0f3f8', '#91bfdb', '#4575b4'],//['#4575b4', '#91bfdb', '#e0f3f8', '#fee090', '#fc8d59', '#d73027'],
     format: ",.1f",
+    direction: 'horizontal',
     show: true,
     Title: ({ layer }) => {
       if(!layer) return
@@ -100,7 +102,8 @@ class NPMRDSLayer extends LayerContainer {
         <div>NPMRDS - {this.filters.vehicles.value}</div>
         <div className='text-sm font-light'> {this.filters.month.value} / {this.filters.year.value} {this.filters.hour.value}:00 - {this.filters.hour.value+1}:00 {this.filters.dow.value}</div> 
       </div>)
-    }
+    },
+    units: "Average Speed (mph)"
   }
   onHover = {
     layers: [...NpmrdsLayers.map(d => d.id)],
@@ -123,7 +126,7 @@ class NPMRDSLayer extends LayerContainer {
       data.push(['hoverlayer', layerId])
       return data
     },
-    //HoverComp
+    HoverComp
     
   }
   // onClick = {
@@ -270,7 +273,7 @@ class NPMRDSLayer extends LayerContainer {
     this.legend.domain = [0,10,20,30,40,50,55]
     //ckmeans(domain,this.legend.range.length).map(d => Math.min(...d))
     this.updateLegend(this.filters,this.legend)
-    return d3scale.scaleLinear()
+    return d3scale.scaleThreshold()
       .domain(this.legend.domain)
       .range(this.legend.range);
   }

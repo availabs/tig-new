@@ -11,7 +11,7 @@ class RTPProjectDataLayer extends LayerContainer {
         super(props);
         this.viewId = props.viewId
     }
-
+    active = false
     setActive = !!this.viewId
     name = 'RTP Project Data'
     filters = {
@@ -167,44 +167,44 @@ class RTPProjectDataLayer extends LayerContainer {
 
     init(map) {
 
-        const url = `${HOST}/views/${this.filters.dataset.value}/data_overlay`
-        const cost_lower = ''
-        const cost_upper = ''
+        // const url = `${HOST}/views/${this.filters.dataset.value}/data_overlay`
+        // const cost_lower = ''
+        // const cost_upper = ''
 
-        const params = `?utf8=%E2%9C%93&rtp_id=${this.filters.rtp_id.value === 'Select All'? '':this.filters.rtp_id.value}&current_year=${this.filters.year.value === 'Select All'? '':this.filters.year.value}&cost_lower=${cost_lower}&cost_upper=${cost_upper}&ptype=${this.filters.project_type.value === 'Select All'? '':this.filters.project_type.value}&plan_portion=${this.filters.plan_portion.value === 'Select All'? '':this.filters.plan_portion.value}&sponsor=${this.filters.sponsor.value === 'Select All'? '':this.filters.sponsor.value}&commit=Filter`
-        return fetcher(url + params)
-            .then(response => {
-                this.data = response
-                this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
-                this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.dataset.value){
-                        a = c.name
-                    }
-                    return a
-                },'')}
-               Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
-                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
-                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.project_type.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.plan_portion.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.sponsor.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')}
-                `
-            })
+        // const params = `?utf8=%E2%9C%93&rtp_id=${this.filters.rtp_id.value === 'Select All'? '':this.filters.rtp_id.value}&current_year=${this.filters.year.value === 'Select All'? '':this.filters.year.value}&cost_lower=${cost_lower}&cost_upper=${cost_upper}&ptype=${this.filters.project_type.value === 'Select All'? '':this.filters.project_type.value}&plan_portion=${this.filters.plan_portion.value === 'Select All'? '':this.filters.plan_portion.value}&sponsor=${this.filters.sponsor.value === 'Select All'? '':this.filters.sponsor.value}&commit=Filter`
+        // return fetcher(url + params)
+        //     .then(response => {
+        //         this.data = response
+        //         this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
+        //         this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
+        //         this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
+        //             if(c.value === this.filters.dataset.value){
+        //                 a = c.name
+        //             }
+        //             return a
+        //         },'')}
+        //        Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
+        //         RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
+        //         Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
+        //             if(c.value === this.filters.project_type.value){
+        //                 a = c.name === 'Select All' ? 'All': c.name
+        //             }
+        //             return a
+        //         },'')},
+        //         Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
+        //             if(c.value === this.filters.plan_portion.value){
+        //                 a = c.name === 'Select All' ? 'All': c.name
+        //             }
+        //             return a
+        //         },'')},
+        //        Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
+        //             if(c.value === this.filters.sponsor.value){
+        //                 a = c.name === 'Select All' ? 'All': c.name
+        //             }
+        //             return a
+        //         },'')}
+        //         `
+        //     })
     }
 
     fetchData() {

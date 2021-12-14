@@ -14,5 +14,8 @@ const fetcher = url => {
             cache.set(url, json);
             return json;
         })
+        .catch(e => {
+            console.log('failed to fetch')
+        })
 }
 export default fetcher;

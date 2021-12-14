@@ -146,33 +146,33 @@ class TestTipLayer extends LayerContainer {
         const cost_lower = ''
         const cost_upper = ''
         const params = `?utf8=%E2%9C%93&tip_id=${this.filters.tip_id.value === 'Select All'? '':this.filters.tip_id.value}&ptype=${this.filters.project_type.value === 'Select All'? '':this.filters.project_type.value}&mpo=${this.filters.mpo_name.value === 'Select All'? '':this.filters.mpo_name.value}&sponsor=${this.filters.agency.value === 'Select All'? '':this.filters.agency.value}&cost_lower=${cost_lower}&cost_upper=${cost_upper}&commit=Filter`
-        return fetcher(url + params)
-            .then(response => {
-                this.data = response
-                this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
-                this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.dataset.value){
-                        a = c.name
-                    }
-                    return a
-                },'')}
-                TIP Id: ${this.filters.tip_id.value === 'Select All'? 'All':this.filters.tip_id.value},
-                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.project_type.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-                MPO Name: ${this.filters.mpo_name.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.mpo_name.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-               Agency: ${this.filters.agency.value === 'Select All'? 'All':''}
-                `
-            })
+        // return fetcher(url + params)
+        //     .then(response => {
+        //         this.data = response
+        //         this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
+        //         this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
+        //         this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
+        //             if(c.value === this.filters.dataset.value){
+        //                 a = c.name
+        //             }
+        //             return a
+        //         },'')}
+        //         TIP Id: ${this.filters.tip_id.value === 'Select All'? 'All':this.filters.tip_id.value},
+        //         Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
+        //             if(c.value === this.filters.project_type.value){
+        //                 a = c.name === 'Select All' ? 'All': c.name
+        //             }
+        //             return a
+        //         },'')},
+        //         MPO Name: ${this.filters.mpo_name.domain.reduce((a,c) =>{
+        //             if(c.value === this.filters.mpo_name.value){
+        //                 a = c.name === 'Select All' ? 'All': c.name
+        //             }
+        //             return a
+        //         },'')},
+        //        Agency: ${this.filters.agency.value === 'Select All'? 'All':''}
+        //         `
+        //     })
     }
     fetchData() {
         const url = `${HOST}/views/${this.filters.dataset.value}/data_overlay`
@@ -206,6 +206,7 @@ class TestTipLayer extends LayerContainer {
                 },'')},
                Agency: ${this.filters.agency.value === 'Select All'? 'All':''}
                 `
+                this.render()
             })
     }
     onFilterChange(filterName,value,preValue){
@@ -353,6 +354,10 @@ class TestTipLayer extends LayerContainer {
         mapboxMap.removeSource('tip_lines')
     }
     render(map){
+        if(!this.data) {
+
+            return this.fetchData()
+        }
         let geojson = {
             type: "FeatureCollection",
             features: []
@@ -415,16 +420,16 @@ class TestTipLayer extends LayerContainer {
             })
         }
 
-        if (map.getSource('tip_symbols')) {
-            map.getSource('tip_symbols').setData(symbols_geojson)
+        if (this.mapboxMap.getSource('tip_symbols')) {
+            this.mapboxMap.getSource('tip_symbols').setData(symbols_geojson)
         }
 
-        if(map.getSource('tip_lines')){
-            map.getSource('tip_lines').setData(line_geojson)
+        if(this.mapboxMap.getSource('tip_lines')){
+            this.mapboxMap.getSource('tip_lines').setData(line_geojson)
         }
 
-        if(!map.getLayer('tip_lines')){
-            map.addLayer({
+        if(!this.mapboxMap.getLayer('tip_lines')){
+            this.mapboxMap.addLayer({
                 'id': 'tip_lines',
                 'type': 'line',
                 source: 'tip_lines',
@@ -443,8 +448,8 @@ class TestTipLayer extends LayerContainer {
             if (feature.properties.icon) {
                 let symbol = feature.properties.icon
                 let layerID = 'tip-' + symbol;
-                if (!map.getLayer(layerID)) {
-                    map.addLayer({
+                if (!this.mapboxMap.getLayer(layerID)) {
+                    this.mapboxMap.addLayer({
                         'id': layerID,
                         'type': 'symbol',
                         'source': 'tip_symbols',

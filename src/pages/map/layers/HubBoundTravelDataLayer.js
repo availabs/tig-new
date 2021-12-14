@@ -130,21 +130,21 @@ class HubBoundTravelDataLayer extends LayerContainer {
         const url = `${HOST}/views/${this.viewId || '23'}/data_overlay?utf8=%E2%9C%93&`
         const params = `year=${this.filters.year.value}&hour=${from}&upper_hour=${to}&transit_mode=${this.filters.mode.value}&transit_direction=${this.filters.direction.value}&lower=&upper=&commit=Filter`
 
-        return fetcher(url+params)
-            .then(response => {
-                this.data = response
-                this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
-                this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
-                    if(c.value === this.filters.mode.value){
-                        a = c.name
-                    }
-                    return a
-                },'')},
-                Year:${this.filters.year.value},From:${this.filters.from.value} to ${this.filters.to.value}, 
-                Direction: ${this.filters.direction.value}`
+        // return fetcher(url+params)
+        //     .then(response => {
+        //         this.data = response
+        //         this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
+        //         this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
+        //         this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
+        //             if(c.value === this.filters.mode.value){
+        //                 a = c.name
+        //             }
+        //             return a
+        //         },'')},
+        //         Year:${this.filters.year.value},From:${this.filters.from.value} to ${this.filters.to.value}, 
+        //         Direction: ${this.filters.direction.value}`
 
-            })
+        //     })
 
     }
 
