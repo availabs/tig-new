@@ -5,29 +5,32 @@ import { Select, useTheme,/*CollapsibleSidebar*/ } from "@availabs/avl-component
 
 
 const Download = ({ inactiveLayers, activeLayers, MapActions, ...rest }) => {
-
+  const [loading, setLoading] = React.useState(false)
   const theme = useTheme();
 
-  const download = (url) => {
-    fetch(url)
-      .then(r => {
-        console.log('response ', r)
-         return r.json()
-      })
-      .then(d => {
-        console.log('Download', d)
-      } )
+  const download = (layer) => {
+      if(layer.download) {
+        setLoading(true)
+        layer
+          .download()
+          .then(d => {
+            console.log('done')
+            setLoading(false)
+          })
+      }
   }
 
   return (
     <>
-      
       <h4>Download</h4>
       { activeLayers.map(layer =>
           <div key={layer.name}>
-            <div className='cursor-pointer' onClick={e => download(`https://tig.nymtc.org/views/${layer.viewId}/export_shp`)}>
+            <div className='cursor-pointer' onClick={e => download(layer)}>
             {layer.name}
             </div>
+            {
+              loading ? <div> download processing ... </div> : ''
+            }
           </div>
         )
       }

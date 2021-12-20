@@ -95,10 +95,10 @@ const TigBreadcrumbs = ({children}) => {
         <div className='w-full flex justify-between py-6 items-baseline z-10'>
             <div className='flex items-stretch'>
                 
-                <Link to='/' 
+                <a href='/' 
                     className='bg-tigGray-100 hover:bg-tigGray-50 hover:text-orange-300 hover:cursor-pointer py-1 px-3 text-sm text-gray-600'>
                     Catalog
-                </Link>
+                </a>
                 {viewId ?
                 <>
                 <div 

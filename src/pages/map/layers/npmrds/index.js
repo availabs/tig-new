@@ -6,6 +6,7 @@ import { /*Select,*/ useFalcor } from '@availabs/avl-components'
 import mapboxgl from "mapbox-gl"
 import * as d3scale from "d3-scale"
 import flatten from 'lodash.flatten'
+import { download as shpDownload } from 'utils/shp-write';
 //import len from '@turf/length'
 // import flatten from 'lodash.flatten'
 
@@ -136,6 +137,7 @@ class NPMRDSLayer extends LayerContainer {
   //     console.log('click', feature, features)
   //   } 
   // }
+
 
   state = {
     activeStation: null,
@@ -303,6 +305,47 @@ class NPMRDSLayer extends LayerContainer {
         
   }
 
+  async download() {
+    let year = +this.filters.year.value,
+      month = +this.filters.month.value,
+      geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
+      hour = this.filters.hour.value,
+      vehicles = this.filters.vehicles.value,
+      filtered = this.geographies
+        .filter(({ value }) => geoids.includes(value));
+    
+    let falcorCache = this.falcor.getCache()
+    let data = filtered.map(d => get(falcorCache, ['tig','npmrds',`${month}|${year}`,`${d.geolevel}|${d.value}`, 'data','value'],[]))
+      .reduce((out,d) => {
+        return {...out, ...d}
+      }, {})  
+    let selection = Object.keys(data)
+    let geometries = await this.falcor.chunk(["tmc",selection,"year", year,"geometries"])
+    falcorCache = this.falcor.getCache()
+    let geojson =  {
+      type: "FeatureCollection",
+      features: selection.map(id => ({
+        type: "Feature",
+        geometry: get(falcorCache, ["tmc", id,"year", year,"geometries", "value"], "FAILED"),
+        properties: {tmc: id, roadname: data[id].roadname, length: data[id].length, ...data[id].s }
+      }))
+    }
+    console.log('Download clicked',geojson)    
+
+    console.log()
+    return shpDownload(geojson,
+          { file: `npmrds_${year}_${month}_${vehicles}`,
+            folder: `npmrds_${year}_${month}_${vehicles}`,
+            types: { 
+              polyline: `npmrds_${year}_${month}_${vehicles}`,
+              line: `npmrds_${year}_${month}_${vehicles}`,
+            }
+          },
+          // aliasString,
+          // tmcMetaString
+        )
+  }
+  
   render(map) {
     // console.log('render', this)
     //console.log('testing', map.getStyle().layers)

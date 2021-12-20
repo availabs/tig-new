@@ -11,9 +11,9 @@ const TigNav = withAuth(() => {
         <div className='w-full'>
             <TopNav 
                 leftMenu={(
-                    <Link to='/' className={' hover:bg-tigGray-50 h-12'}>
+                    <a href='/' className={' hover:bg-tigGray-50 h-12'}>
                         <img alt='NYMTC Logo' className={'bg-tigGray-200 hover:bg-tigGray-50'} style={{height:50}} src='/images/nymtc_logo.svg'/>
-                    </Link>)
+                    </a>)
                 }
                 rightMenu={
                     

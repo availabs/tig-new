@@ -8,16 +8,19 @@ const fetchGeo = (falcor, states) => {
     return falcor.get(["geo", states, "geoLevels"])
 }
 
-const fetchData = (falcor, filtered, month, year) => {
+const fetchData = (falcor, filtered, month, year, setLoading) => {
     if (!filtered.length) return null;
 
+    setLoading(true)
     let requests = filtered.reduce((a, c) => {
         a.push(['tig','npmrds',`${month}|${year}`,`${c.geolevel}|${c.value}`, 'data'])
         a.push(["geo", c.geolevel.toLowerCase(), c.value, "geometry"]);
         return a;
     },[])
 
-    return falcor.get(...requests)
+    return falcor.get(...requests).then(d => {
+        setLoading(false)
+    })
 }
 
 const RenderTable = (data, pageSize) => useMemo(() =>
@@ -37,7 +40,7 @@ const RenderTable = (data, pageSize) => useMemo(() =>
 
 const NpmrdsTable = () => {
     const {falcor, falcorCache} = useFalcor();
-
+    const [loading, setLoading] = useState(false)
     const [geography, setGeography] = useState('All')
     const [year, setYear] = useState(2019)
     const [month, setMonth] = useState(1)
@@ -81,7 +84,7 @@ const NpmrdsTable = () => {
         return geographies.filter(({ value }) => geoids.includes(value));
     }, [falcorCache, geography, month, year]);
 
-    useEffect(() => fetchData(falcor, filtered, month, year), [falcorCache, geography, month, year]);
+    useEffect(() => fetchData(falcor, filtered, month, year,setLoading), [falcorCache, geography, month, year]);
 
     let data = useMemo(() => {
         return filtered.map(d => get(falcorCache, ['tig','npmrds',`${month}|${year}`,`${d.geolevel}|${d.value}`, 'data','value'],[]))
@@ -95,7 +98,7 @@ const NpmrdsTable = () => {
                         )
                         .map(d1 => (
                         {
-                            tmc:d1,
+                            tmc: d1,
                             roadname: d[d1].roadname,
                             // length: d[d1].length,
                             ...d[d1].s.reduce((accHours, value, hour) => {
@@ -115,7 +118,7 @@ const NpmrdsTable = () => {
     }, [falcorCache, month, year, filtered, speedFrom, speedTo])
 
     return (
-        <div>
+        <div className='w-full'>
             <div> NPMRDS Speed (mph) </div>
 
             <div className={`w-5 flex pb-1`}>
@@ -131,7 +134,7 @@ const NpmrdsTable = () => {
             <div className={'flex flex-row pb-5'}>
                 {
                     Object.keys(filters)
-                        .filter(f => f !== 'geography')
+                        .filter(f => !['hour', 'geography'].includes(f))
                         .map((f, fI) =>
                             <>
                                 <label className={`self-center px-1 font-bold text-sm`}>{filters[f].name}:</label>
@@ -151,14 +154,14 @@ const NpmrdsTable = () => {
                     id={'speedFrom'}
                     value={speedFrom}
                     onChange={e => getterSetters.speedFrom.set(e)}
-                    large
+                    
                 />
                 <label  className={`px-1 font-bold text-sm`}>to</label>
                 <Input
                     id={'speedTo'}
                     value={speedTo}
                     onChange={e => getterSetters.speedTo.set(e)}
-                    large
+                    
                 />
 
                 <label  className={`px-1 font-bold text-sm`}>Show:</label>
@@ -170,7 +173,10 @@ const NpmrdsTable = () => {
                     multi={false}
                 /><span  className={`px-1 font-bold text-sm`}>entries</span>
             </div>
-            {RenderTable(data, pageSize)}
+            {loading ? <div>Processing...</div> : ''}
+            <div className='w-full overflow-x-scroll scrollbar font-sm'>
+                {RenderTable(data, pageSize)}
+            </div>
         </div>
     )
 }
