@@ -3,6 +3,8 @@ import {LayerContainer} from "components/avl-map/src"
 import tip_ids from '../config/tip_ids.json'
 import tip_mpos from '../config/tip_mpos.json'
 import fetcher from "../wrappers/fetcher";
+import get from "lodash.get";
+
 var parse = require('wellknown');
 
 class TestTipLayer extends LayerContainer {
@@ -19,9 +21,9 @@ class TestTipLayer extends LayerContainer {
             name: 'Dataset',
             type: 'dropdown',
             domain: [
-                {value:'131', name:'2014-2018 TIP Mappable Projects'},
-                {value:'64', name:'2017-2021 TIP Mappable Projects'},
-                {value:'187',name:'2020-2024 TIP Mappable Projects'}
+                // {value:'131', name:'2014-2018 TIP Mappable Projects'},
+                // {value:'64', name:'2017-2021 TIP Mappable Projects'},
+                // {value:'187',name:'2020-2024 TIP Mappable Projects'}
             ],
             value: this.viewId || '131',
             accessor: d => d.name,
@@ -141,11 +143,18 @@ class TestTipLayer extends LayerContainer {
         },
     ]
 
-    init(map){
+    init(map, falcor){
         const url = `${HOST}/views/${this.filters.dataset.value}/data_overlay`
         const cost_lower = ''
         const cost_upper = ''
         const params = `?utf8=%E2%9C%93&tip_id=${this.filters.tip_id.value === 'Select All'? '':this.filters.tip_id.value}&ptype=${this.filters.project_type.value === 'Select All'? '':this.filters.project_type.value}&mpo=${this.filters.mpo_name.value === 'Select All'? '':this.filters.mpo_name.value}&sponsor=${this.filters.agency.value === 'Select All'? '':this.filters.agency.value}&cost_lower=${cost_lower}&cost_upper=${cost_upper}&commit=Filter`
+
+        falcor.get(['tig', 'views', 'byLayer', 'tig'])
+            .then(res => {
+                let views = get(res, ['json', 'tig', 'views', 'byLayer', 'tig'], [])
+                this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
+            })
+
         // return fetcher(url + params)
         //     .then(response => {
         //         this.data = response

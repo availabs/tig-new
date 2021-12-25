@@ -26,22 +26,22 @@ class SED2055TazLevelForecastLayer extends LayerContainer {
             name: 'Dataset',
             type: 'dropdown',
             domain: [
-                {value: '169', name: '2010-2055 Earnings in $'},
-                {value: '166', name: '2010-2055 Employed Labor Force'},
-                {value: '162', name: '2010-2055 Group Quarters Homeless Population'},
-                {value: '161', name: '2010-2055 Group Quarters Institutional Population'},
-                {value: '163', name: '2010-2055 Group Quarters Other Population'},
-                {value: '160', name: '2010-2055 Group Quarters Population'},
-                {value: '158', name: '2010-2055 Household Income in $'},
-                {value: '159', name: '2010-2055 Household Population '},
-                {value: '164', name: '2010-2055 Households'},
-                {value: '165', name: '2010-2055 Household Size'},
-                {value: '168',name: '2010-2055 Office Employment'},
-                {value: '167',name: '2010-2055 Retail Employment'},
-                {value: '155',name: '2010-2055 School Enrollment'},
-                {value: '157',name: '2010-2055 Total Employment'},
-                {value: '156',name: '2010-2055 Total Population'},
-                {value: '170',name: '2010-2055 University Enrollment'}
+                // {value: '169', name: '2010-2055 Earnings in $'},
+                // {value: '166', name: '2010-2055 Employed Labor Force'},
+                // {value: '162', name: '2010-2055 Group Quarters Homeless Population'},
+                // {value: '161', name: '2010-2055 Group Quarters Institutional Population'},
+                // {value: '163', name: '2010-2055 Group Quarters Other Population'},
+                // {value: '160', name: '2010-2055 Group Quarters Population'},
+                // {value: '158', name: '2010-2055 Household Income in $'},
+                // {value: '159', name: '2010-2055 Household Population '},
+                // {value: '164', name: '2010-2055 Households'},
+                // {value: '165', name: '2010-2055 Household Size'},
+                // {value: '168',name: '2010-2055 Office Employment'},
+                // {value: '167',name: '2010-2055 Retail Employment'},
+                // {value: '155',name: '2010-2055 School Enrollment'},
+                // {value: '157',name: '2010-2055 Total Employment'},
+                // {value: '156',name: '2010-2055 Total Population'},
+                // {value: '170',name: '2010-2055 University Enrollment'}
             ],
             value: this.viewId || '169',
             accessor: d => d.name,
@@ -145,8 +145,12 @@ class SED2055TazLevelForecastLayer extends LayerContainer {
     }
 
 
-    init(map){
-
+    init(map, falcor){
+        falcor.get(['tig', 'views', 'byLayer', 'sed_taz_2055'])
+            .then(res => {
+                let views = get(res, ['json', 'tig', 'views', 'byLayer', 'sed_taz_2055'], [])
+                this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
+            })
         // return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
         //     .then(response => {
         //         this.data = response
@@ -196,6 +200,7 @@ class SED2055TazLevelForecastLayer extends LayerContainer {
             fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
                 .then(response =>{
                     this.data = response
+                    this.taz_ids = this.data.data.map(d => d.area).filter(d => d)
                     setTimeout(resolve,1000)
                 },)
         );

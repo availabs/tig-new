@@ -1,21 +1,27 @@
-import React, {useMemo} from "react"
+import React, {useEffect, useMemo, useState} from "react"
 import get from 'lodash.get'
-import { withAuth } from '@availabs/avl-components'
+import {useFalcor, withAuth} from '@availabs/avl-components'
 import TigLayout from 'components/tig/TigLayout'
 import {useParams} from "react-router-dom";
-import routingConfig from "../map/routing-config/routingConfig.json";
 import {tables} from "./tables";
 
 const Table = withAuth(({ mapOptions,layers,views}) => {
+    const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams();
+    const [layer, setLayer] = useState([]);
 
-    const CurrTable = useMemo(() => {
-        let layerVal = get(routingConfig.filter(c => c.value === viewId), [0, 'layer'],  '')
+    useEffect(() => {
+        falcor.get([ "tig", "byViewId", viewId, 'layer'])
+    }, [viewId])
 
-        return tables[layerVal]
+    useMemo(() => {
+        let l = get(falcorCache, [ "tig", "byViewId", viewId, 'layer', 'value'], null)
+        if(l && !layer.length) {
+            setLayer(l)
+        }
+    }, [viewId, falcorCache])
 
-    }, [viewId,layers])
-
+    const CurrTable = get(tables, [layer], () => <></>)
     return (
         <TigLayout>
             <div className='w-full flex-1 flex'>   

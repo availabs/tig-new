@@ -1,6 +1,6 @@
 import {LayerContainer} from "components/avl-map/src"
 import {HOST} from "./layerHost";
-import { getColorRange} from "@availabs/avl-components"
+import { getColorRange, useFalcor } from "@availabs/avl-components"
 import get from "lodash.get"
 import {
     scaleLinear,
@@ -24,22 +24,22 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
             name: 'Dataset',
             type: 'dropdown',
             domain: [
-                {value: '37', name: '2010-2040 Earnings (Held constant in $ 2010)'},
-                {value: '34', name: '2010-2040 Employed Labor Force'},
-                {value: '30', name: '2010-2040 Group Quarters Homeless Population'},
-                {value: '29', name: '2010-2040 Group Quarters Institutional Population'},
-                {value: '31', name: '2010-2040 Group Quarters Other Population'},
-                {value: '28', name: '2010-2040 Group Quarters Population'},
-                {value: '26', name: '2010-2040 Household Income (Held constant in $ 2010)'},
-                {value: '27', name: '2010-2040 Household Population '},
-                {value: '32', name: '2010-2040 Households'},
-                {value: '33', name: '2010-2040 Household Size'},
-                {value: '36',name: '2010-2040 Office Employment'},
-                {value: '35',name: '2010-2040 Retail Employment'},
-                {value: '13',name: '2010-2040 School Enrollment'},
-                {value: '25',name: '2010-2040 Total Employment'},
-                {value: '24',name: '2010-2040 Total Population'},
-                {value: '38',name: '2010-2040 University Enrollment'}
+                // {value: '37', name: '2010-2040 Earnings (Held constant in $ 2010)'},
+                // {value: '34', name: '2010-2040 Employed Labor Force'},
+                // {value: '30', name: '2010-2040 Group Quarters Homeless Population'},
+                // {value: '29', name: '2010-2040 Group Quarters Institutional Population'},
+                // {value: '31', name: '2010-2040 Group Quarters Other Population'},
+                // {value: '28', name: '2010-2040 Group Quarters Population'},
+                // {value: '26', name: '2010-2040 Household Income (Held constant in $ 2010)'},
+                // {value: '27', name: '2010-2040 Household Population '},
+                // {value: '32', name: '2010-2040 Households'},
+                // {value: '33', name: '2010-2040 Household Size'},
+                // {value: '36',name: '2010-2040 Office Employment'},
+                // {value: '35',name: '2010-2040 Retail Employment'},get(res, ['json', 'tig', 'views', 'byLayer', 'sed_taz_2040'], [])
+                // {value: '13',name: '2010-2040 School Enrollment'},
+                // {value: '25',name: '2010-2040 Total Employment'},
+                // {value: '24',name: '2010-2040 Total Population'},
+                // {value: '38',name: '2010-2040 University Enrollment'}
             ],
             value: this.viewId || '37',
             accessor: d => d.name,
@@ -143,8 +143,12 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     }
 
 
-    init(map){
-
+    init(map, falcor){
+        falcor.get(['tig', 'views', 'byLayer', 'sed_taz_2040'])
+            .then(res => {
+                let views = get(res, ['json', 'tig', 'views', 'byLayer', 'sed_taz_2040'], [])
+                this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
+            })
         // return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
         //     .then(response => {
         //         this.data = response
@@ -193,6 +197,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
             fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
                 .then(response =>{
                     this.data = response
+                    this.taz_ids = this.data.data.map(d => d.area).filter(d => d)
                     setTimeout(resolve,1000)
                 },)
         );

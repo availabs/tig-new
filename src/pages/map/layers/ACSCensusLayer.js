@@ -24,7 +24,8 @@ class ACSCensusLayer extends LayerContainer {
             type: 'dropdown',
             domain: [
                 'Absolute and Relative Minority Population data',
-                'Absolute and Relative Population Below Poverty'],
+                'Absolute and Relative Population Below Poverty'
+            ],
             value:this.categoryName || 'Absolute and Relative Minority Population data',
             multi:false
         },
@@ -140,12 +141,12 @@ class ACSCensusLayer extends LayerContainer {
 
 
 
-    init(map){
-
-        
-
-
-
+    init(map, falcor){
+        // falcor.get(['tig', 'views', 'byLayer', 'acs_census'])
+        //     .then(res => {
+        //         let views = get(res, ['json', 'tig', 'views', 'byLayer', 'acs_census'], [])
+        //         this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
+        //     })
     }
 
     fetchData() {
@@ -264,7 +265,7 @@ class ACSCensusLayer extends LayerContainer {
 
     render(map) {
 
-        if(!this.data) {
+        if(!this.data || !map) {
             return this.fetchData()
         }
         if (this.data_tracts.length) {

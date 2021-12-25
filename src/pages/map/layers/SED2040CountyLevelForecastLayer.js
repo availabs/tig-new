@@ -28,16 +28,16 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
             name: 'Dataset',
             type: 'dropdown',
             domain: [
-                {value: '49', name: '2000-2040 Employment Labor Force'},
-                {value: '46', name: '2000-2040 Group Quarters Population'},
-                {value: '45', name: '2000-2040 Household Population'},
-                {value: '47', name: '2000-2040 Households'},
-                {value: '48', name: '2000-2040 Household Size'},
-                {value: '50', name: '2000-2040 Labor Force'},
-                {value: '43', name: '2000-2040 Payroll Employment - QCEW Based'},
-                {value: '44', name: '2000-2040 Proprietors Employment'},
-                {value: '42', name: '2000-2040 Total Employment'},
-                {value: '41', name: '2000-2040 Total Population'}
+                // {value: '49', name: '2000-2040 Employment Labor Force'},
+                // {value: '46', name: '2000-2040 Group Quarters Population'},
+                // {value: '45', name: '2000-2040 Household Population'},
+                // {value: '47', name: '2000-2040 Households'},
+                // {value: '48', name: '2000-2040 Household Size'},
+                // {value: '50', name: '2000-2040 Labor Force'},
+                // {value: '43', name: '2000-2040 Payroll Employment - QCEW Based'},
+                // {value: '44', name: '2000-2040 Proprietors Employment'},
+                // {value: '42', name: '2000-2040 Total Employment'},
+                // {value: '41', name: '2000-2040 Total Population'}
             ],
             value: this.viewId || '49',
             accessor: d => d.name,
@@ -147,8 +147,12 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
 
 
-    init(map){
-
+    init(map, falcor){
+        falcor.get(['tig', 'views', 'byLayer', 'sed_county_2040'])
+            .then(res => {
+                let views = get(res, ['json', 'tig', 'views', 'byLayer', 'sed_county_2040'], [])
+                this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
+            })
         // return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
         //     .then(response => {
         //         this.data = response
@@ -183,6 +187,15 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
             fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
                 .then(response =>{
                     this.data = response
+                    this.data_counties = this.data.data.map(item =>{
+                        return counties.reduce((a,c) =>{
+                            if(item.area === c.name){
+                                a['name'] = c.name
+                                a['geoid'] = c.geoid
+                            }
+                            return a
+                        },{})
+                    })
                     setTimeout(resolve,1000)
                 },)
             }
@@ -267,7 +280,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
     render(map) {
 
-        if (this.data_counties.length) {
+        if (this.data_counties && this.data_counties.length) {
             map.setFilter("Counties", ["in", ["get", "geoid"], ["literal", this.data_counties.map(d => d.geoid)]]);
         }
         else {

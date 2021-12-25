@@ -235,6 +235,7 @@ class NPMRDSLayer extends LayerContainer {
       .then((res) => {
         // const mInfo = get(res, ["json", "pm3", "measureInfo"], {});
         // console.log('measureInfo', res)
+        console.log('res?', res)
         let geo = get(res,'json.geo',{})
         const geographies = flatten(states.map(s => geo[s].geoLevels));
 

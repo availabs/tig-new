@@ -20,8 +20,8 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
             name: 'Dataset',
             type: 'dropdown',
             domain: [
-                {value:'58',name:'2010 Base - Time period: All Day'},
-                {value:'62',name:'2040 Future - Time period: All Day'}
+                // {value:'58',name:'2010 Base - Time period: All Day'},
+                // {value:'62',name:'2040 Future - Time period: All Day'}
             ],
             value: this.viewId || '58',
             accessor: d => d.name,
@@ -141,8 +141,12 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
 
 
 
-    init(map){
-
+    init(map, falcor){
+        falcor.get(['tig', 'views', 'byLayer', 'bpm_performance'])
+            .then(res => {
+                let views = get(res, ['json', 'tig', 'views', 'byLayer', 'bpm_performance'], [])
+                this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
+            })
         // return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
         //     .then(response =>{
         //         this.data = response
@@ -180,6 +184,15 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
             fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
                 .then(response =>{
                     this.data = response
+                    this.data_counties = this.data.data.map(item =>{
+                        return counties.reduce((a,c) =>{
+                            if(item.area === c.name){
+                                a['name'] = c.name
+                                a['geoid'] = c.geoid
+                            }
+                            return a
+                        },{})
+                    })
                     setTimeout(resolve,1000)
                 })
         );

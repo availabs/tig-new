@@ -3,6 +3,7 @@ import {HOST} from "./layerHost";
 import fetcher from "../wrappers/fetcher";
 import rtp_ids from '../config/rtp_ids.json'
 import rtp_sponsors from '../config/rtp_sponsors.json'
+import get from "lodash.get";
 var parse = require('wellknown');
 
 
@@ -19,8 +20,8 @@ class RTPProjectDataLayer extends LayerContainer {
             name: 'Dataset',
             type: 'dropdown',
             domain: [
-                {name: '2040 RTP Projects', value: '53'},
-                {name: '2045 RTP Projects', value: '141'}
+                // {name: '2040 RTP Projects', value: '53'},
+                // {name: '2045 RTP Projects', value: '141'}
             ],
             value: this.viewId || '53',
             accessor: d => d.name,
@@ -165,8 +166,12 @@ class RTPProjectDataLayer extends LayerContainer {
 
 
 
-    init(map) {
-
+    init(map, falcor) {
+        falcor.get(['tig', 'views', 'byLayer', 'rtp_project_data'])
+            .then(res => {
+                let views = get(res, ['json', 'tig', 'views', 'byLayer', 'rtp_project_data'], [])
+                this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
+            })
         // const url = `${HOST}/views/${this.filters.dataset.value}/data_overlay`
         // const cost_lower = ''
         // const cost_upper = ''

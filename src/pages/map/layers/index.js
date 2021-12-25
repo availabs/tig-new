@@ -15,9 +15,9 @@ export const layers = {
     "sed_county_2040": SED2040CountyLevelForecastLayerFactory,
     "sed_county_2050": SED2050CountyLevelForecastLayerFactory,
     "sed_taz_2040": SED2040TazLevelForecastLayerFactory,
-    "sed_county_2055": SED2055CountyLevelForecastLayerFactory,
+    "sed_county_2055": SED2055CountyLevelForecastLayerFactory, // doesn't work
     "sed_taz_2055": SED2055TazLevelForecastLayerFactory,
-    "acs_census": ACSCensusLayerFactory,
+    "acs_census": ACSCensusLayerFactory, // different
     'bpm_performance': BPMPerformanceMeasuresLayerFactory,
     'hub_bound_travel_data': HubBoundTravelDataLayerFactory,
     'rtp_project_data': RTPProjectDataLayerFactory,
