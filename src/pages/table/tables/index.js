@@ -13,7 +13,7 @@ import TigDataTable from "./TigDataTable";
 export const tables = {
     npmrds: NpmrdsTable,
     rtp_project_data: RtpProjectDataTable,
-    // hub_bound_travel_data: HubBoundTravelDataTable // huge data
+    hub_bound_travel_data: HubBoundTravelDataTable, // huge data
     bpm_performance: BpmPerformanceDataTable,
     acs_census: AcsCensusDataTable,
     sed_taz_2055: SedTaz2055DataTable,

@@ -54,7 +54,7 @@ const RenderTable = (data = [], pageSize, lower, upper) => useMemo(() =>
         striped={true}
     />, [data, pageSize])
 
-const SedCounty2055DataTable = () => {
+const SedCounty2055DataTable = ({name}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams()
     const [loading, setLoading] = useState(false)
@@ -89,7 +89,7 @@ const SedCounty2055DataTable = () => {
     }
     return (
         <div className='w-full'>
-            <div> 2000-2040 Group Quarters Population : Group Quarters Population (in 000s) </div>
+            <div> {name} </div>
 
             <div className={`w-5 flex pb-1`}>
                 <label  className={`self-center px-1 font-bold text-sm`}>Area:</label>

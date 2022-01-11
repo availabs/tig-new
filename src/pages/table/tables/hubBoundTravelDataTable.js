@@ -60,7 +60,7 @@ const RenderTable = (data = [], pageSize) => useMemo(() =>
         striped={true}
     />, [data, pageSize])
 
-const HubBoundTravelDataTable = () => {
+const HubBoundTravelDataTable = ({name}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams()
     const [loading, setLoading] = useState(false)
@@ -102,7 +102,7 @@ const HubBoundTravelDataTable = () => {
     console.log('data', data)
     return (
         <div className='w-full'>
-            <div> NPMRDS Speed (mph) </div>
+            <div> {name} </div>
 
             <div className={`w-5 flex pb-1`}>
                 <label  className={`self-center px-1 font-bold text-sm`}>Area:</label>

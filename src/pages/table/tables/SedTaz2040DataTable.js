@@ -71,7 +71,7 @@ const RenderTable = (data = [], pageSize, lower, upper) => useMemo(() =>
         striped={true}
     />, [data, pageSize])
 
-const SedTaz2055DataTable = () => {
+const SedTaz2055DataTable = ({name}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams()
     const [loading, setLoading] = useState(false)
@@ -81,7 +81,6 @@ const SedTaz2055DataTable = () => {
     const [geography, setGeography] = useState('All')
     const [lower, setLower] = useState()
     const [upper, setUpper] = useState()
-
 
     const getterSetters = {
         geography: {get: geography, set: setGeography},
@@ -106,7 +105,7 @@ const SedTaz2055DataTable = () => {
     }
     return (
         <div className='w-full'>
-            <div> 2010-2040 Earnings (Held constant in $2010) : Earnings </div>
+            <div> {name} </div>
 
             <div className={`w-5 flex pb-1`}>
                 <label  className={`self-center px-1 font-bold text-sm`}>Area:</label>

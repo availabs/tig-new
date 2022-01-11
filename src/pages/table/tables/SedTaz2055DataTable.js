@@ -71,7 +71,7 @@ const RenderTable = (data = [], pageSize, lower, upper) => useMemo(() =>
         striped={true}
     />, [data, pageSize])
 
-const SedTaz2055DataTable = () => {
+const SedTaz2055DataTable = ({name}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams()
     const [loading, setLoading] = useState(false)
@@ -106,7 +106,7 @@ const SedTaz2055DataTable = () => {
     }
     return (
         <div className='w-full'>
-            <div> 2010-2055 Earnings : Earnings </div>
+            <div> {name} </div>
 
             <div className={`w-5 flex pb-1`}>
                 <label  className={`self-center px-1 font-bold text-sm`}>Area:</label>

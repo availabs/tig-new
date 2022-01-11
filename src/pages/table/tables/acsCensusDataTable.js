@@ -46,7 +46,7 @@ const RenderTable = (data = [], pageSize, valueColumn, lower, upper) => useMemo(
         striped={true}
     />, [data, pageSize])
 
-const AcsCensusDataTable = () => {
+const AcsCensusDataTable = ({name}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams()
     const [loading, setLoading] = useState(false)
@@ -90,7 +90,7 @@ const AcsCensusDataTable = () => {
     }
     return (
         <div className='w-full'>
-            <div> 2010 base: </div>
+            <div> {name}: </div>
 
             <div className={`w-5 flex pb-1`}>
                 <label  className={`self-center px-1 font-bold text-sm`}>Area:</label>
