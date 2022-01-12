@@ -20,6 +20,7 @@
     "history": "^4.10.1",
     "jszip": "^3.7.1",
     "linkify-it": "^3.0.3",
+    "lodash": "^4.17.21",
     "lodash.flatten": "^4.4.0",
     "lodash.get": "^4.4.2",
     "mapbox-gl": "1.9.1",

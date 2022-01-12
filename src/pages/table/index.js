@@ -9,15 +9,19 @@ const Table = withAuth(({ mapOptions,layers,views}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams();
     const [layer, setLayer] = useState([]);
+    const [name, setName] = useState([]);
 
     useEffect(() => {
-        falcor.get([ "tig", "byViewId", viewId, 'layer'])
+        falcor.get([ "tig", "byViewId", viewId, ['layer', 'name']])
     }, [viewId])
 
     useMemo(() => {
+        console.log('layer, name', falcorCache)
         let l = get(falcorCache, [ "tig", "byViewId", viewId, 'layer', 'value'], null)
+        let n = get(falcorCache, [ "tig", "byViewId", viewId, 'name', 'value'], null)
         if(l && !layer.length) {
             setLayer(l)
+            setName(n)
         }
     }, [viewId, falcorCache])
 
@@ -25,7 +29,7 @@ const Table = withAuth(({ mapOptions,layers,views}) => {
     return (
         <TigLayout>
             <div className='w-full flex-1 flex'>   
-                <CurrTable />
+                <CurrTable name={name}/>
             </div>
         </TigLayout>
     )
