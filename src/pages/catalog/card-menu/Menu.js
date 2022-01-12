@@ -49,34 +49,7 @@ const MenuComponent = () =>{
                                             </div>
                                         )}
                                     </Menu.Item>
-                                    {/*<Menu.Item>*/}
-                                    {/*    {({ active }) => (*/}
-                                    {/*        <a*/}
-                                    {/*            href="#"*/}
-                                    {/*            className={classNames(*/}
-                                    {/*                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',*/}
-                                    {/*                'flex px-4 py-2 text-sm'*/}
-                                    {/*            )}*/}
-                                    {/*        >*/}
-                                    {/*            <CodeIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />*/}
-                                    {/*            <span>Embed</span>*/}
-                                    {/*        </a>*/}
-                                    {/*    )}*/}
-                                    {/*</Menu.Item>*/}
-                                    {/*<Menu.Item>*/}
-                                    {/*    {({ active }) => (*/}
-                                    {/*        <a*/}
-                                    {/*            href="#"*/}
-                                    {/*            className={classNames(*/}
-                                    {/*                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',*/}
-                                    {/*                'flex px-4 py-2 text-sm'*/}
-                                    {/*            )}*/}
-                                    {/*        >*/}
-                                    {/*            <FlagIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />*/}
-                                    {/*            <span>Report content</span>*/}
-                                    {/*        </a>*/}
-                                    {/*    )}*/}
-                                    {/*</Menu.Item>*/}
+                                    
                                 </div>
                             </Menu.Items>
                         </Transition>

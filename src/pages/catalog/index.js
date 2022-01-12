@@ -9,11 +9,11 @@ import TigLayout from 'components/tig/TigLayout'
 
 const Landing = () =>
   <TigLayout>
-    <div className='flex'>
-      <div className='flex-1'>
+    <div className='grid grid-cols-1 gap-4 items-start lg:grid-cols-5 lg:gap-8'>
+      <div className='grid grid-cols-1 gap-4 lg:col-span-3'>
         <DataSourceList />
       </div>
-      <div className='flex-1 pl-10'>
+      <div className='grid grid-cols-1 gap-4 lg:col-span-2'>
         <RecentActivity />
       </div>
     </div>  

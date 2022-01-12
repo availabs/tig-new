@@ -29,10 +29,7 @@ import {
   enableAuth
 } from "@availabs/ams"
 
-import 'styles/tailwind.css';
-import 'styles/index.css';
-import 'styles/os-icons.css';
-import 'styles/font-awesome/css/all.css'
+import 'index.css';
 
 // addComponents(DmsComponents);
 // addWrappers(DmsWrappers);

@@ -57,14 +57,14 @@ const DatasourceList = () => {
             {sourcesList.length > 0 ?
                 <ul className="">
                     {sourcesList.map((item,i) => (
-                        <li key={i} className="border-t py-13px">
+                        <li key={i} className="border-t border-gray-600 py-5">
                             <div className="flex space-x-3">
                                 <div className="min-w-5xl flex-1">
-                                    <p className="text-sm font-bold text-gray-900 mt-10px">
+                                    <p className="text-sm font-bold text-gray-900 px-4 ">
                                         <Link to={{
                                             pathname: `/datasource/${get(item,['id','value'],'')}`,
                                             state: {name: get(item,['name','value'],''), description: get(item,['description','value'],'')}
-                                        }} className="hover:underline py-6px px-12px border-1">
+                                        }} className="hover:underline hover:text-orange-500 border-1">
                                             {get(item,['name','value'],'')}
                                         </Link>
                                     </p>
