@@ -181,7 +181,7 @@ const TDS_THEME_BASE = {
   headerBgHover: "hover:bg-blueGray-700",
 
   inputBg: "bg-white disabled:bg-gray-300 cursor-pointer focus:outline-none",
-  inputBorder: "rounded border border-gray-300 hover:border-blueGray-400 focus:border-blueGray-300 disabled:border-transparent",
+  inputBorder: "border border-gray-300 hover:border-blueGray-400 focus:border-blueGray-300 disabled:border-transparent",
   inputBgDisabled: "bg-blueGray-300 cursor-not-allowed focus:outline-none",
   inputBorderDisabled: "rounded border border-blueGray-400 hover:border-blueGray-400",
   inputBgFocus: "bg-blue-200 cursor-pointer focus:outline-none",

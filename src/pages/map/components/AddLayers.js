@@ -23,8 +23,8 @@ const LayersTab = ({ inactiveLayers, activeLayers, MapActions, ...rest }) => {
         </div>
       }
       <h4>Active Layers</h4>
-      { activeLayers.map(layer =>
-          <div>
+      { activeLayers.map((layer,i) =>
+          <div key={i}>
             {layer.name}
           </div>
         )

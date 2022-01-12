@@ -55,6 +55,7 @@ const TigBreadcrumbs = ({children}) => {
                     name: get(view,['name','value'],''),
                 }
             }).filter(d => d)
+            .sort((a,b) => a.name - b.name)
             return out
         },{})
         let byView = Object.keys(bySource).reduce((out,dsId) => {

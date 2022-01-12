@@ -20,7 +20,7 @@ const LegendComp = ({layer}) => {
             <h4 className='text-md font-medium'>{legend.units}</h4>
             {
                 legend.domain.map((d,i) =>
-                    <div className=' flex align-baseline'>
+                    <div key={i} className=' flex align-baseline'>
                         <div style={{backgroundColor: legend.range[i], width:20, height:20, display:'inline-block' }} className='m-1'/>
                         <div className='flex-1 pl-2'>{d} - {legend.domain[i+1]}</div>
                     </div>

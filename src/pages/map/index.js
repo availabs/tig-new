@@ -22,10 +22,23 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
         falcor.get([ "tig", "byViewId", viewId, 'layer'])
     }, [viewId])
 
+    useEffect(() => {
+        let allLayers = Object.keys(layers).map(l => {
+            return layers[l]({name: l, type:l, setActive: false})
+        }) 
+        setLayer(allLayers)
+
+    },[]) // only run on first load
+
     useMemo(() => {
         let l = get(falcorCache, [ "tig", "byViewId", viewId, 'layer', 'value'], null)
-        if(l && !layer.length) {
-            setLayer([layers[0][l]({name: l, viewId: viewId, setActive: true})])
+        
+        if(l) {
+           let viewLayer = layer.filter(d => d.type === l)
+           //console.log('got the viewLayer', viewLayer)
+           if(viewLayer[0]) {
+            viewLayer[0].setActive = true;
+           }
         }
     }, [viewId, falcorCache])
 
@@ -120,9 +133,8 @@ const MapPage = {
                     style: 'mapbox://styles/am3081/ckm85o7hq6d8817nr0y6ute5v' }
                     ]
             },
-            layers: [
-               layers
-            ]
+            layers: layers
+            
         },
         wrappers: [
             "avl-falcor"

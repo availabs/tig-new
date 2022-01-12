@@ -142,11 +142,12 @@ class ACSCensusLayer extends LayerContainer {
 
 
     init(map, falcor){
-        // falcor.get(['tig', 'views', 'byLayer', 'acs_census'])
-        //     .then(res => {
-        //         let views = get(res, ['json', 'tig', 'views', 'byLayer', 'acs_census'], [])
-        //         this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
-        //     })
+        falcor.get(['tig', 'views', 'byLayer', 'acs_census'])
+            .then(res => {
+                let views = get(res, ['json', 'tig', 'views', 'byLayer', 'acs_census'], [])
+                console.log('views', views)
+                this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
+            })
     }
 
     fetchData() {

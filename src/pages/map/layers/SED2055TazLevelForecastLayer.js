@@ -26,22 +26,7 @@ class SED2055TazLevelForecastLayer extends LayerContainer {
             name: 'Dataset',
             type: 'dropdown',
             domain: [
-                // {value: '169', name: '2010-2055 Earnings in $'},
-                // {value: '166', name: '2010-2055 Employed Labor Force'},
-                // {value: '162', name: '2010-2055 Group Quarters Homeless Population'},
-                // {value: '161', name: '2010-2055 Group Quarters Institutional Population'},
-                // {value: '163', name: '2010-2055 Group Quarters Other Population'},
-                // {value: '160', name: '2010-2055 Group Quarters Population'},
-                // {value: '158', name: '2010-2055 Household Income in $'},
-                // {value: '159', name: '2010-2055 Household Population '},
-                // {value: '164', name: '2010-2055 Households'},
-                // {value: '165', name: '2010-2055 Household Size'},
-                // {value: '168',name: '2010-2055 Office Employment'},
-                // {value: '167',name: '2010-2055 Retail Employment'},
-                // {value: '155',name: '2010-2055 School Enrollment'},
-                // {value: '157',name: '2010-2055 Total Employment'},
-                // {value: '156',name: '2010-2055 Total Population'},
-                // {value: '170',name: '2010-2055 University Enrollment'}
+               
             ],
             value: this.viewId || '169',
             accessor: d => d.name,

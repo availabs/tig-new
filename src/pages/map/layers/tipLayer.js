@@ -155,33 +155,7 @@ class TestTipLayer extends LayerContainer {
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
             })
 
-        // return fetcher(url + params)
-        //     .then(response => {
-        //         this.data = response
-        //         this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
-        //         this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-        //         this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-        //             if(c.value === this.filters.dataset.value){
-        //                 a = c.name
-        //             }
-        //             return a
-        //         },'')}
-        //         TIP Id: ${this.filters.tip_id.value === 'Select All'? 'All':this.filters.tip_id.value},
-        //         Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
-        //             if(c.value === this.filters.project_type.value){
-        //                 a = c.name === 'Select All' ? 'All': c.name
-        //             }
-        //             return a
-        //         },'')},
-        //         MPO Name: ${this.filters.mpo_name.domain.reduce((a,c) =>{
-        //             if(c.value === this.filters.mpo_name.value){
-        //                 a = c.name === 'Select All' ? 'All': c.name
-        //             }
-        //             return a
-        //         },'')},
-        //        Agency: ${this.filters.agency.value === 'Select All'? 'All':''}
-        //         `
-        //     })
+       
     }
     fetchData() {
         const url = `${HOST}/views/${this.filters.dataset.value}/data_overlay`
