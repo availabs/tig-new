@@ -74,7 +74,7 @@ const NpmrdsTable = ({name}) => {
         let geographies =
             flatten(states.map(s => allGeo[s].geoLevels.value))
                 .map(geo => ({
-                    name: `${geo.geoname.toUpperCase()} ${geo.geolevel}`,
+                    name: `${(geo.geoname || '').toUpperCase()} ${geo.geolevel}`,
                     geolevel: geo.geolevel,
                     value: geo.geoid
                 }));

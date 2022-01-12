@@ -10,10 +10,6 @@ import _ from "lodash";
 
 const columns = ['taz', '2010', '2015', '2020', '2025', '2030', '2035', '2040', '2045', '2050', '2055']
 
-const fetchGeo = (falcor, states) => {
-    return falcor.get(["geo", states, "geoLevels"])
-}
-
 const fetchData = (dataset) => {
     const url = `${HOST}views/${dataset}/table.json`
     const params = `?draw=8&columns%5B0%5D%5Bdata%5D=0&columns%5B0%5D%5Bname%5D=&columns%5B0%5D%5Bsearchable%5D=true
@@ -90,10 +86,6 @@ const SedTaz2055DataTable = ({name}) => {
         pageSize: {get: pageSize, set: setPageSize},
     }
 
-    const states = ["36","34","09","42"];
-
-    useEffect(() => fetchGeo(falcor, states), []);
-
     useEffect(async () => {
         setLoading(true)
         let d = await fetchData(viewId, lower, upper)
@@ -133,7 +125,7 @@ const SedTaz2055DataTable = ({name}) => {
                             />
                         </>)
                 }
-                <label  className={`px-1 font-bold text-sm`}>Earnings from:</label>
+                <label  className={`px-1 font-bold text-sm`}>from:</label>
                 <Input type='number' id={'lower'} value={lower} onChange={setLower} large />
                 <label  className={`px-1 font-bold text-sm`}>to:</label>
                 <Input type='number' id={'upper'} value={upper} onChange={setUpper} large />

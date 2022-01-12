@@ -8,10 +8,6 @@ import fetcher from "../../map/wrappers/fetcher";
 import {useParams} from "react-router-dom";
 import _ from "lodash";
 
-const fetchGeo = (falcor, states) => {
-    return falcor.get(["geo", states, "geoLevels"])
-}
-
 const fetchData = (dataset) => {
     const url = `${HOST}views/${dataset}/table.json`
     const params = (len) => `?length=${len}`
@@ -67,9 +63,6 @@ const AcsCensusDataTable = ({name}) => {
         pageSize: {get: pageSize, set: setPageSize},
     }
 
-    const states = ["36","34","09","42"];
-
-    useEffect(() => fetchGeo(falcor, states), []);
 
     useEffect(async () => {
         setLoading(true)

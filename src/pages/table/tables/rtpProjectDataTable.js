@@ -7,10 +7,6 @@ import {HOST} from "../../map/layers/layerHost";
 import fetcher from "../../map/wrappers/fetcher";
 import {useParams} from "react-router-dom";
 
-const fetchGeo = (falcor, states) => {
-    return falcor.get(["geo", states, "geoLevels"])
-}
-
 const fetchData = (dataset, rtp_id='Select All', year='Select All', project_type='Select All', plan_portion='Select All', sponsor='Select All') => {
     const url = `${HOST}/views/${dataset}/table.json`
     const params = (len) => `?length=${len}&_=1640813298306`
@@ -68,10 +64,6 @@ const RtpProjectDataTable = ({name}) => {
         speedFrom: {get: speedFrom, set: setSpeedFrom},
         speedTo: {get: speedTo, set: setSpeedTo},
     }
-
-    const states = ["36","34","09","42"];
-
-    useEffect(() => fetchGeo(falcor, states), []);
 
     useEffect(async () => {
         let d = await fetchData(viewId)

@@ -13,9 +13,6 @@ const mapping = {
     vehicle_hours_traveled: 'vht (in thousands)',
     avg_speed: 'avg. speed (milers/hr)',
 }
-const fetchGeo = (falcor, states) => {
-    return falcor.get(["geo", states, "geoLevels"])
-}
 
 const fetchData = (dataset, period = 0, functional_class = 0, value_column = '', lower = '', upper = '') => {
     const url = `${HOST}/views/${dataset}/data_overlay`
@@ -63,10 +60,6 @@ const BpmPerformanceDataTable = ({name}) => {
         upper: {get: upper, set: setUpper},
         pageSize: {get: pageSize, set: setPageSize},
     }
-
-    const states = ["36","34","09","42"];
-
-    useEffect(() => fetchGeo(falcor, states), []);
 
     useEffect(async () => {
         setLoading(true)
