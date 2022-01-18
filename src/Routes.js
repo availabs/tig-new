@@ -3,7 +3,6 @@ import Views from "pages/catalog/tigDataSources/DataSourceView"
 import AdminLanding from "pages/catalog/admin"
 import NoMatch from "pages/404"
 import Auth from "pages/auth"
-import TestMap from "pages/map/MapIndex"
 import Map from 'pages/map'
 import Chart from 'pages/chart'
 import Table from 'pages/table'
@@ -18,8 +17,7 @@ const Routes = [
   Table,
   Chart,
   Metadata,
-  ...TestMap,
-
+ 
   NoMatch
 ]
 

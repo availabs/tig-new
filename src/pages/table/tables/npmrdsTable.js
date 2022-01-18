@@ -50,6 +50,7 @@ const NpmrdsTable = ({name}) => {
     const [pageSize, setPageSize] = useState(50)
     const [speedFrom, setSpeedFrom] = useState(0)
     const [speedTo, setSpeedTo] = useState(100)
+    const [direction, setDirection] = useState('All')
 
     const getterSetters = {
         geography: {get: geography, set: setGeography},
@@ -61,9 +62,11 @@ const NpmrdsTable = ({name}) => {
         pageSize: {get: pageSize, set: setPageSize},
         speedFrom: {get: speedFrom, set: setSpeedFrom},
         speedTo: {get: speedTo, set: setSpeedTo},
+        direction: {get: direction, set: setDirection}
     }
 
     const states = ["36","34","09","42"];
+    const directions = ['All', 'Eastbound', 'Westbound', 'Northbound', 'Southbound']
 
     useEffect(() => fetchGeo(falcor, states), []);
 

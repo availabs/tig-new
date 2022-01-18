@@ -78,6 +78,13 @@ const filters = {
     multi: false,
     domain: ['All Vehicles', 'Freight Trucks Only', 'Passenger Vehicles Only'],
     value: 'All Vehicles'
+  },
+  direction: {
+    name: "Direction",
+    type: "select",
+    multi: false,
+    domain: ['All', 'Eastbound', 'Westbound', 'Northbound', 'Southbound'],
+    value: 'All'
   }
  
  

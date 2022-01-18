@@ -194,9 +194,9 @@ const TDS_THEME_BASE = {
   paddingSmall: "py-0 px-1",
   paddingLarge: "py-2 px-4",
 
-  accent1: 'bg-gray-100',
-  accent2: 'bg-gray-200',
-  accent3: 'bg-gray-300',
+  accent1: 'bg-white',
+  accent2: 'bg-blue-200',
+  accent3: 'bg-white',
   accent4: 'bg-gray-400',
 
   highlight1: "bg-cyan-400",

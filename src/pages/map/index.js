@@ -5,7 +5,6 @@ import { withAuth, useFalcor } from '@availabs/avl-components'
 import {layers} from "./layers";
 import {useParams} from 'react-router-dom'
 import get from 'lodash.get'
-import routingConfig from "../map/routing-config/routingConfig.json";
 import TigLayout from 'components/tig/TigLayout'
 
 import LegendComp from './components/LegendSidebar'
@@ -41,19 +40,6 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
            }
         }
     }, [viewId, falcorCache])
-
-    // const layer = useMemo(() => {
-    //     let l = get(falcorCache, [ "tig", "byViewId", viewId, 'layer', 'value'], null)
-    //     // if(l) setLayer([layers[0][l]({name:l, viewId:viewId, setActive: true})])
-    //     // let layerVal = routingConfig.reduce((a, c) => {
-    //     //     if (c.value === viewId) {
-    //     //         a = [layers[0][c.layer]({name:c.name,viewId:viewId})]
-    //     //     }
-    //     //     return a
-    //     // }, '')
-    //     // console.log('layerVal', layerVal)
-    //     // return layerVal
-    // }, [viewId,layers])
 
     return (
         <TigLayout>
