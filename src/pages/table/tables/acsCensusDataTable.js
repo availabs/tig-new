@@ -8,18 +8,29 @@ import fetcher from "../../map/wrappers/fetcher";
 import {useParams} from "react-router-dom";
 import _ from "lodash";
 
-const fetchData = (dataset) => {
-    const url = `${HOST}views/${dataset}/table.json`
-    const params = (len) => `?length=${len}`
-    return fetcher(url + params(5)).then(res => fetcher(url + params(res.recordsFiltered || 500)))
+const fetchData = (falcor,viewId) => {
+    return falcor.get(["tig", "acs_census", "byId", viewId, 'data_overlay'])
 }
 
-const processData = (data) => {
-    const columns = ['county', 'census tract', 'fips', 'population', 'minority population', 'percent minority']
+const processData = (data, viewId) => {
+    const nameMapping = {
+        value: 'population',
+        base_value: ['128', '143', '133', '18'].includes(viewId) ? 'population below poverty' : 'minority population',
+        percentage: ['128', '143', '133', '18'].includes(viewId) ? 'percent below poverty' : 'percent minority'
+    }
+    // 128, 143, 133, 18
     data = data
         .map(row => {
-        return row.reduce((acc, r, rI) => {
-            acc[columns[rI]] = columns[rI] === 'county' ? r : +r
+        return Object.keys(row)
+            .filter(r => !['type', 'view_id'].includes(r))
+            .reduce((acc, r, rI) => {
+            // acc[columns[rI]] = columns[rI] === 'county' ? r : +r
+            if(r === 'area'){
+                acc['county'] = row[r].split(':')[0];
+                acc['census tract'] = row[r].split(':')[1];
+            }else{
+                acc[nameMapping[r] || r] = row[r];
+            }
             return acc
         }, {})
     }, [])
@@ -66,12 +77,11 @@ const AcsCensusDataTable = ({name}) => {
 
     useEffect(async () => {
         setLoading(true)
-        let d = await fetchData(viewId, column, lower, upper)
-        setData(processData(get(d, 'data', [])))
+        let d = await fetchData(falcor, viewId)
+        setData(processData(get(d, ['json', "tig", "acs_census", "byId", viewId, 'data_overlay'], []), viewId))
         setLoading(false)
 
     }, [column, lower, upper]);
-    console.log('data?', data)
     const config = {
         column: {
             name: 'Column',

@@ -7,13 +7,14 @@ import {acsCensusCategoryMappings} from "../config/acsCensusCategoryMappings";
 import {scaleLinear, scaleOrdinal, scaleQuantile, scaleQuantize, scaleThreshold} from "d3-scale"
 import {extent} from "d3-array"
 import fetcher from "../wrappers/fetcher";
+import {useParams} from "react-router-dom";
 
 class ACSCensusLayer extends LayerContainer {
     constructor(props) {
         super(props);
         this.categoryName = props.name
         this.viewid = props.viewId
-
+        this.vid = props.vid
     }
 
     setActive = !!this.viewId
@@ -26,8 +27,10 @@ class ACSCensusLayer extends LayerContainer {
                 'Absolute and Relative Minority Population data',
                 'Absolute and Relative Population Below Poverty'
             ],
-            value:this.categoryName || 'Absolute and Relative Minority Population data',
-            multi:false
+            value:this.categoryName,
+            multi:false,
+            accessor: d => d.name,
+            valueAccessor: d => d.value,
         },
         year: {
             name: 'Year',
@@ -52,30 +55,12 @@ class ACSCensusLayer extends LayerContainer {
         }
     }
     legend = {
-        // types: ["quantile", "linear", "quantize", "ordinal"],
-        // type: "linear",
-        // domain: [0, 50, 100],
-        // range: getColorRange(3, "BrBG", true),
-
-        // type: "ordinal",
-        // domain: ["One", "Two", "Three", "Four", "Five"],
-        // range: getColorRange(5, "Set3", true),
-        // height: 2,
-        // width: 320,
-        // direction: "horizontal",
-
-        // type: "quantize",
-        // domain: [0, 15000],
-        // range: getColorRange(5, "BrBG", true),
-        // format: ",d",
-
         type: "quantile",
         range: getColorRange(5, "YlOrRd", true),
         domain: [],
         show: true,
         Title: "",
         format: ',d',
-
     }
 
     onHover = {
@@ -91,7 +76,7 @@ class ACSCensusLayer extends LayerContainer {
                 }
                 return a
             },{})
-            return this.data.data.reduce((a,c) =>{
+            return this.data.reduce((a,c) =>{
                 if(c.area === graph['name']){
                     a.push(
                         [`${this.filters.dataset.value || this.categoryName}${this.filters.column.value === 'percent' ? 'in %': ''}`],
@@ -142,29 +127,24 @@ class ACSCensusLayer extends LayerContainer {
 
 
     init(map, falcor){
-        falcor.get(['tig', 'views', 'byLayer', 'acs_census'])
+        this.map = map
+        return falcor.get(['tig', 'views', 'byLayer', 'acs_census'])
             .then(res => {
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', 'acs_census'], [])
-                console.log('views', views)
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
+                this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
             })
     }
 
-    fetchData() {
-        const categoryValue = acsCensusCategoryMappings.reduce((a,c ) =>{
-            if((c.name === this.categoryName || c.name === this.filters.dataset.value) && c.year === this.filters.year.value){
-                a = c.value
-            }
-            return a
-        },null)
-
+    fetchData(falcor) {
+        const categoryValue = this.filters.dataset.value
+        
         if(categoryValue){
-            this.filters.dataset.value = this.categoryName ? this.categoryName : this.filters.dataset.value
-            return fetcher(`${HOST}views/${categoryValue}/data_overlay`)
+            return falcor.get(["tig", "acs_census", "byId", categoryValue, 'data_overlay'])
                 .then(response =>{
-                    this.data = response
+                    this.data = get(response, ['json', "tig", "acs_census", "byId", categoryValue, 'data_overlay'], [])
                     this.legend.Title = `${this.filters.dataset.value || this.categoryName}-${this.filters.year.value}`
-                    this.data_tracts = this.data.data.map(item =>{
+                    this.data_tracts = this.data.map(item =>{
                         return tracts.reduce((a,c) =>{
                             if(item.area === c.name){
                                 a['name'] = c.name
@@ -173,12 +153,12 @@ class ACSCensusLayer extends LayerContainer {
                             return a
                         },{})
                     })
-                    this.legend.domain = this.data.data.reduce((a,c) =>{
+                    this.legend.domain = this.data.reduce((a,c) =>{
                         a.push(c.value)
                         return a
                     },[])
-                    this.render()
                     return response
+                    // return response
                 })
         }
 
@@ -264,10 +244,9 @@ class ACSCensusLayer extends LayerContainer {
         }
     }
 
-    render(map) {
-
+    render(map, falcor) {
         if(!this.data || !map) {
-            return this.fetchData()
+            return this.fetchData(falcor)
         }
         if (this.data_tracts.length) {
             map.setFilter("tracts", ["in", ["get", "GEOID"], ["literal", this.data_tracts.map(d => d.geoid)]]);
@@ -276,7 +255,7 @@ class ACSCensusLayer extends LayerContainer {
             map.setFilter("tracts", false);
         }
     //
-        this.processedData = this.data.data.reduce((acc,curr) =>{
+        this.processedData = this.data.reduce((acc,curr) =>{
             this.data_tracts.forEach(data_tract =>{
                 if(curr.area === data_tract.name){
                     acc.push({

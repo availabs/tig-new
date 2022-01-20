@@ -23,7 +23,7 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
 
     useEffect(() => {
         let allLayers = Object.keys(layers).map(l => {
-            return layers[l]({name: l, type:l, setActive: false})
+            return layers[l]({name: l, type:l, vid: viewId, setActive: false})
         }) 
         setLayer(allLayers)
 
