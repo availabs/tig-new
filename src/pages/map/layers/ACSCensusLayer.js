@@ -13,6 +13,7 @@ import {useParams} from "react-router-dom";
 import {filters} from 'pages/map/layers/npmrds/filters.js'
 import mapboxgl from "mapbox-gl";
 import flatten from "lodash.flatten";
+var shpwrite = require('utils/shp-write');
 
 class ACSCensusLayer extends LayerContainer {
     constructor(props) {
@@ -121,6 +122,53 @@ class ACSCensusLayer extends LayerContainer {
         }
     ]
 
+    download(){
+        const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
+                            (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
+
+        let features = this.map.queryRenderedFeatures();
+
+        let d = this.data.reduce((acc,curr) =>{
+            this.data_tracts.forEach(data_tract =>{
+                if(curr.area === data_tract.name){
+                    acc.push({
+                        id: data_tract.geoid,
+                        value: curr.value,
+                        percentage: curr.percentage
+                    })
+                }
+            })
+            return acc
+        },[])
+
+        let geoJSON = {
+            type: 'FeatureCollection',
+            features: d
+                .map(t => {
+                    return {
+                        type: "MultiPolygon",
+                        properties: {geoid: t.id, value: t.value, percent: t.percentage},
+                        geometry: get(features.filter(g => g.properties.GEOID === t.id), [0, 'geometry'])
+                    }
+                })
+                .filter(t => t.geometry)
+        };
+
+        shpwrite.download(
+            geoJSON,
+            {
+                file: filename,
+                folder: filename,
+                types: {
+                    line: filename,
+                    polyline: filename,
+                    polygon: filename
+                }
+            }
+            );
+
+        return Promise.resolve()
+    }
     updateColumnNames() {
         this.filters.column.domain =
             ['128', '143', '133', '18'].includes((this.filters.dataset.value).toString()) ?
@@ -150,7 +198,6 @@ class ACSCensusLayer extends LayerContainer {
     }
 
     init(map, falcor){
-        this.map = map
         let states = ["36","34","09","42"]
         return falcor.get(['tig', 'views', 'byLayer', 'acs_census'], ["geo", states, "geoLevels"])
             .then(res => {
@@ -349,6 +396,8 @@ class ACSCensusLayer extends LayerContainer {
             "#090",
             ["get", ["get", "GEOID"], ["literal", colors]]
         ])
+
+        this.map = map
     }
 
 }

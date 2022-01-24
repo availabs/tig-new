@@ -37,7 +37,7 @@ module.exports = function(gj, options, aliasString, tmcMetaString) {
     }
 
     return zip.generateAsync({
-        type: process.browser === undefined ? 'nodebuffer' : 'blob',
+        type: /*process && process.browser === undefined ? 'nodebuffer' : */ 'blob',
         compression: 'STORE'
     });
 };
