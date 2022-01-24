@@ -69,7 +69,7 @@ const TigBreadcrumbs = ({children}) => {
         }
     },[falcorCache])
     let selected = get(sources,['byView',viewId],{})
-    let views = get(sources,['bySource', selected.source_id], [])
+    let views = get(sources,['bySource', selected.source_id], []).sort((a,b) => a.name.localeCompare(b.name))
     let activeSource = get(sources, ['datasources',selected.source_id], {})
     let actions = [
         {
@@ -93,7 +93,7 @@ const TigBreadcrumbs = ({children}) => {
     
 
     return (
-        <div className='w-full flex justify-between py-6 items-baseline z-10'>
+        <div className='w-full flex justify-between py-6 items-baseline z-40'>
             <div className='flex items-stretch'>
                 
                 <a href='/' 

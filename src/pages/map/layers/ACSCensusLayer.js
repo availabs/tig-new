@@ -3,11 +3,16 @@ import {HOST} from "./layerHost";
 import tracts from '../config/tracts.json'
 import {getColorRange} from "@availabs/avl-components"
 import get from "lodash.get"
+import _ from 'lodash'
+import * as d3scale from "d3-scale"
 import {acsCensusCategoryMappings} from "../config/acsCensusCategoryMappings";
 import {scaleLinear, scaleOrdinal, scaleQuantile, scaleQuantize, scaleThreshold} from "d3-scale"
 import {extent} from "d3-array"
 import fetcher from "../wrappers/fetcher";
 import {useParams} from "react-router-dom";
+import {filters} from 'pages/map/layers/npmrds/filters.js'
+import mapboxgl from "mapbox-gl";
+import flatten from "lodash.flatten";
 
 class ACSCensusLayer extends LayerContainer {
     constructor(props) {
@@ -20,6 +25,7 @@ class ACSCensusLayer extends LayerContainer {
     setActive = !!this.viewId
     name = 'ACS Census Layer'
     filters = {
+        geography: {...filters.geography},
         dataset: {
             name: 'Dataset',
             type: 'dropdown',
@@ -32,21 +38,11 @@ class ACSCensusLayer extends LayerContainer {
             accessor: d => d.name,
             valueAccessor: d => d.value,
         },
-        year: {
-            name: 'Year',
-            type: 'dropdown',
-            domain: [
-                2013,2014,2015,2016,2017,2018
-            ],
-            value: 2013,
-            multi: false
-        },
         column:{
             name: 'Column',
             type: 'dropdown',
             domain: [
-                {name: 'Minority Population',value:'value'},
-                {name: 'Percentage Minority', value:'percent'}
+
             ],
             value: 'value',
             accessor: d => d.name,
@@ -76,13 +72,14 @@ class ACSCensusLayer extends LayerContainer {
                 }
                 return a
             },{})
+
+            const col = this.filters.column.domain.filter(d => d.value === this.filters.column.value)[0].name
             return this.data.reduce((a,c) =>{
                 if(c.area === graph['name']){
                     a.push(
-                        [`${this.filters.dataset.value || this.categoryName}${this.filters.column.value === 'percent' ? 'in %': ''}`],
-                        ["Year:", this.filters.year.value],
-                        ['Tract:',`${c.area}-${graph['state_code']}`],
-                        ["Value:",c[this.filters.column.value]])
+                        ['Tract',`${c.area}-${graph['state_code']}`],
+                        [col , this.filters.column.value === 'percentage' ? c[this.filters.column.value].toFixed(2) + '%' : c[this.filters.column.value]]
+                    )
                 }
                 return a
             },[]).sort()
@@ -124,28 +121,81 @@ class ACSCensusLayer extends LayerContainer {
         }
     ]
 
+    updateColumnNames() {
+        this.filters.column.domain =
+            ['128', '143', '133', '18'].includes((this.filters.dataset.value).toString()) ?
+                [
+                    {name: 'Population Below Poverty',value:'value'},
+                    {name: 'Percent Below Poverty', value:'percentage'}
+                ] :
+                [
+                    {name: 'Minority Population',value:'value'},
+                    {name: 'Percent Minority', value:'percentage'}
+                ]
+    }
 
+    updateLegendDomain() {
+        const domains = {
+            '22-value': [0, 300, 756, 1432, 2553, 21552], '22-percentage': [0, 8.03, 19.34, 39.08, 70.41, 100],
+            '132-value': [0, 370, 861, 1573, 2728, 23217], '132-percentage': [0, 9.92, 22, 42.67, 73.73, 100],
+            '134-value': [0, 400, 883, 1608, 2738, 23665], '134-percentage': [0, 10.45, 22.51, 42.90, 73.93, 100],
+            '142-value': [0, 410, 897, 1610, 2736, 24223], '142-percentage': [0, 10.81, 22.80, 42.95, 73.53, 100],
+            '18-value': [0, 129, 257, 459, 897, 4959], '18-percentage': [0, 3.53, 6.9, 12.63, 22.92, 100],
+            '128-value': [0, 140, 273, 474, 903, 5264], '128-percentage': [0, 3.81, 7.32, 12.85, 23, 100],
+            '133-value': [0, 142, 276, 487, 911, 5610], '133-percentage': [0, 3,94, 7.34, 13.03, 23.31, 100],
+            '143-value': [0, 142, 276, 483, 902, 5520], '143-percentage': [0, 3.89, 7.36, 12.87, 23.01, 100]
+        }
+
+        this.legend.domain = domains[this.filters.dataset.value + '-' + this.filters.column.value]
+    }
 
     init(map, falcor){
         this.map = map
-        return falcor.get(['tig', 'views', 'byLayer', 'acs_census'])
+        let states = ["36","34","09","42"]
+        return falcor.get(['tig', 'views', 'byLayer', 'acs_census'], ["geo", states, "geoLevels"])
             .then(res => {
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', 'acs_census'], [])
-                this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
+                this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name))
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
+
+                this.updateColumnNames()
+                this.updateLegendDomain()
+
+                // geography setup
+                let geo = get(res,'json.geo',{})
+                const geographies = flatten(states.map(s => geo[s].geoLevels));
+
+                this.geographies =
+                    geographies.map(geo => ({
+                        name: `${geo.geoname.toUpperCase()} ${geo.geolevel}`,
+                        geolevel: geo.geolevel,
+                        value: geo.geoid,
+                        bounding_box: geo.bounding_box
+                    }));
+                //this.filters.geography.value = this.loadFromLocalStorage();
+                //console.log('where am i', this.filters.geography.value)
+                this.zoomToGeography();
             })
     }
 
     fetchData(falcor) {
         const categoryValue = this.filters.dataset.value
-        
+
         if(categoryValue){
             return falcor.get(["tig", "acs_census", "byId", categoryValue, 'data_overlay'])
                 .then(response =>{
                     this.data = get(response, ['json', "tig", "acs_census", "byId", categoryValue, 'data_overlay'], [])
-                    this.legend.Title = `${this.filters.dataset.value || this.categoryName}-${this.filters.year.value}`
-                    this.data_tracts = this.data.map(item =>{
-                        return tracts.reduce((a,c) =>{
+
+                    this.legend.Title = this.filters.dataset.domain.filter(d => d.value === categoryValue)[0].name
+                    this.updateLegendDomain()
+
+                    let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
+
+                    this.data_tracts = this.data
+                        .filter(c => geoids.includes(c.fips.slice(0,5)))
+                        .map(item =>{
+                        return tracts
+                            .reduce((a,c) =>{
                             if(item.area === c.name){
                                 a['name'] = c.name
                                 a['geoid'] = c.geoid
@@ -153,38 +203,85 @@ class ACSCensusLayer extends LayerContainer {
                             return a
                         },{})
                     })
-                    this.legend.domain = this.data.reduce((a,c) =>{
-                        a.push(c.value)
-                        return a
-                    },[])
+
                     return response
-                    // return response
                 })
         }
 
 
     }
+    getBounds() {
+        let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
+            filtered = this.geographies.filter(({ value }) => geoids.includes(value));
 
+        return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
+    }
+    zoomToGeography() {
+        if (!this.mapboxMap) return;
+
+        const bounds = this.getBounds();
+
+        if (bounds.isEmpty()) return;
+
+        const options = {
+            padding: {
+                top: 25,
+                right: 200,
+                bottom: 25,
+                left: 200
+            },
+            bearing: 0,
+            pitch: 0,
+            duration: 2000
+        }
+
+        options.offset = [
+            (options.padding.left - options.padding.right) * 0.5,
+            (options.padding.top - options.padding.bottom) * 0.5
+        ];
+
+        const tr = this.mapboxMap.transform,
+            nw = tr.project(bounds.getNorthWest()),
+            se = tr.project(bounds.getSouthEast()),
+            size = se.sub(nw);
+
+        const scaleX = (tr.width - (options.padding.left + options.padding.right)) / size.x,
+            scaleY = (tr.height - (options.padding.top + options.padding.bottom)) / size.y;
+
+        options.center = tr.unproject(nw.add(se).div(2));
+        options.zoom = Math.min(tr.scaleZoom(tr.scale * Math.min(scaleX, scaleY)), tr.maxZoom);
+
+        this.mapboxMap.easeTo(options);
+    }
+
+    saveToLocalStorage(geographies = this.filters.geography.value) {
+        if (window.localStorage) {
+            if (geographies.length) {
+                window.localStorage.setItem("macro-view-geographies", JSON.stringify(geographies));
+            }
+            else {
+                window.localStorage.removeItem("macro-view-geographies")
+            }
+        }
+    }
 
     onFilterChange(filterName,value,preValue){
         if(!this.processedData) {
             return
         }
         switch (filterName){
-            case "year" : {
-                this.legend.Title = `${this.filters.dataset.value}-${value}`
-                this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
-                break;
-            }
             case "dataset":{
-                this.legend.Title = `${value}-${this.filters.year.value}`
-                this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
+                this.legend.Title = `${this.filters.dataset.domain.filter(d => d.value === value)[0].name}`
+                // this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
+
+                this.updateColumnNames()
                 break;
             }
             case "column": {
+                // this.legend.domain = this.filters.column.value === 'percentage' ? [0, 3.53, 6.9, 12.63, 22.92, 100] : [0,129, 257, 459, 897, 4959]
 
-                this.legend.Title = `${this.filters.dataset.value} in %-${this.filters.year.value}`
-                this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
+                // this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
+
                 if(value === 'percent'){
                     this.legend.format = ',f'
                 }else{
@@ -192,6 +289,14 @@ class ACSCensusLayer extends LayerContainer {
                 }
                 break;
             }
+
+            case "geography": {
+                //console.log('new geography', newValue)
+                this.zoomToGeography(value);
+                this.saveToLocalStorage();
+                break;
+            }
+
             default:{
                 //do nothing
             }
@@ -204,44 +309,9 @@ class ACSCensusLayer extends LayerContainer {
     }
 
     getColorScale(data) {
-
-        const { type, range, domain } = this.legend;
-
-        switch (type) {
-            case "quantile": {
-                const domain = data.map(d => d.value).filter(d => d).sort();
-                this.legend.domain = domain;
-                return scaleQuantile()
-                    .domain(domain)
-                    .range(range);
-            }
-            case "quantize": {
-                const domain = extent(data, d => d.value);
-                this.legend.domain = domain;
-                return scaleQuantize()
-                    .domain(domain)
-                    .range(range);
-            }
-            case "threshold": {
-                return scaleThreshold()
-                    .domain(domain)
-                    .range(range)
-            }
-            case "linear":{
-                return scaleLinear()
-                    .domain(domain)
-                    .range(range)
-            }
-            case "ordinal":{
-                return scaleOrdinal()
-                    .domain(domain)
-                    .range(range)
-
-            }
-            default:{
-                //do nothing
-            }
-        }
+        return d3scale.scaleThreshold()
+            .domain(this.legend.domain)
+            .range(this.legend.range);
     }
 
     render(map, falcor) {
@@ -268,7 +338,7 @@ class ACSCensusLayer extends LayerContainer {
         },[])
 
         const colorScale = this.getColorScale(this.processedData),
-            colors = this.processedData.reduce((a,c) =>{
+            colors = this.processedData.filter(c => c.value).reduce((a,c) =>{
                 a[c.id] = colorScale(c.value)
                 return a
             },{});
