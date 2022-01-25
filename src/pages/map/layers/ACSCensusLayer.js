@@ -135,7 +135,9 @@ class ACSCensusLayer extends LayerContainer {
                         id: data_tract.geoid,
                         value: curr.value,
                         percentage: curr.percentage,
-                        geom: JSON.parse(curr.geom)
+                        geom: JSON.parse(curr.geom),
+                        name: curr.area,
+                        type: curr.type
                     })
                 }
             })
@@ -151,7 +153,7 @@ class ACSCensusLayer extends LayerContainer {
             .map(t => {
                 return {
                     type: "feature",
-                    properties: {geoid: t.id, value: t.value, percent: t.percentage},
+                    properties: {geoid: t.id, value: t.value, percent: t.percentage, area: t.name, area_type: t.type},
                     geometry: t.geom
                 }
             })
