@@ -7,10 +7,10 @@ module.exports = function(gj, options, aliasString, tmcMetaString) {
     var zip = new JSZip(),
         layers = zip.folder(options && options.folder ? options.folder : 'layers');
 
-    [geojson.point(gj), geojson.line(gj), geojson.multiline(gj), geojson.polygon(gj)]
+    [geojson.point(gj), geojson.line(gj), geojson.multiline(gj), geojson.polygon(gj), geojson.polygonm(gj)]
         .forEach(function(l) {
         if (l.geometries.length && l.geometries[0].length) {
-            // console.log('l.geo',l.geometries)
+            console.log('l.geo',l.geometries)
             write(
                 // field definitions
                 l.properties,

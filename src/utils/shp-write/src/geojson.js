@@ -2,6 +2,7 @@ module.exports.point = justType('Point', 'POINT');
 module.exports.multiline = justType('MultiLineString', 'POLYLINE');
 module.exports.line = justType('LineString', 'POLYLINE');
 module.exports.polygon = justType('Polygon', 'POLYGON');
+module.exports.polygonm = justType('MultiPolygon', 'POLYGONM');
 
 function justType(type, TYPE) {
     return function(gj) {

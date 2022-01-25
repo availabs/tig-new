@@ -13,7 +13,9 @@ import {useParams} from "react-router-dom";
 import {filters} from 'pages/map/layers/npmrds/filters.js'
 import mapboxgl from "mapbox-gl";
 import flatten from "lodash.flatten";
+import combine from '@turf/combine'
 var shpwrite = require('utils/shp-write');
+
 
 class ACSCensusLayer extends LayerContainer {
     constructor(props) {
@@ -126,15 +128,14 @@ class ACSCensusLayer extends LayerContainer {
         const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
                             (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
 
-        let features = this.map.queryRenderedFeatures();
-
         let d = this.data.reduce((acc,curr) =>{
             this.data_tracts.forEach(data_tract =>{
                 if(curr.area === data_tract.name){
                     acc.push({
                         id: data_tract.geoid,
                         value: curr.value,
-                        percentage: curr.percentage
+                        percentage: curr.percentage,
+                        geom: JSON.parse(curr.geom)
                     })
                 }
             })
@@ -143,16 +144,39 @@ class ACSCensusLayer extends LayerContainer {
 
         let geoJSON = {
             type: 'FeatureCollection',
-            features: d
-                .map(t => {
-                    return {
-                        type: "MultiPolygon",
-                        properties: {geoid: t.id, value: t.value, percent: t.percentage},
-                        geometry: get(features.filter(g => g.properties.GEOID === t.id), [0, 'geometry'])
-                    }
-                })
-                .filter(t => t.geometry)
+            features: []
         };
+
+        d
+            .map(t => {
+                return {
+                    type: "feature",
+                    properties: {geoid: t.id, value: t.value, percent: t.percentage},
+                    geometry: t.geom
+                }
+            })
+            .forEach((feat) => {
+            let geom=feat.geometry;
+            let props=feat.properties;
+
+            if (geom.type === 'MultiPolygon'){
+                for (var i=0; i < geom.coordinates.length; i++){
+                    var polygon = {
+                        type: 'feature',
+                        properties: props,
+                        geometry:  {
+                            'type':'Polygon',
+                            'coordinates':geom.coordinates[i],
+                            }
+                    };
+                    geoJSON.features.push(polygon)
+                }
+            }else{
+                geoJSON.features.push(feat)
+            }
+        });
+        console.log('counts', _.uniq(geoJSON.features.map(f => f.geometry.type)), geoJSON.features.filter(f => f.geometry.type === 'Polygon').length, geoJSON.features.filter(f => f.geometry.type === 'MultiPolygon').length)
+
 
         shpwrite.download(
             geoJSON,
@@ -162,7 +186,8 @@ class ACSCensusLayer extends LayerContainer {
                 types: {
                     line: filename,
                     polyline: filename,
-                    polygon: filename
+                    polygon: filename,
+                    polygonm: filename,
                 }
             }
             );
