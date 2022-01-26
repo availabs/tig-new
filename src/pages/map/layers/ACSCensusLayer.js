@@ -246,8 +246,7 @@ class ACSCensusLayer extends LayerContainer {
                         value: geo.geoid,
                         bounding_box: geo.bounding_box
                     }));
-                //this.filters.geography.value = this.loadFromLocalStorage();
-                //console.log('where am i', this.filters.geography.value)
+
                 this.zoomToGeography();
             })
     }

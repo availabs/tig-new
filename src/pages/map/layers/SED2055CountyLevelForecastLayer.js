@@ -113,7 +113,7 @@ class SED2055CountyLevelForecastLayer extends LayerContainer {
             id: "counties",
             source: {
                 type: "vector",
-                url: "https://tigtest2.nymtc.org/tiles/data/nymtc_2020_taz"
+                url: "mapbox://am3081.a8ndgl5n"
             }
         }
     ]
