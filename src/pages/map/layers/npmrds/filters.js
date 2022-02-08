@@ -83,8 +83,10 @@ const filters = {
     name: "Direction",
     type: "select",
     multi: false,
-    domain: ['All', 'Eastbound', 'Westbound', 'Northbound', 'Southbound'],
-    value: 'All'
+    domain: [{name: 'All', value: 'all'}, {name: 'Eastbound', value: 'E'}, {name: 'Westbound', value: 'W'}, {name: 'Northbound', value: 'N'}, {name: 'Southbound', value: 'S'}],
+    value: 'all',
+    accessor: d => d.name,
+    valueAccessor: d => d.value,
   }
  
  

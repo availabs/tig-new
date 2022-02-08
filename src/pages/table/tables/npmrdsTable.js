@@ -66,7 +66,6 @@ const NpmrdsTable = ({name}) => {
     }
 
     const states = ["36","34","09","42"];
-    const directions = ['All', 'Eastbound', 'Westbound', 'Northbound', 'Southbound']
 
     useEffect(() => fetchGeo(falcor, states), []);
 
@@ -97,7 +96,8 @@ const NpmrdsTable = ({name}) => {
                     ...Object.keys(d)
                         .filter(d1 =>
                             (!speedFrom || d[d1].s.find(s1 => s1 >= speedFrom && (!speedTo || s1 <= speedTo))) &&
-                            (!speedTo || d[d1].s.find(s1 => s1 <= speedTo && (!speedFrom || s1 >= speedFrom)))
+                            (!speedTo || d[d1].s.find(s1 => s1 <= speedTo && (!speedFrom || s1 >= speedFrom))) &&
+                            (direction === 'all' || d[d1].direction === direction)
                         )
                         .map(d1 => (
                         {
@@ -118,7 +118,7 @@ const NpmrdsTable = ({name}) => {
                         }))
                 ]
             }, [])
-    }, [falcorCache, month, year, filtered, speedFrom, speedTo])
+    }, [falcorCache, month, year, filtered, speedFrom, speedTo, direction])
 
     return (
         <div className='w-full'>
