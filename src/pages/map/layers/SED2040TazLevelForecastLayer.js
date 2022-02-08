@@ -128,6 +128,76 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
 
     }
 
+    infoBoxes = [
+        {
+            Component: ({layer}) => {
+                const setBubble = (range, bubble) => {
+                    const val = range.value;
+                    const min = range.min ? range.min : 0;
+                    const max = range.max ? range.max : 100;
+                    const newVal = Number(((val - min) * 100) / (max - min));
+                    bubble.innerHTML = layer.filters.year.domain[val];
+
+                    // Sorta magic numbers based on size of the native UI thumb
+                    bubble.style.left = `calc(${newVal}% + (${50 - newVal}px))`;
+                }
+
+                let range = document.getElementById('yearRange'),
+                    bubble = document.getElementById('yearRangeBubble');
+
+                if(range){
+                    range.addEventListener("input", () => {
+                        setBubble(range, bubble);
+                    });
+                    setBubble(range, bubble);
+                }
+                return (
+                    <div className="relative pt-1">
+                        <label htmlFor="yearRange" className="form-label">Year</label>
+                        <output id="yearRangeBubble" className="bubble text-sm" style={{
+                            padding: '1px 14px',
+                            marginTop: '1.95rem',
+                            position: 'absolute',
+                            borderRadius: '2px',
+                            left: '50%',
+                            transform: 'translateX(-50%)'}}></output>
+
+                        <div className={'flex mt-10'}>
+                            <div>{layer.filters.year.domain[0]}</div>
+                            <input
+                                type="range"
+                                className="
+                                      form-range
+                                      appearance-none
+                                      w-full
+                                      h-6
+                                      p-0
+                                      bg-transparent
+                                      focus:outline-none focus:ring-0 focus:shadow-none
+                                    "
+                                min={0}
+                                max={layer.filters.year.domain.length - 1}
+                                step={1}
+                                defaultValue={0}
+                                id="yearRange"
+                                name="yearRange"
+                                onChange={e => {
+                                    // layer.filters.year.value = layer.filters.year.domain[e.target.value]
+                                    // document.getElementById('yearRange').value = e.target.value
+                                    layer.filters.year.onChange()
+                                    layer.onFilterChange('year', layer.filters.year.domain[e.target.value])
+                                    layer.dispatchUpdate(layer, {year: layer.filters.year.domain[e.target.value]})
+                                }}
+                            />
+                            <div>{layer.filters.year.domain[layer.filters.year.domain.length - 1]}</div>
+                        </div>
+                    </div>
+                )
+            },
+            width: 450
+        }
+    ]
+
     download(){
         const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
             (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
@@ -146,7 +216,6 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
             })
             return acc
         },[])
-        console.log('d?', d)
         let geoJSON = {
             type: 'FeatureCollection',
             features: []
@@ -180,8 +249,6 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     geoJSON.features.push(feat)
                 }
             });
-        console.log('counts', _.uniq(geoJSON.features.map(f => f.geometry.type)), geoJSON.features.filter(f => f.geometry.type === 'Polygon').length, geoJSON.features.filter(f => f.geometry.type === 'MultiPolygon').length)
-
 
         shpwrite.download(
             geoJSON,
@@ -320,7 +387,6 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                 this.data = get(response, ["json", "tig", "sed_taz", "byId", view, 'data_overlay'], [])
                 this.taz_ids = this.data.filter(item => geoids.includes(counties.filter(c => c.name === item.enclosing_name)[0].geoid)).map(d => d.area).filter(d => d)
 
-                console.log('d?', this.data, geoids)
                 if(!this.filters.year.domain.length){
                     this.filters.year.domain = _.uniq(this.data.reduce((acc, curr) => [...acc, ...Object.keys(curr.data)], []));
                     this.filters.year.value = this.filters.year.domain[0];
@@ -329,13 +395,16 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
             })
     }
 
-
     onFilterChange(filterName,value,preValue){
         switch (filterName){
             case "year" : {
                 this.filters.year.domain = _.uniq(this.data.reduce((acc, curr) => [...acc, ...Object.keys(curr.data)], []));
                 this.filters.year.value = value;
 
+                if(value && document.getElementById('yearRange').value.toString() !== this.filters.year.domain.indexOf(value).toString()){
+                    document.getElementById('yearRange').value = this.filters.year.domain.indexOf(value).toString()
+                }
+                this.dispatchUpdate(this, {year: value})
                 this.updateLegendDomain()
                 break;
             }
@@ -346,7 +415,6 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
             }
 
             case "geography": {
-                //console.log('new geography', newValue)
                 this.zoomToGeography(value);
                 this.saveToLocalStorage();
                 break;
