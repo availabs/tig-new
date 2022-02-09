@@ -20,7 +20,7 @@ export const layers = {
     "sed_taz_2040": SED2040TazLevelForecastLayerFactory, //done
     "sed_taz_2055": SED2055TazLevelForecastLayerFactory, // no data!
 
-    "tig": TestTipLayerFactory,
+    "tip": TestTipLayerFactory,
     'bpm_performance': BPMPerformanceMeasuresLayerFactory,
     'hub_bound_travel_data': HubBoundTravelDataLayerFactory,
     'rtp_project_data': RTPProjectDataLayerFactory,

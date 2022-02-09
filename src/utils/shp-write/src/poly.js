@@ -38,7 +38,7 @@ module.exports.write = function writePoints(geometries, extent, shpView, shxView
         shpView.setInt32(shpI + 52, 0, true); // The first part - index zero
 
         var onlyParts = coordinates.reduce(function (arr, coords) {
-            if (Array.isArray(coords[0][0])) {
+            if (coords[0] && Array.isArray(coords[0][0])) {
                 arr = arr.concat(coords);
             } else {
                 arr.push(coords);
@@ -85,7 +85,7 @@ function parts(geometries, TYPE) {
     if (TYPE === types.geometries.POLYGON || TYPE === types.geometries.POLYLINE)  {
         no = geometries.reduce(function (no, coords) {
             no += coords.length;
-            if (Array.isArray(coords[0][0][0])) { // multi
+            if (coords[0][0] && Array.isArray(coords[0][0][0])) { // multi
                 no += coords.reduce(function (no, rings) {
                     return no + rings.length - 1; // minus outer
                 }, 0);

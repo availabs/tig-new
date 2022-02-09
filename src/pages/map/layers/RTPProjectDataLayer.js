@@ -1,29 +1,102 @@
 import {LayerContainer} from "components/avl-map/src"
 import {HOST} from "./layerHost";
 import fetcher from "../wrappers/fetcher";
+import {useTheme} from "@availabs/avl-components";
+import {filters} from 'pages/map/layers/npmrds/filters.js'
 import rtp_ids from '../config/rtp_ids.json'
 import rtp_sponsors from '../config/rtp_sponsors.json'
 import get from "lodash.get";
+import flatten from "lodash.flatten";
+import shpwrite from "../../../utils/shp-write";
+import mapboxgl from "mapbox-gl";
 var parse = require('wellknown');
 
+const symbology = [
+    {
+        "color": "#38A800",
+        "value": "Bike",
+        "label": "Bike"
+    },
+    {
+        "color": "#0070FF",
+        "value": "Bus",
+        "label": "Bus"
+    },
+    {
+        "color": "#D79E9E",
+        "value": "Ferry",
+        "label": "Ferry"
+    },
+    {
+        "color": "#FFF",
+        "value": "Highway",
+        "label": "Highway"
+    },
+    {
+        "color": "#FF00C5",
+        "value": "ITS",
+        "label": "ITS"
+    },
+    {
+        "color": "#B1FF00",
+        "value": "Pedestrian",
+        "label": "Pedestrian"
+    },
+    {
+        "color": "#9C9C9C",
+        "value": "Rail",
+        "label": "Rail"
+    },
+    {
+        "color": "#FFAA00",
+        "value": "Study",
+        "label": "Study"
+    },
+    {
+        "color": "#00C5FF",
+        "value": "Transit",
+        "label": "Transit"
+    },
+    {
+        "color": "#000",
+        "value": "Truck",
+        "label": "Truck"
+    }
+]
+
+const symbols_map = {
+    'Rail': 'rail',
+    'Transit': 'rail-metro',
+    'Truck': 'us-interstate-truck-3',
+    'Bus': 'bus',
+    'Bike': 'bicycle-share',
+    'Ferry': 'ferry',
+    'Highway': 'au-national-highway-3',
+    'Pedestrian': 'pitch-11',
+    'Study': 'college-11',
+
+}
 
 class RTPProjectDataLayer extends LayerContainer {
     constructor(props) {
         super(props);
         this.viewId = props.viewId
+
+        this.vid = props.vid
+        this.type = props.type
+
     }
     active = false
     setActive = !!this.viewId
     name = 'RTP Project Data'
     filters = {
+        geography: {...filters.geography},
         dataset: {
             name: 'Dataset',
             type: 'dropdown',
             domain: [
-                // {name: '2040 RTP Projects', value: '53'},
-                // {name: '2045 RTP Projects', value: '141'}
             ],
-            value: this.viewId || '53',
+            value: undefined,
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi: false
@@ -47,35 +120,27 @@ class RTPProjectDataLayer extends LayerContainer {
             name: 'Project Type',
             type: 'dropdown',
             domain: [
-                {name:'Select All',value:"Select All"},
-                {name: 'Study', value: '1'},
-                {name: 'Highway', value: '2'},
-                {name: 'Ferry', value: '3'},
-                {name: 'Transit', value: '4'},
-                {name: 'Rail', value: '5'},
-                {name: 'Truck', value: '6'},
-                {name: 'Pedestrian', value: '7'},
-                {name: 'Bike', value: '8'},
-                {name: 'Bus', value: '10'},
-                {name: 'ITS', value: '9'},
-                {name: 'Parking', value: '12'}
+                "Select All",
+                "Study",
+                "Highway",
+                "Ferry",
+                "Transit",
+                "Rail",
+                "Truck",
+                "Pedestrian",
+                "Bike",
+                "Bus",
+                "ITS",
+                "Parking"
             ],
             value: 'Select All',
-            accessor: d => d.name,
-            valueAccessor: d => d.value,
             multi: false
         },
         plan_portion: {
             name: 'Plan Portion',
             type: 'dropdown',
-            domain: [
-                {name:'Select All',value:'Select All'},
-                {name: 'Constrained', value: '2'},
-                {name: 'Vision', value: '1'}
-            ],
+            domain: ['Select All', 'Constrained', 'Vision'],
             value: 'Select All',
-            accessor: d => d.name,
-            valueAccessor: d => d.value,
             multi: false
         },
         sponsor: {
@@ -83,8 +148,6 @@ class RTPProjectDataLayer extends LayerContainer {
             type: 'dropdown',
             domain: rtp_sponsors,
             value: 'Select All',
-            accessor: d => d.name,
-            valueAccessor: d => d.value,
             multi: false
         }
     }
@@ -134,7 +197,7 @@ class RTPProjectDataLayer extends LayerContainer {
         layers: ["county_lines", "county_polygons", 'poi-rail', 'poi-rail-metro', 'poi-us-interstate-truck-3', 'poi-bus', 'poi-bicycle-share', 'poi-ferry', 'poi-au-national-highway-3', 'poi-pitch-11', 'poi-college-11'],
         callback: (layerId, features, lngLat) => {
             const feature = features.reduce((a, c) => {
-                a = this.data.data.reduce((acc, curr) => {
+                a = this.data.reduce((acc, curr) => {
 
                     if (curr['rtp_id'] === c['properties']['rtp_id']
                         && curr['ptype'] === c['properties']['project_type']
@@ -158,282 +221,252 @@ class RTPProjectDataLayer extends LayerContainer {
                 ['Cost:', feature['estimated_cost']],
                 ['Description:', feature['description'].toLowerCase()]
             ]
+        },
+        HoverComp: ({data, layer}) => {
+            const theme = useTheme();
+            return (
+                <div style={{maxHeight: '300px'}} className={`${theme.bg} rounded relative px-1 overflow-auto scrollbarXsm`}>
+                    {
+                        data.map((row, i) =>
+                            <div key={i} className="flex">
+                                {
+                                    row.map((d, ii) =>
+                                        <div key={ii}
+                                             style={{maxWidth: '200px'}}
+                                             className={`
+                                                    ${ii === 0 ? "flex-1 font-bold" : "overflow-auto scrollbarXsm"}
+                                                    ${row.length > 1 && ii === 0 ? "mr-4" : ""}
+                                                    ${row.length === 1 && ii === 0 ? `border-b-2 text-lg ${i > 0 ? "mt-1" : ""}` : ""}
+                                                    `}>
+                                            {d}
+                                        </div>
+                                    )
+                                }
+                            </div>
+                        )
+                    }
+                </div>
+            )
+        },
+
+    }
+
+    download(){
+        const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
+            (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
+
+        let d = this.data
+            .filter(d => {
+                let f = Object.keys(this.filters)
+                    .filter(f => !['geography', 'dataset'].includes(f) && this.filters[f].value !== 'Select All')
+                    .reduce((acc, filter) => acc && d[filter === 'project_type' ? 'ptype' : filter] === this.filters[filter].value, true)
+
+                return d.geography && f
+            })
+            .reduce((acc,curr) =>{
+            acc.push({
+                // geoid: data_tract.geoid,
+                ...{...curr.data},
+                geom: JSON.parse(curr.geom || '{}'),
+                area: curr.name,
+                "description": curr['description'],
+                "estimated_cost": curr['estimated_cost'],
+                "plan_portion": curr['plan_portion'],
+                "project_type": curr['ptype'],
+                "rtp_id": curr['rtp_id'],
+                "sponsor": curr['sponsor'],
+                "icon": symbols_map[curr['ptype']]
+            })
+            return acc
+        },[])
+        let geoJSON = {
+            type: 'FeatureCollection',
+            features: []
+        };
+
+        d
+            .map(t => {
+                return {
+                    type: "feature",
+                    properties: Object.keys(t).filter(t => t !== 'geom').reduce((acc, curr) => ({...acc, [curr]: t[curr]}) , {}),
+                    geometry: t.geom
+                }
+            })
+            .forEach((feat) => {
+                let geom=feat.geometry;
+                let props=feat.properties;
+
+                if (geom.type === 'MultiPolygon'){
+                    for (var i=0; i < geom.coordinates.length; i++){
+                        var polygon = {
+                            type: 'feature',
+                            properties: props,
+                            geometry:  {
+                                'type':'Polygon',
+                                'coordinates':geom.coordinates[i],
+                            }
+                        };
+                        geoJSON.features.push(polygon)
+                    }
+                }else{
+                    geoJSON.features.push(feat)
+                }
+            });
 
 
+        shpwrite.download(
+            geoJSON,
+            {
+                file: filename,
+                folder: filename,
+                types: {
+                    point: filename + ' point',
+                    line: filename + ' line',
+                    polyline: filename + ' polyline',
+                    polygon: filename + ' polygon',
+                    polygonm: filename + ' multiPolygon',
+                }
+            }
+        );
+
+        return Promise.resolve()
+    }
+
+    updateLegendDomain() {
+        this.legend.domain = symbology.map(d => d.value)
+        this.legend.range = symbology.map(d => d.color)
+    }
+    updateLegendTitle() {
+        this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
+            if(c.value === this.filters.dataset.value){
+                a = c.name
+            }
+            return a
+        },'')}
+                Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
+                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
+                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
+            if(c === this.filters.project_type.value){
+                a = c === 'Select All' ? 'All': c
+            }
+            return a
+        },'')},
+                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
+            if(c === this.filters.plan_portion.value){
+                a = c === 'Select All' ? 'All': c
+            }
+            return a
+        },'')},
+               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
+            if(c === this.filters.sponsor.value){
+                a = c === 'Select All' ? 'All': c
+            }
+            return a
+        },'')}
+                `
+    }
+    getBounds() {
+        let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
+            filtered = this.geographies.filter(({ value }) => geoids.includes(value));
+
+        return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
+    }
+
+    zoomToGeography() {
+        if (!this.mapboxMap) return;
+
+        const bounds = this.getBounds();
+
+        if (bounds.isEmpty()) return;
+
+        const options = {
+            padding: {
+                top: 25,
+                right: 200,
+                bottom: 25,
+                left: 200
+            },
+            bearing: 0,
+            pitch: 0,
+            duration: 2000
+        }
+
+        options.offset = [
+            (options.padding.left - options.padding.right) * 0.5,
+            (options.padding.top - options.padding.bottom) * 0.5
+        ];
+
+        const tr = this.mapboxMap.transform,
+            nw = tr.project(bounds.getNorthWest()),
+            se = tr.project(bounds.getSouthEast()),
+            size = se.sub(nw);
+
+        const scaleX = (tr.width - (options.padding.left + options.padding.right)) / size.x,
+            scaleY = (tr.height - (options.padding.top + options.padding.bottom)) / size.y;
+
+        options.center = tr.unproject(nw.add(se).div(2));
+        options.zoom = Math.min(tr.scaleZoom(tr.scale * Math.min(scaleX, scaleY)), tr.maxZoom);
+
+        this.mapboxMap.easeTo(options);
+    }
+
+    saveToLocalStorage(geographies = this.filters.geography.value) {
+        if (window.localStorage) {
+            if (geographies.length) {
+                window.localStorage.setItem("macro-view-geographies", JSON.stringify(geographies));
+            }
+            else {
+                window.localStorage.removeItem("macro-view-geographies")
+            }
         }
     }
 
 
-
-
     init(map, falcor) {
-        falcor.get(['tig', 'views', 'byLayer', 'rtp_project_data'])
-            .then(res => {
-                let views = get(res, ['json', 'tig', 'views', 'byLayer', 'rtp_project_data'], [])
-                this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
-            })
-        // const url = `${HOST}/views/${this.filters.dataset.value}/data_overlay`
-        // const cost_lower = ''
-        // const cost_upper = ''
+        let states = ["36","34","09","42"]
 
-        // const params = `?utf8=%E2%9C%93&rtp_id=${this.filters.rtp_id.value === 'Select All'? '':this.filters.rtp_id.value}&current_year=${this.filters.year.value === 'Select All'? '':this.filters.year.value}&cost_lower=${cost_lower}&cost_upper=${cost_upper}&ptype=${this.filters.project_type.value === 'Select All'? '':this.filters.project_type.value}&plan_portion=${this.filters.plan_portion.value === 'Select All'? '':this.filters.plan_portion.value}&sponsor=${this.filters.sponsor.value === 'Select All'? '':this.filters.sponsor.value}&commit=Filter`
-        // return fetcher(url + params)
-        //     .then(response => {
-        //         this.data = response
-        //         this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
-        //         this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-        //         this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-        //             if(c.value === this.filters.dataset.value){
-        //                 a = c.name
-        //             }
-        //             return a
-        //         },'')}
-        //        Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
-        //         RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
-        //         Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
-        //             if(c.value === this.filters.project_type.value){
-        //                 a = c.name === 'Select All' ? 'All': c.name
-        //             }
-        //             return a
-        //         },'')},
-        //         Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
-        //             if(c.value === this.filters.plan_portion.value){
-        //                 a = c.name === 'Select All' ? 'All': c.name
-        //             }
-        //             return a
-        //         },'')},
-        //        Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
-        //             if(c.value === this.filters.sponsor.value){
-        //                 a = c.name === 'Select All' ? 'All': c.name
-        //             }
-        //             return a
-        //         },'')}
-        //         `
-        //     })
+        falcor.get(['tig', 'views', 'byLayer', 'rtp_project_data'], ["geo", states, "geoLevels"])
+            .then(res => {
+                let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
+
+                this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
+                this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
+
+                this.updateLegendDomain()
+
+                // geography setup
+                let geo = get(res,'json.geo',{})
+                const geographies = flatten(states.map(s => geo[s].geoLevels));
+
+                this.geographies =
+                    geographies.map(geo => ({
+                        name: `${geo.geoname.toUpperCase()} ${geo.geolevel}`,
+                        geolevel: geo.geolevel,
+                        value: geo.geoid,
+                        bounding_box: geo.bounding_box
+                    }));
+                this.zoomToGeography();
+            })
     }
 
-    fetchData() {
-        const url = `${HOST}/views/${this.filters.dataset.value}/data_overlay`
-        const cost_lower = ''
-        const cost_upper = ''
-        const params = `?utf8=%E2%9C%93&rtp_id=${this.filters.rtp_id.value === 'Select All'? '':this.filters.rtp_id.value}&current_year=${this.filters.year.value === 'Select All'? '':this.filters.year.value}&cost_lower=${cost_lower}&cost_upper=${cost_upper}&ptype=${this.filters.project_type.value === 'Select All'? '':this.filters.project_type.value}&plan_portion=${this.filters.plan_portion.value === 'Select All'? '':this.filters.plan_portion.value}&sponsor=${this.filters.sponsor.value === 'Select All'? '':this.filters.sponsor.value}&commit=Filter`
+    fetchData(falcor) {
+        let view = this.filters.dataset.value || this.vid
 
-        return fetcher(url + params)
+        return falcor.get(["tig", this.type, "byId", view, 'data_overlay'])
             .then(response => {
-                this.data = response
-                this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
-                this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.dataset.value){
-                        a = c.name
-                    }
-                    return a 
-                },'')}
-                Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
-                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
-                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.project_type.value){
-                        a = c.name === 'Select All' ? 'All': c.name 
-                    }
-                    return a
-                },'')},
-                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.plan_portion.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.sponsor.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')}
-                `
+
+                this.data = get(response, ['json', "tig", this.type, "byId", view, 'data_overlay'],[]);
+                this.updateLegendTitle()
+            
             })
     }
 
     onFilterChange(filterName,value,preValue){
-
+        this.updateLegendTitle(value)
         switch (filterName){
-            case "dataset" : {
-                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-                    if(c.value === value){
-                        a = c.name
-                    }
-                    return a
-                },'')}
-                Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
-                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
-                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.project_type.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.plan_portion.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.sponsor.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')}
-                `
-                break;
-            }
-            case "year":{
-                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.dataset.value){
-                        a = c.name
-                    }
-                    return a
-                },'')}
-                Year: ${value === 'Select All'? 'All':value}, 
-                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
-                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.project_type.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.plan_portion.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.sponsor.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')}
-                `
-                break;
-            }
-            case "rtp_id":{
-                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.dataset.value){
-                        a = c.name
-                    }
-                    return a
-                },'')}
-                Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
-                RTP Id: ${value === 'Select All'? 'All':value},
-                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.project_type.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.plan_portion.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.sponsor.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')}
-                `
-                break;
-            }
-            case "project_type":{
-                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.dataset.value){
-                        a = c.name
-                    }
-                    return a
-                },'')}
-                Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
-                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
-                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
-                    if(c.value === value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.plan_portion.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.sponsor.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')}
-                `
-                break;
-            }
-            case "plan_portion":{
-                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.dataset.value){
-                        a = c.name
-                    }
-                    return a
-                },'')}
-                Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
-                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
-                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.project_type.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
-                    if(c.value === value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.sponsor.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')}
-                `
-                break;
-            }
-            case "sponsor": {
-                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.dataset.value){
-                        a = c.name
-                    }
-                    return a
-                },'')}
-                Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
-                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
-                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.project_type.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
-                    if(c.value === this.filters.plan_portion.value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')},
-               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
-                    if(c.value === value){
-                        a = c.name === 'Select All' ? 'All': c.name
-                    }
-                    return a
-                },'')}
-                `
+            case "geography": {
+                this.zoomToGeography(value);
+                this.saveToLocalStorage();
                 break;
             }
             default:{
@@ -468,20 +501,16 @@ class RTPProjectDataLayer extends LayerContainer {
             features: []
         }
 
-        const symbols_map = {
-            'Rail': 'rail',
-            'Transit': 'rail-metro',
-            'Truck': 'us-interstate-truck-3',
-            'Bus': 'bus',
-            'Bike': 'bicycle-share',
-            'Ferry': 'ferry',
-            'Highway': 'au-national-highway-3',
-            'Pedestrian': 'pitch-11',
-            'Study': 'college-11',
+        geojson.features = this.data
+            .filter(d => {
+                let f = Object.keys(this.filters)
+                    .filter(f => !['geography', 'dataset'].includes(f) && this.filters[f].value !== 'Select All')
+                    .reduce((acc, filter) => {
+                        return acc && d[filter === 'project_type' ? 'ptype' : filter] === this.filters[filter].value
+                    }, true)
 
-        }
-
-        geojson.features = this.data.data.map((d, i) => {
+                return d.geography && f
+            }).map((d, i) => {
 
             return {
                 type: 'Feature',
@@ -522,7 +551,7 @@ class RTPProjectDataLayer extends LayerContainer {
 
         polygon_geojson.features.forEach(feature =>{
 
-            feature.properties['color'] = this.data.symbologies[0].color_scheme.reduce((a,c) =>{
+            feature.properties['color'] = symbology.reduce((a,c) =>{
                 if(c.label === feature.properties.project_type){
                     a = c.color
                 }
@@ -543,7 +572,7 @@ class RTPProjectDataLayer extends LayerContainer {
 
         line_geojson.features.forEach(feature =>{
 
-            feature.properties['color'] = this.data.symbologies[0].color_scheme.reduce((a,c) =>{
+            feature.properties['color'] = symbology.reduce((a,c) =>{
                 if(c.label === feature.properties.project_type){
                     a = c.color
                 }
