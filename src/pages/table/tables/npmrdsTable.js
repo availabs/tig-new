@@ -50,7 +50,7 @@ const NpmrdsTable = ({name}) => {
     const [pageSize, setPageSize] = useState(50)
     const [speedFrom, setSpeedFrom] = useState(0)
     const [speedTo, setSpeedTo] = useState(100)
-    const [direction, setDirection] = useState('All')
+    const [direction, setDirection] = useState('all')
 
     const getterSetters = {
         geography: {get: geography, set: setGeography},
@@ -103,6 +103,7 @@ const NpmrdsTable = ({name}) => {
                         {
                             tmc: d1,
                             roadname: d[d1].roadname,
+                            direction: d[d1].direction,
                             // length: d[d1].length,
                             ...d[d1].s.reduce((accHours, value, hour) => {
                                 if(
