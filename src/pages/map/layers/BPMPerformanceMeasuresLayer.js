@@ -2,20 +2,33 @@ import {LayerContainer} from "components/avl-map/src"
 import {HOST} from "./layerHost";
 import {getColorRange} from "@availabs/avl-components"
 import get from "lodash.get"
-import {scaleLinear, scaleOrdinal, scaleQuantile, scaleQuantize, scaleThreshold} from "d3-scale"
-import {extent} from "d3-array"
-import fetcher from "../wrappers/fetcher";
+import _ from "lodash"
+import * as d3scale from "d3-scale"
 import counties from "../config/counties.json";
+import {filters} from 'pages/map/layers/npmrds/filters.js'
+import shpwrite from "../../../utils/shp-write";
+import mapboxgl from "mapbox-gl";
+import flatten from "lodash.flatten";
+
+const color_scheme = {
+    "start_color": "yellow",
+    "end_color": "red",
+    "class_count": 5
+}
 
 class BPMPerformanceMeasuresLayer extends LayerContainer {
     constructor(props) {
         super(props);
         this.viewId = props.viewId
+
+        this.vid = props.vid
+        this.type = props.type
     }
 
     setActive = !!this.viewId
     name = 'BPM Performance Measures'
     filters = {
+        geography: {...filters.geography},
         dataset: {
             name: 'Dataset',
             type: 'dropdown',
@@ -24,6 +37,39 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                 // {value:'62',name:'2040 Future - Time period: All Day'}
             ],
             value: this.viewId || '58',
+            accessor: d => d.name,
+            valueAccessor: d => d.value,
+            multi:false
+        },
+
+        period: {
+            name: 'Period',
+            type: 'dropdown',
+            domain: [
+                {value: 0,name:'All Day'},
+                {value: 1,name:'AM Peak'},
+                {value: 2,name:'Mid Day'},
+                {value: 3,name:'PM Peak'},
+                {value: 4,name:'Night'},
+            ],
+            value: 0,
+            accessor: d => d.name,
+            valueAccessor: d => d.value,
+            multi:false
+        },
+
+        functional_class: {
+            name: 'Functional class',
+            type: 'dropdown',
+            domain: [
+                {value: 0,name:'Total'},
+                {value: 1,name:'Highway'},
+                {value: 2,name:'Arterial'},
+                {value: 3,name:'Local'},
+                {value: 4,name:'Ramps'},
+                {value: 5,name:'Other'},
+            ],
+            value: 0,
             accessor: d => d.name,
             valueAccessor: d => d.value,
             multi:false
@@ -43,22 +89,6 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         }
     }
     legend = {
-        // types: ["quantile", "linear", "quantize", "ordinal"],
-        // type: "linear",
-        // domain: [0, 50, 100],
-        // range: getColorRange(3, "BrBG", true),
-
-        // type: "ordinal",
-        // domain: ["One", "Two", "Three", "Four", "Five"],
-        // range: getColorRange(5, "Set3", true),
-        // height: 2,
-        // width: 320,
-        // direction: "horizontal",
-
-        // type: "quantize",
-        // domain: [0, 15000],
-        // range: getColorRange(5, "BrBG", true),
-        // format: ",d",
 
         type: "quantile",
         range: getColorRange(5, "YlOrRd", true),
@@ -82,22 +112,28 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                 }
                 return a
             },{})
-            return this.data.data.reduce((a,c) =>{
-                if(c.area === graph['name']){
-                    a.push(
-                        [`${this.filters.dataset.domain.reduce((a,c) => {
-                            if(c.value === this.filters.dataset.value){
-                                a = c.name
-                            }
-                            return a
-                        },'')}-${this.filters.column.domain.reduce((a,c) => {
-                           if(c.value === this.filters.column.value){
-                               a = c.name
-                           } 
-                           return a 
-                        },'')}`],
-                        ['County:',`${c.area}-${graph['state_code']}`],
-                        ["Value:",c[this.filters.column.value]])
+            return this.data
+                .filter(d =>
+                    Object.keys(this.filters)
+                        .filter(f => !['dataset', 'geography', 'column'].includes(f))
+                        .reduce((acc, curr) => {
+                            return acc && (this.filters[curr].value === d[curr])
+                        }, true)
+                ).reduce((a,c) =>{
+                if(c.name === graph['name']){
+                    a = [ [`${this.filters.dataset.domain.reduce((a,c) => {
+                        if(c.value === this.filters.dataset.value){
+                            a = c.name
+                        }
+                        return a
+                    },'')}-${this.filters.column.domain.reduce((a,c) => {
+                        if(c.value === this.filters.column.value){
+                            a = c.name
+                        }
+                        return a
+                    },'')}`],
+                        ['County:',`${c.name}-${graph['state_code']}`],
+                        ["Value:",c[this.filters.column.value]] ]
                 }
                 return a
             },[]).sort()
@@ -139,105 +175,241 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         }
     ]
 
+    download() {
+        const filename = this.filters.dataset.domain.reduce((acc, d) => {
+            if(d.value === this.filters.dataset.value){
+                acc = d.name
+                return acc
+            }
 
+            return acc
+        }, 'download')
+
+        let data = this.data
+            .filter(d =>
+                Object.keys(this.filters)
+                    .filter(f => !['dataset', 'geography', 'column'].includes(f))
+                    .reduce((acc, curr) => {
+                        return acc && (this.filters[curr].value === d[curr])
+                    }, true)
+            )
+
+        let d = data.reduce((acc,curr) =>{
+            let data_tract = this.data_counties.filter(data_tract => curr.name === data_tract.name)[0]
+            acc.push({
+                geoid: data_tract.geoid,
+                ...{...curr},
+                geom: JSON.parse(curr.geom),
+                area: curr.name,
+                area_type: curr.type
+            })
+            return acc
+        },[])
+
+        let geoJSON = {
+            type: 'FeatureCollection',
+            features: []
+        };
+
+        _.uniqBy(d)
+            .map(t => {
+                return {
+                    type: "feature",
+                    properties: Object.keys(t).filter(t => t !== 'geom').reduce((acc, curr) => ({...acc, [curr]: t[curr]}) , {}),
+                    geometry: t.geom
+                }
+            })
+            .forEach((feat) => {
+                let geom=feat.geometry;
+                let props=feat.properties;
+
+                if (geom.type === 'MultiPolygon'){
+                    for (var i=0; i < geom.coordinates.length; i++){
+                        var polygon = {
+                            type: 'feature',
+                            properties: props,
+                            geometry:  {
+                                'type':'Polygon',
+                                'coordinates':geom.coordinates[i],
+                            }
+                        };
+                        geoJSON.features.push(polygon)
+                    }
+                }else{
+                    geoJSON.features.push(feat)
+                }
+            });
+
+        shpwrite.download(
+            geoJSON,
+            {
+                file: filename,
+                folder: filename,
+                types: {
+                    point: filename + ' point',
+                    line: filename + ' line',
+                    polyline: filename + ' polyline',
+                    polygon: filename + ' polygon',
+                    polygonm: filename + ' multiPolygon',
+                }
+            }
+        );
+
+        return Promise.resolve()
+    }
+
+    getBounds() {
+        let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
+            filtered = this.geographies.filter(({value}) => geoids.includes(value));
+
+        return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
+    }
+
+    zoomToGeography() {
+        if (!this.mapboxMap) return;
+
+        const bounds = this.getBounds();
+
+        if (bounds.isEmpty()) return;
+
+        const options = {
+            padding: {
+                top: 25,
+                right: 200,
+                bottom: 25,
+                left: 200
+            },
+            bearing: 0,
+            pitch: 0,
+            duration: 2000
+        }
+
+        options.offset = [
+            (options.padding.left - options.padding.right) * 0.5,
+            (options.padding.top - options.padding.bottom) * 0.5
+        ];
+
+        const tr = this.mapboxMap.transform,
+            nw = tr.project(bounds.getNorthWest()),
+            se = tr.project(bounds.getSouthEast()),
+            size = se.sub(nw);
+
+        const scaleX = (tr.width - (options.padding.left + options.padding.right)) / size.x,
+            scaleY = (tr.height - (options.padding.top + options.padding.bottom)) / size.y;
+
+        options.center = tr.unproject(nw.add(se).div(2));
+        options.zoom = Math.min(tr.scaleZoom(tr.scale * Math.min(scaleX, scaleY)), tr.maxZoom);
+
+        this.mapboxMap.easeTo(options);
+    }
+
+    saveToLocalStorage(geographies = this.filters.geography.value) {
+        if (window.localStorage) {
+            if (geographies.length) {
+                window.localStorage.setItem("macro-view-geographies", JSON.stringify(geographies));
+            } else {
+                window.localStorage.removeItem("macro-view-geographies")
+            }
+        }
+    }
+
+    updateLegendDomain() {
+        const domains = {
+            58: {
+                'vehicle_miles_traveled': [2900, 6375, 9069, 13740, 20958, 38322],
+                'vehicle_hours_traveled': [74, 223, 313, 503, 789],
+                'avg_speed': [16.11, 24.27, 29.9, 32.83, 34.83, 38.26]
+            },
+            62: {
+                'vehicle_miles_traveled': [3801, 7548, 10517, 16107, 24273, 44357],
+                'vehicle_hours_traveled': [101, 324, 398, 646, 856, 1594],
+                'avg_speed': [15.31, 22.24, 28.49, 31.74, 34.66, 37.45]
+            }
+        }
+        this.legend.domain = domains[this.filters.dataset.value][this.filters.column.value] || domains["58"]['vehicle_miles_traveled']
+    }
+
+    getColorScale(data) {
+        return d3scale.scaleThreshold()
+            .domain(this.legend.domain)
+            .range(this.legend.range);
+    }
 
     init(map, falcor){
-        falcor.get(['tig', 'views', 'byLayer', 'bpm_performance'])
+
+        let states = ["36", "34", "09", "42"]
+
+        falcor.get(['tig', 'views', 'byLayer', this.type], ["geo", states, "geoLevels"])
             .then(res => {
+
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', 'bpm_performance'], [])
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
+
+                this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
+
+                this.updateLegendDomain()
+                
+                let geo = get(res, 'json.geo', {})
+                const geographies = flatten(states.map(s => geo[s].geoLevels));
+
+                this.geographies =
+                    geographies.map(geo => ({
+                        name: `${geo.geoname.toUpperCase()} ${geo.geolevel}`,
+                        geolevel: geo.geolevel,
+                        value: geo.geoid,
+                        bounding_box: geo.bounding_box
+                    }));
+                this.zoomToGeography();
             })
-        // return fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
-        //     .then(response =>{
-        //         this.data = response
-        //         this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-        //             if (c.value === this.filters.dataset.value){
-        //                 a = c.name
-        //             }
-        //             return a
-        //         },'')}-${this.filters.column.domain.reduce((a,c) =>{
-        //            if(c.value === this.filters.column.value){
-        //                a = c.name
-        //            } 
-        //            return a 
-        //         },'')}`
-        //         this.data_counties = this.data.data.map(item =>{
-        //             return counties.reduce((a,c) =>{
-        //                 if(item.area === c.name){
-        //                     a['name'] = c.name
-        //                     a['geoid'] = c.geoid
-        //                 }
-        //                 return a
-        //             },{})
-        //         })
-        //         this.legend.domain = this.data.data.reduce((a,c) =>{
-        //             a.push(c[this.filters.column.value])
-        //             return a
-        //         },[])
-        //         return response
-        //     })
-
     }
 
-    fetchData() {
-        return new Promise(resolve =>
-            fetcher(`${HOST}views/${this.filters.dataset.value}/data_overlay`)
-                .then(response =>{
-                    this.data = response
-                    this.data_counties = this.data.data.map(item =>{
-                        return counties.reduce((a,c) =>{
-                            if(item.area === c.name){
-                                a['name'] = c.name
-                                a['geoid'] = c.geoid
-                            }
-                            return a
-                        },{})
-                    })
-                    setTimeout(resolve,1000)
+    fetchData(falcor) {
+
+        let view = this.vid || 23
+
+        return falcor.get(["tig", this.type, "byId", view, 'data_overlay'])
+            .then(response => {
+
+                this.data = get(response, ['json', "tig", this.type, "byId", view, 'data_overlay'], []);
+                this.data_counties = this.data.map(item =>{
+                    return counties.reduce((a,c) =>{
+                        if(item.name === c.name){
+                            a['name'] = c.name
+                            a['geoid'] = c.geoid
+                        }
+                        return a
+                    },{})
                 })
-        );
+                this.updateLegendTitle()
+
+            })
     }
 
+    updateLegendTitle(value){
+        this.legend.Title = `${this.filters.dataset.domain.reduce((acc, curr) => {
+            if(curr.value === this.filters.dataset.value){
+                acc = curr.name
+            }
+            return acc
+        }, '')}-${this.filters.column.domain.reduce((a,c) => {
+            if(c.value === this.filters.column.value){
+                a = c.name
+            }
+            return a
+        },'')}`
+        this.updateLegendDomain()
+    }
 
     onFilterChange(filterName,value,preValue){
+        this.updateLegendTitle(value)
 
-        switch (filterName){
-            case "dataset":{
-                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-                    if (c.value === value){
-                        a = c.name
-                    }
-                    return a
-                },'')}-${this.filters.column.domain.reduce((a,c) => {
-                    if(c.value === this.filters.column.value){
-                        a = c.name
-                    }
-                    return a
-                },'')}`
-                this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
+        switch (filterName) {
+            case "geography": {
+                this.zoomToGeography(value);
+                this.saveToLocalStorage();
                 break;
             }
-            case "column": {
-                this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-                    if (c.value === this.filters.dataset.value){
-                        a = c.name
-                    }
-                    return a
-                },'')}-${this.filters.column.domain.reduce((a,c) => {
-                    if(c.value === value){
-                        a = c.name
-                    }
-                    return a
-                },'')}`
-                this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
-                if(value === 'avg_speed'){
-                    this.legend.format = ',f'
-                }else{
-                    this.legend.format = ',d'
-                }
-                break;
-            }
-            default:{
+            default: {
                 //do nothing
             }
         }
@@ -248,47 +420,6 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         return ',d' ? column === 'value' : ',f'
     }
 
-    getColorScale(data) {
-
-        const { type, range, domain } = this.legend;
-
-        switch (type) {
-            case "quantile": {
-                const domain = data.map(d => d.value).filter(d => d).sort();
-                this.legend.domain = domain;
-                return scaleQuantile()
-                    .domain(domain)
-                    .range(range);
-            }
-            case "quantize": {
-                const domain = extent(data, d => d.value);
-                this.legend.domain = domain;
-                return scaleQuantize()
-                    .domain(domain)
-                    .range(range);
-            }
-            case "threshold": {
-                return scaleThreshold()
-                    .domain(domain)
-                    .range(range)
-            }
-            case "linear":{
-                return scaleLinear()
-                    .domain(domain)
-                    .range(range)
-            }
-            case "ordinal":{
-                return scaleOrdinal()
-                    .domain(domain)
-                    .range(range)
-
-            }
-            default:{
-                //do nothing
-            }
-        }
-    }
-
     render(map) {
 
         if (this.data_counties.length) {
@@ -297,10 +428,18 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         else {
             map.setFilter("Counties", false);
         }
-        //
-        this.processedData = this.data.data.reduce((acc,curr) =>{
+
+        this.processedData = this.data
+            .filter(d =>
+                Object.keys(this.filters)
+                    .filter(f => !['dataset', 'geography', 'column'].includes(f))
+                    .reduce((acc, curr) => {
+                        return acc && (this.filters[curr].value === d[curr])
+                    }, true)
+            )
+            .reduce((acc,curr) =>{
             this.data_counties.forEach(data_county =>{
-                if(curr.area === data_county.name){
+                if(curr.name === data_county.name){
                     acc.push({
                         id: data_county.geoid,
                         value: curr[this.filters.column.value]

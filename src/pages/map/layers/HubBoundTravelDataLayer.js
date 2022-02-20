@@ -1,19 +1,52 @@
 import {LayerContainer} from "components/avl-map/src"
-import {HOST} from "./layerHost";
 import get from "lodash.get"
-import fetcher from "../wrappers/fetcher";
+import {filters} from 'pages/map/layers/npmrds/filters.js'
 import hub_bound from '../config/hub_bound.json'
 import mapboxgl from 'mapbox-gl'
+import shpwrite from "../../../utils/shp-write";
+import flatten from "lodash.flatten";
+
+const color_scheme = [
+    {
+        "color": "rgb(0, 255, 255)",
+        "value": "60th Street Sector",
+        "label": "60th Street Sector"
+    },
+    {
+        "color": "rgb(0, 255, 0)",
+        "value": "Brooklyn",
+        "label": "Brooklyn"
+    },
+    {
+        "color": "rgb(255, 0, 0)",
+        "value": "New Jersey",
+        "label": "New Jersey"
+    },
+    {
+        "color": "rgb(0, 0, 255)",
+        "value": "Queens",
+        "label": "Queens"
+    },
+    {
+        "color": "rgb(255, 0, 255)",
+        "value": "Staten Island",
+        "label": "Staten Island"
+    }
+]
 
 class HubBoundTravelDataLayer extends LayerContainer {
     constructor(props) {
         super(props);
         this.viewId = props.viewId
+
+        this.vid = props.vid
+        this.type = props.type
     }
 
     setActive = !!this.viewId
     name = 'Hub Bound Travel Data'
     filters = {
+        geography: {...filters.geography},
         year: {
             name: 'Year',
             type: 'dropdown',
@@ -35,24 +68,22 @@ class HubBoundTravelDataLayer extends LayerContainer {
             value: '12PM',
             multi: false
         },
-        mode: {
+        mode_name: {
             name: 'Mode',
             type: 'dropdown',
             domain: [
-                {name:'Bicycle',value:'9'},
-                {name:'Express Bus',value:'5'},
-                {name:'Local Bus',value:'4'},
-                {name:'Private Ferry',value:'8'},
-                {name:'Public Ferry',value:'7'},
-                {name:'Rail Rapid Transit - Express',value:'3'},
-                {name:'Rail Rapid Transit - Local',value:'2'},
-                {name:'Suburban Rail',value:'1'},
-                {name:'Tramway',value:'10'},
-                {name:'Vehicles (Auto+Taxi+Trucks+Comm. Vans)',value:'6'}
+                "Bicycle",
+                "Express Bus",
+                "Local Bus",
+                "Private Ferry",
+                "Public Ferry",
+                "Rail Rapid Transit - Express",
+                "Rail Rapid Transit - Local",
+                "Suburban Rail",
+                "Tramway",
+                "Vehicles (Auto+Taxi+Trucks+Comm. Vans)"
             ],
-            accessor: d => d.name,
-            valueAccessor: d => d.value,
-            value: '6',
+            value: "Vehicles (Auto+Taxi+Trucks+Comm. Vans)",
             multi: false
         },
         direction: {
@@ -66,25 +97,23 @@ class HubBoundTravelDataLayer extends LayerContainer {
     onHover = {
         layers: ["county_points"],
         callback: (layerId, features, lngLat) => {
-            const id = features.reduce((a,c)=>{
-                a = get(c,['id'],'')
+            const id = features.reduce((a, c) => {
+                a = get(c, ['id'], '')
                 return a
-            },0)
-            return this.data.data.reduce((a,c) =>{
-                if(c.id === id){
+            }, 0)
+            return this.data.reduce((a, c) => {
+                if (c.id === id) {
 
                     a.push(
-                        ['Facility Name:',c['loc_name']],
-                        ['Sector:',c['sector_name']],
-                        ['Mode:',c['mode_name']],
-                        ['Route:',c['route_name']],
-                        [c['var_name'],c['count']],
-
+                        ['Facility Name:', c['loc_name']],
+                        ['Sector:', c['sector_name']],
+                        ['Mode:', c['mode_name']],
+                        ['Route:', c['route_name']],
+                        [c['var_name'], c['count']],
                     )
                 }
                 return a
-            },[])
-
+            }, [])
 
 
         }
@@ -96,8 +125,8 @@ class HubBoundTravelDataLayer extends LayerContainer {
         height: 5,
         width: 320,
         direction: "vertical",
-        show:true,
-        Title:""
+        show: true,
+        Title: ""
     }
     sources = [
         {
@@ -114,167 +143,224 @@ class HubBoundTravelDataLayer extends LayerContainer {
     ]
     layers = [
         {
-            id:"county_points",
-            source:'county_points',
+            id: "county_points",
+            source: 'county_points',
             type: 'circle',
-            paint:{
-                'circle-opacity':1
+            paint: {
+                'circle-opacity': 1
             },
             visibility: 'none',
         }
     ]
 
-    init(map) {
-        const from = this.convertTime(this.filters.from.value)
-        const to = this.convertTime(this.filters.to.value)
-        const url = `${HOST}/views/${this.viewId || '23'}/data_overlay?utf8=%E2%9C%93&`
-        const params = `year=${this.filters.year.value}&hour=${from}&upper_hour=${to}&transit_mode=${this.filters.mode.value}&transit_direction=${this.filters.direction.value}&lower=&upper=&commit=Filter`
+    download() {
+        const filename = `hub_bound_travel_data__${this.filters.year.domain[0]}_${this.filters.year.domain[this.filters.year.domain.length - 1]}_year${this.filters.year.value}_hour${this.filters.from.value}_${this.filters.to.value}_${this.filters.mode_name.value}_${this.filters.direction.value}`
 
-        // return fetcher(url+params)
-        //     .then(response => {
-        //         this.data = response
-        //         this.legend.domain = this.data.symbologies[0].color_scheme.map(d => d.value)
-        //         this.legend.range = this.data.symbologies[0].color_scheme.map(d => d.color)
-        //         this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
-        //             if(c.value === this.filters.mode.value){
-        //                 a = c.name
-        //             }
-        //             return a
-        //         },'')},
-        //         Year:${this.filters.year.value},From:${this.filters.from.value} to ${this.filters.to.value}, 
-        //         Direction: ${this.filters.direction.value}`
+        let data = this.data
+            .filter(d =>
+                Object.keys(this.filters)
+                    .filter(f => !['geography'].includes(f))
+                    .reduce((acc, curr) => {
+                        return acc && (
+                            curr === 'from' ? d.hour >= this.convertTime(this.filters[curr].value) :
+                                curr === 'to' ? d.hour <= this.convertTime(this.filters[curr].value) :
+                                    this.filters[curr].value.toString() === d[curr].toString())
+                    }, true)
+            )
 
-        //     })
+        let geoJSON = {
+            type: 'FeatureCollection',
+            features: data.map(item => {
+                return {
+                    type: "Feature",
+                    id: item['id'],
+                    properties: {
+                        "name": item['loc_name'],
+                        "sector": item['sector_name'],
+                    },
+                    geometry: {
+                        type: "Point",
+                        "coordinates": [item["lon"], item["lat"]]
+                    }
+                }
+            })
+        };
 
+        shpwrite.download(
+            geoJSON,
+            {
+                file: filename,
+                folder: filename,
+                types: {
+                    point: filename + ' point',
+                    line: filename + ' line',
+                    polyline: filename + ' polyline',
+                    polygon: filename + ' polygon',
+                    polygonm: filename + ' multiPolygon',
+                }
+            }
+        );
+
+        return Promise.resolve()
     }
 
-    fetchData() {
+    getBounds() {
+        let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
+            filtered = this.geographies.filter(({value}) => geoids.includes(value));
 
-        const from = this.convertTime(this.filters.from.value)
-        const to = this.convertTime(this.filters.to.value)
-        const url = `${HOST}/views/23/data_overlay?utf8=%E2%9C%93&`
-        const params = `year=${this.filters.year.value}&hour=${from}&upper_hour=${to}&transit_mode=${this.filters.mode.value}&transit_direction=${this.filters.direction.value}&lower=&upper=&commit=Filter`
-        return fetcher(url+params)
+        return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
+    }
+
+    zoomToGeography() {
+        if (!this.mapboxMap) return;
+
+        const bounds = this.getBounds();
+
+        if (bounds.isEmpty()) return;
+
+        const options = {
+            padding: {
+                top: 25,
+                right: 200,
+                bottom: 25,
+                left: 200
+            },
+            bearing: 0,
+            pitch: 0,
+            duration: 2000
+        }
+
+        options.offset = [
+            (options.padding.left - options.padding.right) * 0.5,
+            (options.padding.top - options.padding.bottom) * 0.5
+        ];
+
+        const tr = this.mapboxMap.transform,
+            nw = tr.project(bounds.getNorthWest()),
+            se = tr.project(bounds.getSouthEast()),
+            size = se.sub(nw);
+
+        const scaleX = (tr.width - (options.padding.left + options.padding.right)) / size.x,
+            scaleY = (tr.height - (options.padding.top + options.padding.bottom)) / size.y;
+
+        options.center = tr.unproject(nw.add(se).div(2));
+        options.zoom = Math.min(tr.scaleZoom(tr.scale * Math.min(scaleX, scaleY)), tr.maxZoom);
+
+        this.mapboxMap.easeTo(options);
+    }
+
+    saveToLocalStorage(geographies = this.filters.geography.value) {
+        if (window.localStorage) {
+            if (geographies.length) {
+                window.localStorage.setItem("macro-view-geographies", JSON.stringify(geographies));
+            } else {
+                window.localStorage.removeItem("macro-view-geographies")
+            }
+        }
+    }
+
+    init(map, falcor) {
+        let states = ["36", "34", "09", "42"]
+
+        falcor.get(['tig', 'views', 'byLayer', this.type], ["geo", states, "geoLevels"])
+            .then(res => {
+                let geo = get(res, 'json.geo', {})
+                const geographies = flatten(states.map(s => geo[s].geoLevels));
+
+                this.geographies =
+                    geographies.map(geo => ({
+                        name: `${geo.geoname.toUpperCase()} ${geo.geolevel}`,
+                        geolevel: geo.geolevel,
+                        value: geo.geoid,
+                        bounding_box: geo.bounding_box
+                    }));
+                this.zoomToGeography();
+            })
+    }
+
+    fetchData(falcor) {
+
+        let view = this.vid || 23
+
+        return falcor.get(["tig", this.type, "byId", view, 'data_overlay'])
             .then(response => {
 
-                this.data = response
+                this.data = get(response, ['json', "tig", this.type, "byId", view, 'data_overlay'], []);
+                this.updateLegendTitle()
+
             })
     }
 
     onAdd(mapboxMap, falcor) {
         let coordinates = hub_bound.features[0].geometry.coordinates[0];
-        let bounds =coordinates.reduce(function (bounds, coord) {
+        let bounds = coordinates.reduce(function (bounds, coord) {
             return bounds.extend(coord);
         }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
-        mapboxMap.fitBounds(bounds,{
+        mapboxMap.fitBounds(bounds, {
             padding: 10
         })
         return Promise.resolve();
     }
 
-    onRemove(mapboxMap){
+    onRemove(mapboxMap) {
 
         mapboxMap.removeLayer('counties')
         mapboxMap.removeSource('counties')
         mapboxMap.fitBounds([
-            [-70.12161387603946,45.142811053355814],
-            [-78.23968012395866,39.90735688410206]
+            [-70.12161387603946, 45.142811053355814],
+            [-78.23968012395866, 39.90735688410206]
         ])
     }
-    onFilterChange(filterName,value,preValue){
 
-        switch (filterName){
-            case "year" : {
-                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
-                        if(c.value === this.filters.mode.value){
-                            a = c.name 
-                        }
-                        return a 
-                    },'')},
-                Year:${value},From:${this.filters.from.value} to ${this.filters.to.value}, 
-                Direction: ${this.filters.direction.value}`
-                break;
-            }
-            case "from":{
-                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
-                    if(c.value === this.filters.mode.value){
-                        a = c.name
-                    }
-                    return a
-                },'')},
-                Year:${this.filters.year.value},From:${value} to ${this.filters.to.value}, 
-                Direction: ${this.filters.direction.value}`
-                break;
-            }
-            case "to":{
-                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
-                    if(c.value === this.filters.mode.value){
-                        a = c.name
-                    }
-                    return a
-                },'')},
-                Year:${this.filters.year.value},From:${this.filters.from.value} to ${value}, 
-                Direction: ${this.filters.direction.value}`
-                break;
-            }
-            case "mode":{
-                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
-                    if(c.value === value){
-                        a = c.name
-                    }
-                    return a
-                },'')},
+    updateLegendTitle(value) {
+        this.legend.Title = `Mode:${this.filters.mode_name.value},
                 Year:${this.filters.year.value},From:${this.filters.from.value} to ${this.filters.to.value}, 
                 Direction: ${this.filters.direction.value}`
+    }
+
+    onFilterChange(filterName, value, preValue) {
+        this.updateLegendTitle(value)
+
+        switch (filterName) {
+            case "geography": {
+                this.zoomToGeography(value);
+                this.saveToLocalStorage();
                 break;
             }
-            case "direction":{
-                this.legend.Title = `Mode:${this.filters.mode.domain.reduce((a,c) => {
-                    if(c.value === this.filters.mode.value){
-                        a = c.name
-                    }
-                    return a
-                },'')},
-                Year:${this.filters.year.value},From:${this.filters.from.value} to ${this.filters.to.value}, 
-                Direction: ${value}`
-                break;
-            }
-            default:{
+            default: {
                 //do nothing
             }
         }
 
     }
 
-    convertTime(time){
+    convertTime(time) {
         let value = 0
-        if (time.includes('AM') && time !== '12AM'){
-            value = time.substring(0,time.length - 1)
-        }
-        else if(time.includes('PM') && time !== '12PM'){
-            value = 12 + parseInt(time.substring(0,time.length - 1))
-        }
-        else if(time === '12AM'){
+        if (time.includes('AM') && time !== '12AM') {
+            value = time.substring(0, time.length - 1)
+        } else if (time.includes('PM') && time !== '12PM') {
+            value = 12 + parseInt(time.substring(0, time.length - 1))
+        } else if (time === '12AM') {
             value = 0
-        }else{
-            value = 12
+        } else {
+            value = 23
         }
         return value
     }
 
-    render(map){
+    render(map) {
 
         let geojson = {
             type: "FeatureCollection",
-            features : []
+            features: []
         }
 
         let line_geojson = {
-            type:'geojson',
+            type: 'geojson',
             data: {
                 type: 'Feature',
                 properties: {},
-                geometry : {
+                geometry: {
                     type: 'LineString',
                     coordinates: hub_bound.features[0].geometry.coordinates[0]
                 }
@@ -282,62 +368,74 @@ class HubBoundTravelDataLayer extends LayerContainer {
         }
 
         const colors = {}
+        let data = this.data
+            .filter(d =>
+                Object.keys(this.filters)
+                    .filter(f => !['geography'].includes(f))
+                    .reduce((acc, curr) => {
+                        return acc && (
+                            curr === 'from' ? d.hour >= this.convertTime(this.filters[curr].value) :
+                                curr === 'to' ? d.hour <= this.convertTime(this.filters[curr].value) :
+                                    this.filters[curr].value.toString() === d[curr].toString())
+                    }, true)
+            )
 
-        this.data.data.forEach(d=>{
-        this.data.symbologies[0].color_scheme.forEach(item =>{
-            if (item.value === d['sector_name']){
-                    colors[d['sector_name']] = item.color
-                }
+        data
+            .forEach(d => {
+                color_scheme.forEach(item => {
+                    if (item.value === d['sector_name']) {
+                        colors[d['sector_name']] = item.color
+                    }
+                })
             })
-        })
 
-        geojson.features = this.data.data.map(item =>{
+        geojson.features =
+            data
+                .map(item => {
 
-            return {
-                type: "Feature",
-                id:item['id'],
-                properties: {
-                    "name":item['loc_name'],
-                    "sector":item['sector_name'],
+                    return {
+                        type: "Feature",
+                        id: item['id'],
+                        properties: {
+                            "name": item['loc_name'],
+                            "sector": item['sector_name'],
 
-                },
-                geometry: {
-                    type:"Point",
-                    "coordinates": [item["lng"],item["lat"]]
-                }
-            }
-        })
+                        },
+                        geometry: {
+                            type: "Point",
+                            "coordinates": [item["lon"], item["lat"]]
+                        }
+                    }
+                })
 
-
-        if(!map.getSource('counties') && !map.getLayer('counties')){
+        if (!map.getSource('counties') && !map.getLayer('counties')) {
             map.addSource('counties', line_geojson)
             map.addLayer({
                 id: "counties",
-                source:'counties',
+                source: 'counties',
                 type: 'line',
-                paint:{
+                paint: {
                     'line-color': 'black',
-                    'line-width':1,
-                    'line-dasharray':[10,5]
+                    'line-width': 1,
+                    'line-dasharray': [10, 5]
                 }
             })
         }
-        if(map.getSource('county_points')){
+        if (map.getSource('county_points')) {
             map.getSource('county_points').setData(geojson)
         }
 
-        if(map.getSource('county_points') && map.getLayer("county_points")){
+        if (map.getSource('county_points') && map.getLayer("county_points")) {
             map.setPaintProperty(
                 'county_points',
                 'circle-color',
-                ["get", ["to-string", ["get", "sector"]], ["literal",colors]]
+                ["get", ["to-string", ["get", "sector"]], ["literal", colors]]
             )
         }
     }
 
 
 }
-
 
 
 export const HubBoundTravelDataLayerFactory = (options = {}) => new HubBoundTravelDataLayer(options);
