@@ -27,8 +27,30 @@ const HoverComp = ({ data, layer }) => {
   //return <DefaultHoverComp data={data} layer={layer} />
 }
 
+let SpeedGraph = ({speeds, scale, hour}) => {
+  return (
+    <div className='w-64 flex h-16 items-end'>
+      {speeds.map((speed,i) =>
+         <div 
+          key={i}
+          className={`flex-1 text-xs text-white  ${hour === i ? 'border border-gray-800' : '' }`}
+          style={{
+            height: `${((speed/65)*100).toFixed(1)}%`,
+            background: scale(speed)
+          }}/>
+           
+        
+      )}
+    </div>
+    )
+}
+
 const TmcComp = ({ data, layer, tmc }) => {
   const { falcor, falcorCache } = useFalcor();
+  
+  let tmcData = get(layer, `tmcData[${tmc}]`, {})
+  
+
 
   React.useEffect(() => {
     if (tmc === null) return;
@@ -52,31 +74,21 @@ const TmcComp = ({ data, layer, tmc }) => {
     return data.filter((d) => d[0] === "n")[0][1];
   }, [data]);
 
-  const MeasureInfo = React.useMemo(() => {
-    return get(
-      falcorCache,
-      ["conflation", "tmc", tmc, "data", layer.filters.year.value],
-      {}
-    );
-  }, [tmc, falcorCache]);
-
   const currentData = get(layer, 'state.currentData', []).reduce((out, seg) => {
     out[seg.id] = seg
     return out
   },{})
 
-  //console.log('MeasureInfo', currentData[tmc][layer.getMeasure(layer.filters)])
+  // console.log('TMC Hover',tmc, currentData, tmcData, tmcData.s)
 
   return (
-    <div className="p-1 w-44 overflow-hidden">
+    <div className="p-1 overflow-hidden">
       <div className=" px-2">
         <div className="text-center text-lg">{TmcInfo.roadname}</div>
         <div className="flex  ">
           <div className="text-xs flex-1 font-bold">TMC</div>
           <div className="flex-0">
-            <a target="_blank" href={`/tmc/${tmc}`}>
               {tmc}
-            </a>
           </div>
         </div>
         <div className="flex  ">
@@ -97,20 +109,14 @@ const TmcComp = ({ data, layer, tmc }) => {
           <div className="flex-0">
             {get(TmcInfo, "miles", 0).toLocaleString()} mi
           </div>
-        {/*<div className="">
-          <div className="text-xs flex-1 font-bold text-center">
-            {layer.getMeasureName(
-              layer.falcor,
-              layer.getMeasure(layer.filters)
-            )}
-          </div>
-          <div className="flex-0 text-lg text-center">
-            {(
-              get(currentData,`${tmc}.${layer.getMeasure(layer.filters)}`,0)
-            ).toLocaleString()}
-          </div>
-        </div>*/}
        
+      </div>
+      <div className=''>
+        <SpeedGraph 
+          speeds={get(tmcData,'s',[])} 
+          scale={layer.scale}
+          hour={layer.filters.hour.value}
+          />
       </div>
     </div>
     </div>

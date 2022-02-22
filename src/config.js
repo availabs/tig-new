@@ -1,8 +1,8 @@
 export const PROJECT_NAME = 'NPMRDS';
 
-let API_HOST = 'https://graph.availabs.org';
+let API_HOST = 'https://tigtest2.nymtc.org/api2';
 let AUTH_HOST = 'https://availauth.availabs.org';
-let CLIENT_HOST = 'https://npmrds.availabs.org';
+let CLIENT_HOST = 'https://tigtest2.nymtc.org';
 
 if (process.env.NODE_ENV === 'development') {
   API_HOST = 'http://localhost:4445';

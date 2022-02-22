@@ -391,29 +391,33 @@ class TestTipLayer extends LayerContainer {
         const cost_upper = ''
         const params = `?utf8=%E2%9C%93&tip_id=${this.filters.tip_id.value === 'Select All'? '':this.filters.tip_id.value}&ptype=${this.filters.project_type.value === 'Select All'? '':this.filters.project_type.value}&mpo=${this.filters.mpo_name.value === 'Select All'? '':this.filters.mpo_name.value}&sponsor=${this.filters.agency.value === 'Select All'? '':this.filters.agency.value}&cost_lower=${cost_lower}&cost_upper=${cost_upper}&commit=Filter`
 
-        falcor.get(['tig', 'views', 'byLayer', 'tip'], ["geo", states, "geoLevels"])
-            .then(res => {
-                let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
+        if(this.vid){
+            console.log('view id', this.vid)
+            falcor.get(['tig', 'views', 'byLayer', 'tip'], ["geo", states, "geoLevels"])
+                .then(res => {
+                    let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
+                    console.log(res, views)
 
-                this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
-                this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
+                    this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
+                    this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
 
-                this.updateLegendDomain()
+                    this.updateLegendDomain()
 
-                // geography setup
-                let geo = get(res,'json.geo',{})
-                const geographies = flatten(states.map(s => geo[s].geoLevels));
+                    // geography setup
+                    let geo = get(res,'json.geo',{})
+                    const geographies = flatten(states.map(s => geo[s].geoLevels));
 
-                this.geographies =
-                    geographies.map(geo => ({
-                        name: `${geo.geoname.toUpperCase()} ${geo.geolevel}`,
-                        geolevel: geo.geolevel,
-                        value: geo.geoid,
-                        bounding_box: geo.bounding_box
-                    }));
-                this.zoomToGeography();
+                    this.geographies =
+                        geographies.map(geo => ({
+                            name: `${geo.geoname.toUpperCase()} ${geo.geolevel}`,
+                            geolevel: geo.geolevel,
+                            value: geo.geoid,
+                            bounding_box: geo.bounding_box
+                        }));
+                    this.zoomToGeography();
 
-            })
+                })
+        }
 
        
     }

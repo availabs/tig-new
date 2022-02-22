@@ -39,7 +39,7 @@ X - All Years Working
 3 - Overview Graph through time
 4- test measures by geography
    ---------------- */
-console.log('what text', getColorRange(6, "RdYlBu") ,getColorRange(6, "RdYlBu").reverse())
+//console.log('what text', getColorRange(6, "RdYlBu") ,getColorRange(6, "RdYlBu").reverse())
 const getMonths = {
   1 : 'January',
   2 : 'February',
@@ -306,6 +306,15 @@ class NPMRDSLayer extends LayerContainer {
         
   }
 
+  linetoMulti(geom) {
+    if(geom.type && geom.type === 'MultiLineString'){
+      return geom
+    }
+
+    geom.type = 'MultiLineString'
+    geom.coordinates = [geom.coordinates]
+    return geom
+  }
   async download() {
     let year = +this.filters.year.value,
       month = +this.filters.month.value,
@@ -323,17 +332,18 @@ class NPMRDSLayer extends LayerContainer {
     let selection = Object.keys(data)
     let geometries = await this.falcor.chunk(["tmc",selection,"year", year,"geometries"])
     falcorCache = this.falcor.getCache()
+    console.log('falcorCache', falcorCache)
     let geojson =  {
       type: "FeatureCollection",
       features: selection.map(id => ({
         type: "Feature",
-        geometry: get(falcorCache, ["tmc", id,"year", year,"geometries", "value"], "FAILED"),
+        geometry: this.linetoMulti(get(falcorCache, ["tmc", id,"year", year,"geometries", "value"], "FAILED")),
         properties: {tmc: id, roadname: data[id].roadname, length: data[id].length, ...data[id].s }
       }))
     }
     console.log('Download clicked',geojson)    
 
-    console.log()
+    //console.log()
     return shpDownload(geojson,
           { file: `npmrds_${year}_${month}_${vehicles}`,
             folder: `npmrds_${year}_${month}_${vehicles}`,
@@ -369,10 +379,13 @@ class NPMRDSLayer extends LayerContainer {
         return {...out, ...d}
       }, {})
 
+    this.tmcData=data
+
     //console.log('data',data)
       
     let domain = Object.values(data).map(d => get(d, `s[${hour}]`, 0))
     const scale = this.getColorScale(domain.sort((a, b) => a - b));
+    this.scale = scale
     const colors = Object.keys(data).reduce((a, c) => {
       let val = scale(get(data[c], `s[${hour}]`, 0))
       a[c] = val ? val : 'hsla(185, 0%, 27%,0.8)'

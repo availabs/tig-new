@@ -32,6 +32,7 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
     useMemo(() => {
         let l = get(falcorCache, [ "tig", "byViewId", viewId, 'layer', 'value'], null)
         
+        console.log('get map layer', l)
         if(l) {
            let viewLayer = layer.filter(d => d.type === l)
            //console.log('got the viewLayer', viewLayer)

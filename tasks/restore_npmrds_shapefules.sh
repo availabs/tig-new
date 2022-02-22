@@ -1,0 +1,1 @@
+pg_dump --host "pluto.availabs.org" --port "5432" --username "npmrds_admin" --verbose -Fp --table "public.npmrds_shapefile_2016" "npmrds_production"
