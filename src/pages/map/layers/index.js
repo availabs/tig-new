@@ -18,7 +18,7 @@ export const layers = {
     "sed_county_2055": SED2055CountyLevelForecastLayerFactory, // taz?
 
     "sed_taz_2040": SED2040TazLevelForecastLayerFactory, //done
-    "sed_taz_2055": SED2055TazLevelForecastLayerFactory, // no data!
+    "sed_taz_2055": SED2040TazLevelForecastLayerFactory, // no data!
 
     "tip": TestTipLayerFactory,
     'bpm_performance': BPMPerformanceMeasuresLayerFactory,

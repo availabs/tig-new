@@ -288,7 +288,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
             38:[0, 1, 670, 2586, 8143, 51583]
         }
 
-        this.legend.domain = domains[this.filters.dataset.value] || domains["37"]
+        this.legend.domain = domains[this.filters.dataset.value] || (this.processedData || []).map(d => d.value).filter(d => d).sort()
     }
 
     getBounds() {
