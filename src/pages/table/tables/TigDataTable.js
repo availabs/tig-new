@@ -8,21 +8,23 @@ import fetcher from "../../map/wrappers/fetcher";
 import {useParams} from "react-router-dom";
 import _ from "lodash";
 
-const columns = ['tip id', 'project type', 'cost', 'mpo name', 'county', 'agency', 'description', 'actions']
-
-const fetchData = (dataset) => {
-    const url = `${HOST}views/${dataset}/table.json`
-    const params = len => `?draw=1&columns%5B0%5D%5Bdata%5D=0&columns%5B0%5D%5Bname%5D=&columns%5B0%5D%5Bsearchable%5D=true&columns%5B0%5D%5Borderable%5D=true&columns%5B0%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B0%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B1%5D%5Bdata%5D=1&columns%5B1%5D%5Bname%5D=&columns%5B1%5D%5Bsearchable%5D=true&columns%5B1%5D%5Borderable%5D=true&columns%5B1%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B1%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B2%5D%5Bdata%5D=2&columns%5B2%5D%5Bname%5D=&columns%5B2%5D%5Bsearchable%5D=true&columns%5B2%5D%5Borderable%5D=true&columns%5B2%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B2%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B3%5D%5Bdata%5D=3&columns%5B3%5D%5Bname%5D=&columns%5B3%5D%5Bsearchable%5D=true&columns%5B3%5D%5Borderable%5D=true&columns%5B3%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B3%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B4%5D%5Bdata%5D=4&columns%5B4%5D%5Bname%5D=&columns%5B4%5D%5Bsearchable%5D=true&columns%5B4%5D%5Borderable%5D=true&columns%5B4%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B4%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B5%5D%5Bdata%5D=5&columns%5B5%5D%5Bname%5D=&columns%5B5%5D%5Bsearchable%5D=true&columns%5B5%5D%5Borderable%5D=true&columns%5B5%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B5%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B6%5D%5Bdata%5D=6&columns%5B6%5D%5Bname%5D=&columns%5B6%5D%5Bsearchable%5D=true&columns%5B6%5D%5Borderable%5D=true&columns%5B6%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B6%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B7%5D%5Bdata%5D=7&columns%5B7%5D%5Bname%5D=&columns%5B7%5D%5Bsearchable%5D=true&columns%5B7%5D%5Borderable%5D=true&columns%5B7%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B7%5D%5Bsearch%5D%5Bregex%5D=false&order%5B0%5D%5Bcolumn%5D=0&order%5B0%5D%5Bdir%5D=asc&start=0&length=${len}&search%5Bvalue%5D=&search%5Bregex%5D=false&_=1641916669262`
-    return fetcher(url + params(5)).then(res => fetcher(url + params(res.recordsFiltered || 500)))
+const columns = {
+    tip_id: 'tip id', ptype: 'project type', cost: 'cost', mpo: 'mpo name', name: 'county', sponsor: 'agency', description: 'description', actions: 'actions'
 }
 
-const processData = (data) => {
+const fetchData = (view, falcor) => {
+    return falcor.get(["tig", 'tip', "byId", view, 'data_overlay']).then(d => get(d, ['json', "tig", 'tip', "byId", view, 'data_overlay'],[]))
+}
+
+const processData = (data, searchId, viewId) => {
     data = data
+        .filter(r => !searchId || r.tip_id === searchId)
         .map(row => {
-        return row.reduce((acc, r, rI) => {
-            acc[columns[rI]] = columns[rI] === 'taz' ? r : r
+        return Object.keys(row).reduce((acc, r, rI) => {
+
+            acc[columns[r]] = row[r]
             return acc
-        }, {})
+        }, {actions: `/views/${viewId}/map?search=${row.tip_id}`})
     }, [])
     return data
 }
@@ -31,7 +33,7 @@ const RenderTable = (data = [], pageSize) => useMemo(() =>
     <Table
         data={data}
         columns={
-           columns
+           Object.values(columns)
                 .map(c => ({
                     Header: c,
                     accessor: c,
@@ -43,7 +45,7 @@ const RenderTable = (data = [], pageSize) => useMemo(() =>
         striped={true}
     />, [data, pageSize])
 
-const SedTaz2055DataTable = ({name}) => {
+const SedTaz2055DataTable = ({name, searchId}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams()
     const [loading, setLoading] = useState(false)
@@ -59,8 +61,8 @@ const SedTaz2055DataTable = ({name}) => {
 
     useEffect(async () => {
         setLoading(true)
-        let d = await fetchData(viewId)
-        setData(processData(get(d, 'data', [])))
+        let d = await fetchData(viewId, falcor)
+        setData(processData(d, searchId, viewId))
         setLoading(false)
 
     }, []);

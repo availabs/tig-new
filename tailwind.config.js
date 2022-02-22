@@ -14,6 +14,9 @@ module.exports = {
             '100': '#679d89'
           }
       },
+        backgroundImage: {
+           bus: "url('images/mapIcons/bus.png')"
+        }
       /*fontFamily: {
         sans: ['Proxima Nova W01', 'Inter var', ...defaultTheme.fontFamily.sans],
         serif: ['Alfa Slab One', ...defaultTheme.fontFamily.serif]

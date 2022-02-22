@@ -9,7 +9,8 @@ import get from "lodash.get";
 import flatten from "lodash.flatten";
 import shpwrite from "../../../utils/shp-write";
 import mapboxgl from "mapbox-gl";
-
+import {Link} from "react-router-dom";
+import _ from 'lodash'
 var parse = require('wellknown');
 
 const symbology = [
@@ -67,15 +68,16 @@ const symbology = [
 
 const symbols_map = {
     'Rail': 'rail',
-    'Transit': 'rail-metro',
-    'Truck': 'us-interstate-truck-3',
+    'Transit': 'transit',
+    'Truck': 'truck',
     'Bus': 'bus',
-    'Bike': 'bicycle-share',
+    'Bike': 'cycling',
     'Ferry': 'ferry',
-    'Highway': 'au-national-highway-3',
-    'Pedestrian': 'pitch-11',
-    'Study': 'college-11',
-
+    'Highway': 'highway',
+    'Pedestrian': 'pedestrian',
+    'Study': 'study',
+    'Parking': 'parking',
+    "ITS": 'its'
 }
 
 const nameMapping = {
@@ -113,10 +115,8 @@ class TestTipLayer extends LayerContainer {
         tip_id :{
             name: 'Tip ID',
             type:'dropdown',
-            domain: tip_ids,
+            domain: [],
             value: 'Select All',
-            accessor: d => d.name,
-            valueAccessor: d => d.value,
             multi:false
         },
         project_type: {
@@ -146,8 +146,8 @@ class TestTipLayer extends LayerContainer {
             value: 'Select All',
             multi:false
         },
-        agency:{
-            name:'Agency',
+        sponsor:{
+            name:'Sponsor',
             type:'dropdown',
             domain:['Select All'],
             value:'Select All'
@@ -165,7 +165,7 @@ class TestTipLayer extends LayerContainer {
         Title:""
     }
     onHover = {
-        layers: ["tip_lines", "tip_symbols", 'tip-rail', 'tip-rail-metro', 'tip-bus', 'tip-bicycle-share', 'tip-ferry', 'tip-au-national-highway-3', 'tip-pitch-11', 'tip-college-11','tip-parking-11'],
+        layers: ["tip_lines", "tip_symbols", ...Object.values(symbols_map).map(t => 'tip-' + t)],
         callback: (layerId, features, lngLat) => {
             const feature = features.reduce((a, c) => {
                 a = this.data.reduce((acc, curr) => {
@@ -183,27 +183,39 @@ class TestTipLayer extends LayerContainer {
 
             return [
                 ['TIP ID:', feature['tip_id']],
-                ['County:',feature['county']],
+                ['County:',feature['name']],
                 ['MPO:',feature['mpo']],
                 ['Sponsor:', feature['sponsor']],
                 ['Project Type:', feature['ptype']],
-                ['Cost:', feature['estimated_cost']],
+                ['Cost:', feature['cost']],
                 ['Description:', feature['description'].toLowerCase()]
             ]
         },
         HoverComp: ({data, layer}) => {
             const theme = useTheme();
+            console.log(data)
             return (
-                <div style={{maxHeight: '300px'}} className={`${theme.bg} rounded relative px-1 overflow-auto scrollbarXsm`}>
+                <div className={`${theme.bg} rounded relative px-1 break-all`}>
+                    <div key={'vit2'} className={`flex`}>
+                        <div key={'vit0'}
+                             style={{maxWidth: '250px'}}
+                             className={`flex-1 font-bold mr-4`}>
+                        </div>
+                        <div key={'vit1'}
+                             style={{maxWidth: '250px'}}
+                             className={`whitespace-pre-wrap`}>
+                            <Link to={`/views/${this.vid}/table?search=${data[0][1]}`} >view in table</Link>
+                        </div>
+                    </div>
                     {
                         data.map((row, i) =>
                             <div key={i} className="flex">
                                 {
                                     row.map((d, ii) =>
                                         <div key={ii}
-                                             style={{maxWidth: '200px'}}
+                                             style={{maxWidth: '250px'}}
                                              className={`
-                                                    ${ii === 0 ? "flex-1 font-bold" : "overflow-auto scrollbarXsm"}
+                                                    ${ii === 0 ? "flex-1 font-bold" : "whitespace-pre-wrap"}
                                                     ${row.length > 1 && ii === 0 ? "mr-4" : ""}
                                                     ${row.length === 1 && ii === 0 ? `border-b-2 text-lg ${i > 0 ? "mt-1" : ""}` : ""}
                                                     `}>
@@ -334,7 +346,7 @@ class TestTipLayer extends LayerContainer {
         return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
     }
 
-    zoomToGeography() {
+    zoomToGeography(value) {
         if (!this.mapboxMap) return;
 
         const bounds = this.getBounds();
@@ -386,11 +398,6 @@ class TestTipLayer extends LayerContainer {
     init(map, falcor){
         let states = ["36","34","09","42"]
 
-        const url = `${HOST}/views/${this.filters.dataset.value}/data_overlay`
-        const cost_lower = ''
-        const cost_upper = ''
-        const params = `?utf8=%E2%9C%93&tip_id=${this.filters.tip_id.value === 'Select All'? '':this.filters.tip_id.value}&ptype=${this.filters.project_type.value === 'Select All'? '':this.filters.project_type.value}&mpo=${this.filters.mpo_name.value === 'Select All'? '':this.filters.mpo_name.value}&sponsor=${this.filters.agency.value === 'Select All'? '':this.filters.agency.value}&cost_lower=${cost_lower}&cost_upper=${cost_upper}&commit=Filter`
-
         falcor.get(['tig', 'views', 'byLayer', 'tip'], ["geo", states, "geoLevels"])
             .then(res => {
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
@@ -438,7 +445,7 @@ class TestTipLayer extends LayerContainer {
             }
             return a
         },'')},
-               Agency: ${this.filters.agency.value === 'Select All'? 'All':''}
+               sponsor: ${this.filters.sponsor.value === 'Select All'? 'All':''}
                 `
     }
 
@@ -448,6 +455,10 @@ class TestTipLayer extends LayerContainer {
         return falcor.get(["tig", this.type, "byId", view, 'data_overlay'])
             .then(response => {
                 this.data = get(response, ['json', "tig", this.type, "byId", view, 'data_overlay'],[]);
+
+                this.filters.sponsor.domain = ['Select All', ..._.uniq(this.data.map(d => d.sponsor))]
+                this.filters.tip_id.domain = ['Select All', ..._.uniq(this.data.map(d => d.tip_id))]
+
                 this.updateLegendTitle()
 
             })
@@ -457,8 +468,17 @@ class TestTipLayer extends LayerContainer {
         this.updateLegendTitle()
         switch (filterName){
             case "geography": {
-                this.zoomToGeography(value);
+                this.zoomToGeography();
                 this.saveToLocalStorage();
+                break;
+            }
+            case "tip_id": {
+                if(value === 'Select All') {
+                    this.zoomToGeography();
+                }else{
+                    console.log('d?', this.data.filter(d => d.tip_id === value))
+                    // .reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
+                }
                 break;
             }
             default:{
@@ -496,6 +516,7 @@ class TestTipLayer extends LayerContainer {
             out[curr.value] = curr.color
             return out;
         }, {})
+
 
          geojson.features = this.data
              .filter(d => {
@@ -576,16 +597,25 @@ class TestTipLayer extends LayerContainer {
                 let symbol = feature.properties.icon
                 let layerID = 'tip-' + symbol;
                 if (!this.mapboxMap.getLayer(layerID)) {
-                    this.mapboxMap.addLayer({
-                        'id': layerID,
-                        'type': 'symbol',
-                        'source': 'tip_symbols',
-                        'layout': {
-                            'icon-image': symbol,
-                            'icon-allow-overlap': true
-                        },
-                        'filter': ['==', 'icon', symbol]
-                    })
+                    this.mapboxMap.loadImage(`mapIcons/${symbol}.png`,
+                    (error, image) => {
+                        if (error) return 0;
+                        this.mapboxMap.addImage(symbol, image);
+
+                        this.mapboxMap.addLayer({
+                            'id': layerID,
+                            'type': 'symbol',
+                            'source': 'tip_symbols',
+                            'layout': {
+                                'icon-image': symbol,
+                                'icon-allow-overlap': true,
+                                'icon-size': 0.4
+                            },
+                            'filter': ['==', 'icon', symbol]
+                        })
+                    }
+
+                    )
 
                 }
             }
