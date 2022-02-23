@@ -1,19 +1,14 @@
 import {LayerContainer} from "components/avl-map/src"
-import {HOST} from "./layerHost";
 import tracts from '../config/tracts.json'
 import {getColorRange} from "@availabs/avl-components"
 import get from "lodash.get"
 import _ from 'lodash'
 import * as d3scale from "d3-scale"
-import {acsCensusCategoryMappings} from "../config/acsCensusCategoryMappings";
-import {scaleLinear, scaleOrdinal, scaleQuantile, scaleQuantize, scaleThreshold} from "d3-scale"
-import {extent} from "d3-array"
-import fetcher from "../wrappers/fetcher";
-import {useParams} from "react-router-dom";
 import {filters} from 'pages/map/layers/npmrds/filters.js'
 import mapboxgl from "mapbox-gl";
 import flatten from "lodash.flatten";
-import combine from '@turf/combine'
+import centroid from "@turf/centroid";
+
 var shpwrite = require('utils/shp-write');
 
 
@@ -36,22 +31,20 @@ class ACSCensusLayer extends LayerContainer {
                 'Absolute and Relative Minority Population data',
                 'Absolute and Relative Population Below Poverty'
             ],
-            value:this.categoryName,
-            multi:false,
+            value: this.categoryName,
+            multi: false,
             accessor: d => d.name,
             valueAccessor: d => d.value,
         },
         column:{
             name: 'Column',
             type: 'dropdown',
-            domain: [
-
-            ],
+            domain: [],
             value: 'value',
             accessor: d => d.name,
             valueAccessor: d => d.value,
-            multi:false
-        }
+            multi: false
+        },
     }
     legend = {
         type: "quantile",
@@ -65,27 +58,27 @@ class ACSCensusLayer extends LayerContainer {
     onHover = {
         layers: ["tracts"],
         callback: (layerId, features, lngLat) => {
-            const geoid = features.reduce((a,c) => {
-                a = get(c,['properties','GEOID'],'')
+            const geoid = features.reduce((a, c) => {
+                a = get(c, ['properties', 'GEOID'], '')
                 return a
-            },'')
-            const graph = tracts.reduce((a,c) =>{
-                if (c.geoid === geoid ){
+            }, '')
+            const graph = tracts.reduce((a, c) => {
+                if (c.geoid === geoid) {
                     a = c
                 }
                 return a
-            },{})
+            }, {})
 
             const col = this.filters.column.domain.filter(d => d.value === this.filters.column.value)[0].name
-            return this.data.reduce((a,c) =>{
-                if(c.area === graph['name']){
+            return this.data.reduce((a, c) => {
+                if (c.area === graph['name']) {
                     a.push(
-                        ['Tract',`${c.area}-${graph['state_code']}`],
-                        [col , this.filters.column.value === 'percentage' ? c[this.filters.column.value].toFixed(2) + '%' : c[this.filters.column.value]]
+                        ['Tract', `${c.area}-${graph['state_code']}`],
+                        [col, this.filters.column.value === 'percentage' ? c[this.filters.column.value].toFixed(2) + '%' : c[this.filters.column.value]]
                     )
                 }
                 return a
-            },[]).sort()
+            }, []).sort()
 
         }
     }
@@ -124,13 +117,44 @@ class ACSCensusLayer extends LayerContainer {
         }
     ]
 
-    download(){
-        const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
-                            (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
+    infoBoxes = [
+        {
+            Component: ({layer}) => {
 
-        let d = this.data.reduce((acc,curr) =>{
-            this.data_tracts.forEach(data_tract =>{
-                if(curr.area === data_tract.name){
+                return (
+                    <div className="relative pt-1">
+                        <div className={'flex mt-5'}>
+                            <label className={'self-center mr-1'} htmlFor={'search'}>Tract Search: </label>
+                            <input
+                                className={'p-1'}
+                                id={'search'}
+                                type={'text'}
+                                name={'search'}
+                                onChange={e => {
+                                    let v = e.target.value
+                                    if (!e.target.value.length) {
+                                        v = 'Select All'
+                                    }
+                                    // layer.filters.census_tract.onChange(v)
+                                    layer.onFilterChange('census_tract', v)
+                                    layer.dispatchUpdate(layer, {census_tract: v})
+                                }}
+                                placeholder={'search...'}/>
+                        </div>
+                    </div>
+                )
+            },
+            width: 450
+        }
+    ]
+
+    download() {
+        const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
+            (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
+
+        let d = this.data.reduce((acc, curr) => {
+            this.data_tracts.forEach(data_tract => {
+                if (curr.area === data_tract.name) {
                     acc.push({
                         id: data_tract.geoid,
                         value: curr.value,
@@ -142,7 +166,7 @@ class ACSCensusLayer extends LayerContainer {
                 }
             })
             return acc
-        },[])
+        }, [])
 
         let geoJSON = {
             type: 'FeatureCollection',
@@ -158,25 +182,25 @@ class ACSCensusLayer extends LayerContainer {
                 }
             })
             .forEach((feat) => {
-            let geom=feat.geometry;
-            let props=feat.properties;
+                let geom = feat.geometry;
+                let props = feat.properties;
 
-            if (geom.type === 'MultiPolygon'){
-                for (var i=0; i < geom.coordinates.length; i++){
-                    var polygon = {
-                        type: 'feature',
-                        properties: props,
-                        geometry:  {
-                            'type':'Polygon',
-                            'coordinates':geom.coordinates[i],
+                if (geom.type === 'MultiPolygon') {
+                    for (var i = 0; i < geom.coordinates.length; i++) {
+                        var polygon = {
+                            type: 'feature',
+                            properties: props,
+                            geometry: {
+                                'type': 'Polygon',
+                                'coordinates': geom.coordinates[i],
                             }
-                    };
-                    geoJSON.features.push(polygon)
+                        };
+                        geoJSON.features.push(polygon)
+                    }
+                } else {
+                    geoJSON.features.push(feat)
                 }
-            }else{
-                geoJSON.features.push(feat)
-            }
-        });
+            });
         console.log('counts', _.uniq(geoJSON.features.map(f => f.geometry.type)), geoJSON.features.filter(f => f.geometry.type === 'Polygon').length, geoJSON.features.filter(f => f.geometry.type === 'MultiPolygon').length)
 
 
@@ -192,20 +216,21 @@ class ACSCensusLayer extends LayerContainer {
                     polygonm: filename,
                 }
             }
-            );
+        );
 
         return Promise.resolve()
     }
+
     updateColumnNames() {
         this.filters.column.domain =
             ['128', '143', '133', '18'].includes((this.filters.dataset.value).toString()) ?
                 [
-                    {name: 'Population Below Poverty',value:'value'},
-                    {name: 'Percent Below Poverty', value:'percentage'}
+                    {name: 'Population Below Poverty', value: 'value'},
+                    {name: 'Percent Below Poverty', value: 'percentage'}
                 ] :
                 [
-                    {name: 'Minority Population',value:'value'},
-                    {name: 'Percent Minority', value:'percentage'}
+                    {name: 'Minority Population', value: 'value'},
+                    {name: 'Percent Minority', value: 'percentage'}
                 ]
     }
 
@@ -217,26 +242,29 @@ class ACSCensusLayer extends LayerContainer {
             '142-value': [0, 410, 897, 1610, 2736, 24223], '142-percentage': [0, 10.81, 22.80, 42.95, 73.53, 100],
             '18-value': [0, 129, 257, 459, 897, 4959], '18-percentage': [0, 3.53, 6.9, 12.63, 22.92, 100],
             '128-value': [0, 140, 273, 474, 903, 5264], '128-percentage': [0, 3.81, 7.32, 12.85, 23, 100],
-            '133-value': [0, 142, 276, 487, 911, 5610], '133-percentage': [0, 3,94, 7.34, 13.03, 23.31, 100],
+            '133-value': [0, 142, 276, 487, 911, 5610], '133-percentage': [0, 3, 94, 7.34, 13.03, 23.31, 100],
             '143-value': [0, 142, 276, 483, 902, 5520], '143-percentage': [0, 3.89, 7.36, 12.87, 23.01, 100]
         }
 
         this.legend.domain = domains[this.filters.dataset.value + '-' + this.filters.column.value]
     }
 
-    init(map, falcor){
-        let states = ["36","34","09","42"]
+    init(map, falcor) {
+        let states = ["36", "34", "09", "42"]
         return falcor.get(['tig', 'views', 'byLayer', 'acs_census'], ["geo", states, "geoLevels"])
             .then(res => {
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', 'acs_census'], [])
-                this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name))
+                this.filters.dataset.domain = views.map(v => ({
+                    value: v.id,
+                    name: v.name
+                })).sort((a, b) => a.name.localeCompare(b.name))
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
 
                 this.updateColumnNames()
                 this.updateLegendDomain()
 
                 // geography setup
-                let geo = get(res,'json.geo',{})
+                let geo = get(res, 'json.geo', {})
                 const geographies = flatten(states.map(s => geo[s].geoLevels));
 
                 this.geographies =
@@ -254,9 +282,9 @@ class ACSCensusLayer extends LayerContainer {
     fetchData(falcor) {
         const categoryValue = this.filters.dataset.value
 
-        if(categoryValue){
+        if (categoryValue) {
             return falcor.get(["tig", "acs_census", "byId", categoryValue, 'data_overlay'])
-                .then(response =>{
+                .then(response => {
                     this.data = get(response, ['json', "tig", "acs_census", "byId", categoryValue, 'data_overlay'], [])
 
                     this.legend.Title = this.filters.dataset.domain.filter(d => d.value === categoryValue)[0].name
@@ -265,32 +293,41 @@ class ACSCensusLayer extends LayerContainer {
                     let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
 
                     this.data_tracts = this.data
-                        .filter(c => geoids.includes(c.fips.slice(0,5)))
-                        .map(item =>{
-                        return tracts
-                            .reduce((a,c) =>{
-                            if(item.area === c.name){
-                                a['name'] = c.name
-                                a['geoid'] = c.geoid
-                            }
-                            return a
-                        },{})
-                    })
+                        .filter(c => geoids.includes(c.fips.slice(0, 5)))
+                        .map(item => {
+                            return tracts
+                                .reduce((a, c) => {
+                                    if (item.area === c.name) {
+                                        a['name'] = c.name
+                                        a['geoid'] = c.geoid
+                                    }
+                                    return a
+                                }, {})
+                        })
 
+
+                    // this.filters.census_tract.domain = this.data_tracts.map(dt => dt.name)
                     return response
                 })
         }
 
 
     }
+
     getBounds() {
         let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
-            filtered = this.geographies.filter(({ value }) => geoids.includes(value));
+            filtered = this.geographies.filter(({value}) => geoids.includes(value));
 
         return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
     }
-    zoomToGeography() {
+
+    zoomToGeography(value) {
         if (!this.mapboxMap) return;
+
+        if (value) {
+            this.mapboxMap.easeTo({center: value, zoom: 12})
+            return;
+        }
 
         const bounds = this.getBounds();
 
@@ -331,19 +368,18 @@ class ACSCensusLayer extends LayerContainer {
         if (window.localStorage) {
             if (geographies.length) {
                 window.localStorage.setItem("macro-view-geographies", JSON.stringify(geographies));
-            }
-            else {
+            } else {
                 window.localStorage.removeItem("macro-view-geographies")
             }
         }
     }
 
-    onFilterChange(filterName,value,preValue){
-        if(!this.processedData) {
+    onFilterChange(filterName, value, preValue) {
+        if (!this.processedData) {
             return
         }
-        switch (filterName){
-            case "dataset":{
+        switch (filterName) {
+            case "dataset": {
                 this.legend.Title = `${this.filters.dataset.domain.filter(d => d.value === value)[0].name}`
                 // this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
 
@@ -355,9 +391,9 @@ class ACSCensusLayer extends LayerContainer {
 
                 // this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
 
-                if(value === 'percent'){
+                if (value === 'percent') {
                     this.legend.format = ',f'
-                }else{
+                } else {
                     this.legend.format = ',d'
                 }
                 break;
@@ -365,19 +401,30 @@ class ACSCensusLayer extends LayerContainer {
 
             case "geography": {
                 //console.log('new geography', newValue)
-                this.zoomToGeography(value);
+                this.zoomToGeography();
                 this.saveToLocalStorage();
                 break;
             }
 
-            default:{
+            case "census_tract": {
+                let geom = JSON.parse(get(this.data.filter(d => d.area === value), [0, 'geom'], '{}'))
+
+                if (geom && Object.keys(geom).length) {
+                    this.zoomToGeography(get(centroid(geom), ['geometry', 'coordinates']))
+                }else{
+                    this.zoomToGeography();
+                }
+                break;
+            }
+
+            default: {
                 //do nothing
             }
         }
 
     }
 
-    getFormat(column){
+    getFormat(column) {
         return ',d' ? column === 'value' : ',f'
     }
 
@@ -388,19 +435,18 @@ class ACSCensusLayer extends LayerContainer {
     }
 
     render(map, falcor) {
-        if(!this.data || !map) {
+        if (!this.data || !map) {
             return this.fetchData(falcor)
         }
         if (this.data_tracts.length) {
             map.setFilter("tracts", ["in", ["get", "GEOID"], ["literal", this.data_tracts.map(d => d.geoid)]]);
-        }
-        else {
+        } else {
             map.setFilter("tracts", false);
         }
-    //
-        this.processedData = this.data.reduce((acc,curr) =>{
-            this.data_tracts.forEach(data_tract =>{
-                if(curr.area === data_tract.name){
+        //
+        this.processedData = this.data.reduce((acc, curr) => {
+            this.data_tracts.forEach(data_tract => {
+                if (curr.area === data_tract.name) {
                     acc.push({
                         id: data_tract.geoid,
                         value: curr[this.filters.column.value]
@@ -408,13 +454,13 @@ class ACSCensusLayer extends LayerContainer {
                 }
             })
             return acc
-        },[])
+        }, [])
 
         const colorScale = this.getColorScale(this.processedData),
-            colors = this.processedData.filter(c => c.value).reduce((a,c) =>{
+            colors = this.processedData.filter(c => c.value).reduce((a, c) => {
                 a[c.id] = colorScale(c.value)
                 return a
-            },{});
+            }, {});
 
         map.setPaintProperty("tracts", "fill-color", [
             "case",

@@ -396,7 +396,20 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                 a = c.name
             }
             return a
-        },'')}`
+        },'')}, 
+        Period: ${this.filters.period.domain.reduce((a,c) => {
+            if(c.value === this.filters.period.value){
+                a = c.name
+            }
+            return a
+        },'')},
+        Functional Class: ${this.filters.functional_class.domain.reduce((a,c) => {
+            if(c.value === this.filters.functional_class.value){
+                a = c.name
+            }
+            return a
+        },'')}
+        `
         this.updateLegendDomain()
     }
 

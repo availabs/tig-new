@@ -5,6 +5,7 @@ import hub_bound from '../config/hub_bound.json'
 import mapboxgl from 'mapbox-gl'
 import shpwrite from "../../../utils/shp-write";
 import flatten from "lodash.flatten";
+import _ from 'lodash'
 
 const color_scheme = [
     {
@@ -97,25 +98,41 @@ class HubBoundTravelDataLayer extends LayerContainer {
     onHover = {
         layers: ["county_points"],
         callback: (layerId, features, lngLat) => {
-            const id = features.reduce((a, c) => {
-                a = get(c, ['id'], '')
-                return a
-            }, 0)
-            return this.data.reduce((a, c) => {
-                if (c.id === id) {
+            const ids = _.uniq(features.map(c => get(c, ['id'], '')))
 
-                    a.push(
-                        ['Facility Name:', c['loc_name']],
-                        ['Sector:', c['sector_name']],
-                        ['Mode:', c['mode_name']],
-                        ['Route:', c['route_name']],
-                        [c['var_name'], c['count']],
+            let data =
+                this.data
+                    .filter(d =>
+                        Object.keys(this.filters)
+                            .filter(f => !['geography'].includes(f))
+                            .reduce((acc, curr) => {
+                                return acc && (
+                                    curr === 'from' ? d.hour >= this.convertTime(this.filters[curr].value) :
+                                        curr === 'to' ? d.hour <= this.convertTime(this.filters[curr].value) :
+                                            this.filters[curr].value.toString() === d[curr].toString())
+                            }, true)
                     )
-                }
-                return a
-            }, [])
 
+            let c = ids.reduce((acc, id) => {
+                    let tmpData = data.filter(d => d.id === id)[0]
+                    acc = {
+                        'Facility Name:': tmpData['loc_name'],
+                        'Sector:': tmpData['sector_name'],
+                        'Mode:': tmpData['mode_name'],
+                        'Route:': tmpData['route_name'],
+                        ...acc,
+                        [tmpData.var_name]: tmpData.var_name === 'Occupancy Rates' ? tmpData.count : get(acc, [tmpData.var_name], 0) + parseInt(tmpData.count),
+                    }
 
+                    return acc
+                },
+                {
+                    'Occupancy Rates': 0,
+                    'Passengers': 0,
+                    'Vehicles': 0,
+                })
+
+            return Object.keys(c).map((curr) => ([curr, c[curr]]))
         }
     }
     legend = {
@@ -313,8 +330,10 @@ class HubBoundTravelDataLayer extends LayerContainer {
     }
 
     updateLegendTitle(value) {
-        this.legend.Title = `Mode:${this.filters.mode_name.value},
-                Year:${this.filters.year.value},From:${this.filters.from.value} to ${this.filters.to.value}, 
+        this.legend.Title = `${this.name} 
+                Mode:${this.filters.mode_name.value},
+                Year:${this.filters.year.value},
+                From:${this.filters.from.value} to ${this.filters.to.value}, 
                 Direction: ${this.filters.direction.value}`
     }
 

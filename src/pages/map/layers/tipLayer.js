@@ -1,16 +1,15 @@
 import {useTheme} from "@availabs/avl-components";
-import {HOST} from './layerHost'
 import {LayerContainer} from "components/avl-map/src"
 import {filters} from 'pages/map/layers/npmrds/filters.js'
-import tip_ids from '../config/tip_ids.json'
 import tip_mpos from '../config/tip_mpos.json'
-import fetcher from "../wrappers/fetcher";
 import get from "lodash.get";
 import flatten from "lodash.flatten";
 import shpwrite from "../../../utils/shp-write";
 import mapboxgl from "mapbox-gl";
 import {Link} from "react-router-dom";
 import _ from 'lodash'
+import centroid from '@turf/centroid'
+
 var parse = require('wellknown');
 
 const symbology = [
@@ -110,14 +109,15 @@ class TestTipLayer extends LayerContainer {
             value: undefined,
             accessor: d => d.name,
             valueAccessor: d => d.value,
-            multi:false
+            multi: false
         },
-        tip_id :{
+        tip_id: {
             name: 'Tip ID',
-            type:'dropdown',
+            type: 'dropdown',
             domain: [],
             value: 'Select All',
-            multi:false
+            multi: false,
+            searchable: true
         },
         project_type: {
             name: 'Project Type',
@@ -141,16 +141,16 @@ class TestTipLayer extends LayerContainer {
         },
         mpo_name: {
             name: 'MPO Name',
-            type:'dropdown',
+            type: 'dropdown',
             domain: tip_mpos,
             value: 'Select All',
-            multi:false
+            multi: false
         },
-        sponsor:{
-            name:'Sponsor',
-            type:'dropdown',
-            domain:['Select All'],
-            value:'Select All'
+        sponsor: {
+            name: 'Sponsor',
+            type: 'dropdown',
+            domain: ['Select All'],
+            value: 'Select All'
         },
 
     }
@@ -161,8 +161,8 @@ class TestTipLayer extends LayerContainer {
         height: 5,
         width: 350,
         direction: "vertical",
-        show:true,
-        Title:""
+        show: true,
+        Title: ""
     }
     onHover = {
         layers: ["tip_lines", "tip_symbols", ...Object.values(symbols_map).map(t => 'tip-' + t)],
@@ -183,8 +183,8 @@ class TestTipLayer extends LayerContainer {
 
             return [
                 ['TIP ID:', feature['tip_id']],
-                ['County:',feature['name']],
-                ['MPO:',feature['mpo']],
+                ['County:', feature['name']],
+                ['MPO:', feature['mpo']],
                 ['Sponsor:', feature['sponsor']],
                 ['Project Type:', feature['ptype']],
                 ['Cost:', feature['cost']],
@@ -193,7 +193,7 @@ class TestTipLayer extends LayerContainer {
         },
         HoverComp: ({data, layer}) => {
             const theme = useTheme();
-            console.log(data)
+
             return (
                 <div className={`${theme.bg} rounded relative px-1 break-all`}>
                     <div key={'vit2'} className={`flex`}>
@@ -204,7 +204,7 @@ class TestTipLayer extends LayerContainer {
                         <div key={'vit1'}
                              style={{maxWidth: '250px'}}
                              className={`whitespace-pre-wrap`}>
-                            <Link to={`/views/${this.vid}/table?search=${data[0][1]}`} >view in table</Link>
+                            <Link to={`/views/${this.vid}/table?search=${data[0][1]}`}>view in table</Link>
                         </div>
                     </div>
                     {
@@ -253,7 +253,38 @@ class TestTipLayer extends LayerContainer {
         },
     ]
 
-    download(){
+    infoBoxes = [
+        {
+            Component: ({layer}) => {
+
+                return (
+                    <div className="relative pt-1">
+                        <div className={'flex mt-5'}>
+                            <label className={'self-center pr-1'} htmlFor={'search'}>TIP Project Search: </label>
+                            <input
+                                className={'p-1'}
+                                id={'search'}
+                                type={'text'}
+                                name={'search'}
+                                onChange={e => {
+                                    let v = e.target.value
+                                    if(!e.target.value.length){
+                                        v = 'Select All'
+                                    }
+                                    layer.filters.tip_id.onChange(v)
+                                    layer.onFilterChange('tip_id', v)
+                                    layer.dispatchUpdate(layer, {tip_id: v})
+                                }}
+                                placeholder={'search...'}/>
+                        </div>
+                    </div>
+                )
+            },
+            width: 450
+        }
+    ]
+
+    download() {
         const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
             (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
 
@@ -265,7 +296,7 @@ class TestTipLayer extends LayerContainer {
 
                 return d.geography && f
             })
-            .reduce((acc,curr) =>{
+            .reduce((acc, curr) => {
                 acc.push({
                     // geoid: data_tract.geoid,
                     ...{...curr.data},
@@ -280,7 +311,7 @@ class TestTipLayer extends LayerContainer {
                     "icon": symbols_map[curr['ptype']]
                 })
                 return acc
-            },[])
+            }, [])
         let geoJSON = {
             type: 'FeatureCollection',
             features: []
@@ -290,27 +321,30 @@ class TestTipLayer extends LayerContainer {
             .map(t => {
                 return {
                     type: "feature",
-                    properties: Object.keys(t).filter(t => t !== 'geom').reduce((acc, curr) => ({...acc, [curr]: t[curr]}) , {}),
+                    properties: Object.keys(t).filter(t => t !== 'geom').reduce((acc, curr) => ({
+                        ...acc,
+                        [curr]: t[curr]
+                    }), {}),
                     geometry: t.geom
                 }
             })
             .forEach((feat) => {
-                let geom=feat.geometry;
-                let props=feat.properties;
+                let geom = feat.geometry;
+                let props = feat.properties;
 
-                if (geom.type === 'MultiPolygon'){
-                    for (var i=0; i < geom.coordinates.length; i++){
+                if (geom.type === 'MultiPolygon') {
+                    for (var i = 0; i < geom.coordinates.length; i++) {
                         var polygon = {
                             type: 'feature',
                             properties: props,
-                            geometry:  {
-                                'type':'Polygon',
-                                'coordinates':geom.coordinates[i],
+                            geometry: {
+                                'type': 'Polygon',
+                                'coordinates': geom.coordinates[i],
                             }
                         };
                         geoJSON.features.push(polygon)
                     }
-                }else{
+                } else {
                     geoJSON.features.push(feat)
                 }
             });
@@ -341,13 +375,18 @@ class TestTipLayer extends LayerContainer {
 
     getBounds() {
         let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
-            filtered = this.geographies.filter(({ value }) => geoids.includes(value));
+            filtered = this.geographies.filter(({value}) => geoids.includes(value));
 
         return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
     }
 
     zoomToGeography(value) {
         if (!this.mapboxMap) return;
+
+        if (value) {
+            this.mapboxMap.easeTo({center: value, zoom: 10})
+            return;
+        }
 
         const bounds = this.getBounds();
 
@@ -388,27 +427,29 @@ class TestTipLayer extends LayerContainer {
         if (window.localStorage) {
             if (geographies.length) {
                 window.localStorage.setItem("macro-view-geographies", JSON.stringify(geographies));
-            }
-            else {
+            } else {
                 window.localStorage.removeItem("macro-view-geographies")
             }
         }
     }
 
-    init(map, falcor){
-        let states = ["36","34","09","42"]
+    init(map, falcor) {
+        let states = ["36", "34", "09", "42"]
 
         falcor.get(['tig', 'views', 'byLayer', 'tip'], ["geo", states, "geoLevels"])
             .then(res => {
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
 
-                this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
+                this.filters.dataset.domain = views.map(v => ({
+                    value: v.id,
+                    name: v.name
+                })).sort((a, b) => a.name.localeCompare(b.name));
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
 
                 this.updateLegendDomain()
 
                 // geography setup
-                let geo = get(res,'json.geo',{})
+                let geo = get(res, 'json.geo', {})
                 const geographies = flatten(states.map(s => geo[s].geoLevels));
 
                 this.geographies =
@@ -422,30 +463,30 @@ class TestTipLayer extends LayerContainer {
 
             })
 
-       
+
     }
 
     updateLegendTitle() {
-        this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-            if(c.value === this.filters.dataset.value){
+        this.legend.Title = `${this.filters.dataset.domain.reduce((a, c) => {
+            if (c.value === this.filters.dataset.value) {
                 a = c.name
             }
             return a
-        },'')}
-                TIP Id: ${this.filters.tip_id.value === 'Select All'? 'All':this.filters.tip_id.value},
-                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
-            if(c === this.filters.project_type.value){
-                a = c === 'Select All' ? 'All': c
+        }, '')}
+                TIP Id: ${this.filters.tip_id.value === 'Select All' ? 'All' : this.filters.tip_id.value},
+                Project Type: ${this.filters.project_type.domain.reduce((a, c) => {
+            if (c === this.filters.project_type.value) {
+                a = c === 'Select All' ? 'All' : c
             }
             return a
-        },'')},
-                MPO Name: ${this.filters.mpo_name.domain.reduce((a,c) =>{
-            if(c === this.filters.mpo_name.value){
-                a = c === 'Select All' ? 'All': c
+        }, '')},
+                MPO Name: ${this.filters.mpo_name.domain.reduce((a, c) => {
+            if (c === this.filters.mpo_name.value) {
+                a = c === 'Select All' ? 'All' : c
             }
             return a
-        },'')},
-               sponsor: ${this.filters.sponsor.value === 'Select All'? 'All':''}
+        }, '')},
+               sponsor: ${this.filters.sponsor.value === 'Select All' ? 'All' : ''}
                 `
     }
 
@@ -454,7 +495,7 @@ class TestTipLayer extends LayerContainer {
 
         return falcor.get(["tig", this.type, "byId", view, 'data_overlay'])
             .then(response => {
-                this.data = get(response, ['json', "tig", this.type, "byId", view, 'data_overlay'],[]);
+                this.data = get(response, ['json', "tig", this.type, "byId", view, 'data_overlay'], []);
 
                 this.filters.sponsor.domain = ['Select All', ..._.uniq(this.data.map(d => d.sponsor))]
                 this.filters.tip_id.domain = ['Select All', ..._.uniq(this.data.map(d => d.tip_id))]
@@ -464,29 +505,32 @@ class TestTipLayer extends LayerContainer {
             })
     }
 
-    onFilterChange(filterName,value,preValue){
+    onFilterChange(filterName, value, preValue) {
         this.updateLegendTitle()
-        switch (filterName){
+        switch (filterName) {
             case "geography": {
                 this.zoomToGeography();
                 this.saveToLocalStorage();
                 break;
             }
             case "tip_id": {
-                if(value === 'Select All') {
+                if (value === 'Select All') {
                     this.zoomToGeography();
-                }else{
-                    console.log('d?', this.data.filter(d => d.tip_id === value))
-                    // .reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
+                } else {
+                    let geom = JSON.parse(get(this.data.filter(d => d.tip_id === value), [0, 'geom'], '{}'))
+                    if(geom && Object.keys(geom).length){
+                        this.zoomToGeography(get(centroid(geom), ['geometry', 'coordinates']))
+                    }
                 }
                 break;
             }
-            default:{
+            default: {
                 //do nothing
             }
         }
 
     }
+
     onRemove(mapboxMap) {
 
         mapboxMap.removeLayer('tip-rail')
@@ -502,8 +546,9 @@ class TestTipLayer extends LayerContainer {
         mapboxMap.removeSource('tip_symbols')
         mapboxMap.removeSource('tip_lines')
     }
-    render(map){
-        if(!this.data) {
+
+    render(map) {
+        if (!this.data) {
 
             return this.fetchData()
         }
@@ -511,41 +556,47 @@ class TestTipLayer extends LayerContainer {
             type: "FeatureCollection",
             features: []
         }
-        
-        let colors = symbology.reduce( (out,curr) => {
+
+        let colors = symbology.reduce((out, curr) => {
             out[curr.value] = curr.color
             return out;
         }, {})
 
+        let iconSizes = {
+            rail: 1,
+            bus: 1,
+            ferry: 1,
+            parking: 1
+        }
 
-         geojson.features = this.data
-             .filter(d => {
-                 let f = Object.keys(this.filters)
-                     .filter(f => !['geography', 'dataset'].includes(f) && this.filters[f].value !== 'Select All')
-                     .reduce((acc, filter) => {
-                         return acc && d[nameMapping[filter] || filter] === this.filters[filter].value
-                     }, true)
+        geojson.features = this.data
+            .filter(d => {
+                let f = Object.keys(this.filters)
+                    .filter(f => !['geography', 'dataset'].includes(f) && this.filters[f].value !== 'Select All')
+                    .reduce((acc, filter) => {
+                        return acc && d[nameMapping[filter] || filter] === this.filters[filter].value
+                    }, true)
 
-                 return d.geography && f
-             })
-             .map((d,i) => {
-            return {
-                "type": "Feature",
-                id: i,
-                "properties": {
-                    county: d.county,
-                    description: d.description,
-                    estimated_cost : d.cost,
-                    mpo: d.mpo,
-                    project_type: d.ptype,
-                    color: colors[d.ptype],
-                    sponsor: d.sponsor,
-                    tip_id: d.tip_id,
-                    icon: symbols_map[d['ptype']]
-                },
-                "geometry": parse(d['geography'])
-            }
-        })
+                return d.geography && f
+            })
+            .map((d, i) => {
+                return {
+                    "type": "Feature",
+                    id: i,
+                    "properties": {
+                        county: d.county,
+                        description: d.description,
+                        estimated_cost: d.cost,
+                        mpo: d.mpo,
+                        project_type: d.ptype,
+                        color: colors[d.ptype],
+                        sponsor: d.sponsor,
+                        tip_id: d.tip_id,
+                        icon: symbols_map[d['ptype']]
+                    },
+                    "geometry": parse(d['geography'])
+                }
+            })
 
         const symbols_geojson =
             {
@@ -572,11 +623,11 @@ class TestTipLayer extends LayerContainer {
             this.mapboxMap.getSource('tip_symbols').setData(symbols_geojson)
         }
 
-        if(this.mapboxMap.getSource('tip_lines')){
+        if (this.mapboxMap.getSource('tip_lines')) {
             this.mapboxMap.getSource('tip_lines').setData(line_geojson)
         }
 
-        if(!this.mapboxMap.getLayer('tip_lines')){
+        if (!this.mapboxMap.getLayer('tip_lines')) {
             this.mapboxMap.addLayer({
                 'id': 'tip_lines',
                 'type': 'line',
@@ -584,8 +635,8 @@ class TestTipLayer extends LayerContainer {
                 paint: {
                     'line-width': 3,
                     'line-color': {
-                        type:'identity',
-                        property:'color'
+                        type: 'identity',
+                        property: 'color'
                     },
                 }
             })
@@ -598,23 +649,26 @@ class TestTipLayer extends LayerContainer {
                 let layerID = 'tip-' + symbol;
                 if (!this.mapboxMap.getLayer(layerID)) {
                     this.mapboxMap.loadImage(`mapIcons/${symbol}.png`,
-                    (error, image) => {
-                        if (error) return 0;
-                        this.mapboxMap.addImage(symbol, image);
+                        (error, image) => {
+                            if (error) return 0;
+                            if (!this.mapboxMap.hasImage(symbol)) {
+                                this.mapboxMap.addImage(symbol, image);
+                            }
 
-                        this.mapboxMap.addLayer({
-                            'id': layerID,
-                            'type': 'symbol',
-                            'source': 'tip_symbols',
-                            'layout': {
-                                'icon-image': symbol,
-                                'icon-allow-overlap': true,
-                                'icon-size': 0.4
-                            },
-                            'filter': ['==', 'icon', symbol]
-                        })
-                    }
-
+                            if (!this.mapboxMap.getLayer(layerID)) {
+                                this.mapboxMap.addLayer({
+                                    'id': layerID,
+                                    'type': 'symbol',
+                                    'source': 'tip_symbols',
+                                    'layout': {
+                                        'icon-image': symbol,
+                                        'icon-allow-overlap': true,
+                                        'icon-size': iconSizes[symbol] || 0.4
+                                    },
+                                    'filter': ['==', 'icon', symbol]
+                                })
+                            }
+                        }
                     )
 
                 }
