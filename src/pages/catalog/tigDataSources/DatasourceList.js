@@ -43,7 +43,7 @@ const DatasourceList = () => {
         let sourcesById = get(falcorCache, ['tig', 'datasources', 'byId'], null)
         let data = []
         if (sourcesById) {
-            data = Object.keys(sourcesById).map(id => sourcesById[id])
+            data = Object.keys(sourcesById).map(id => sourcesById[id]).sort((a,b) => a.name.value.localeCompare(b.name.value))
         }
         console.log('sourcesList', data)
         return data

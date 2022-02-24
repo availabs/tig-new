@@ -1,0 +1,52 @@
+
+
+"acs_census": ACSCensusLayerFactory,
+	- in infobox add census tract search, by tig name, autocomplete if possible
+	- on succesful search zoom to tract
+
+	"tip": TestTipLayerFactory,
+		- Make Custom Hover Component (see NPMRDS for example),
+		  have description box show full description without scroll
+		  set constant width for box so description adds height.
+		- Add link to view in Table in hoverbox
+		- Retrieve Icons from tig.nymtc.org and use those icons for symbology
+		- Add project Search
+
+
+	'bpm_performance': BPMPerformanceMeasuresLayerFactory,
+		- Make sure the Source name is in infobox with the selected Filter Name
+
+
+	'hub_bound_travel_data': HubBoundTravelDataLayerFactory,
+		- Make sure the Source name is in infobox with the selected Filter Name
+		- in popup make sure values for vehicles, occupancy and passangers all show
+
+
+	'rtp_project_data': RTPProjectDataLayerFactory,
+		- Make Custom Hover Component (see NPMRDS for example),
+		  have description box show full description without scroll
+		  set constant width for box so description adds height.
+		- Add link to view in Table in hoverbox
+		- Retrieve Icons from tig.nymtc.org and use those icons for symbology
+		- Add project Search
+
+
+	'npmrds': NPMRDSLayerFactory
+
+
+	"sed_county_*": SED2040CountyLevelForecastLayerFactory, //done
+	
+		- Can we combine SED COUNTY layers to 1 layer
+		- Make sure infobox has title 
+		- add county search to infobox (autocomplete, zoom on select)
+
+	"sed_taz_*": SED2040TazLevelForecastLayerFactory, //done
+		- Can we combine SED COUNTY layers to 1 layer
+		- Make sure the Source name is in infobox with the selected Filter Name
+		- add Taz search to infobox (autocomplete, zoom on select)
+
+
+Data Issues
+	SED TAZ / COUNTY combinations
+	TIP 2020-2024 Doesn't have points / data
+	HUB Bound Travel check lor

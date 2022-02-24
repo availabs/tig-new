@@ -21,5 +21,5 @@ export const tables = {
     sed_taz_2040: SedTaz2040DataTable,
     sed_county_2050: SedCounty2050DataTable,
     sed_county_2040: SedCounty2040DataTable,
-    tig: TigDataTable
+    tip: TigDataTable
 }

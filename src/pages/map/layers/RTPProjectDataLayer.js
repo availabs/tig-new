@@ -1,14 +1,14 @@
 import {LayerContainer} from "components/avl-map/src"
-import {HOST} from "./layerHost";
-import fetcher from "../wrappers/fetcher";
 import {useTheme} from "@availabs/avl-components";
 import {filters} from 'pages/map/layers/npmrds/filters.js'
-import rtp_ids from '../config/rtp_ids.json'
-import rtp_sponsors from '../config/rtp_sponsors.json'
 import get from "lodash.get";
 import flatten from "lodash.flatten";
 import shpwrite from "../../../utils/shp-write";
 import mapboxgl from "mapbox-gl";
+import {Link} from "react-router-dom";
+import _ from "lodash";
+import centroid from "@turf/centroid";
+
 var parse = require('wellknown');
 
 const symbology = [
@@ -66,15 +66,16 @@ const symbology = [
 
 const symbols_map = {
     'Rail': 'rail',
-    'Transit': 'rail-metro',
-    'Truck': 'us-interstate-truck-3',
+    'Transit': 'transit',
+    'Truck': 'truck',
     'Bus': 'bus',
-    'Bike': 'bicycle-share',
+    'Bike': 'cycling',
     'Ferry': 'ferry',
-    'Highway': 'au-national-highway-3',
-    'Pedestrian': 'pitch-11',
-    'Study': 'college-11',
-
+    'Highway': 'highway',
+    'Pedestrian': 'pedestrian',
+    'Study': 'study',
+    'Parking': 'parking',
+    "ITS": 'its'
 }
 
 class RTPProjectDataLayer extends LayerContainer {
@@ -86,6 +87,7 @@ class RTPProjectDataLayer extends LayerContainer {
         this.type = props.type
 
     }
+
     active = false
     setActive = !!this.viewId
     name = 'RTP Project Data'
@@ -94,8 +96,7 @@ class RTPProjectDataLayer extends LayerContainer {
         dataset: {
             name: 'Dataset',
             type: 'dropdown',
-            domain: [
-            ],
+            domain: [],
             value: undefined,
             accessor: d => d.name,
             valueAccessor: d => d.value,
@@ -104,16 +105,15 @@ class RTPProjectDataLayer extends LayerContainer {
         rtp_id: {
             name: 'RTP ID',
             type: 'dropdown',
-            domain: rtp_ids.filter(d => d.name !== null),
+            domain: [],
             value: "Select All",
-            accessor: d => d.name,
-            valueAccessor: d => d.value,
-            multi: false
+            multi: false,
+            searchable: true
         },
         year: {
             name: 'Year',
             type: 'dropdown',
-            domain: ['Select All',2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2040],
+            domain: ['Select All', 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2040],
             value: 'Select All'
         },
         project_type: {
@@ -146,7 +146,7 @@ class RTPProjectDataLayer extends LayerContainer {
         sponsor: {
             name: 'Sponsor',
             type: 'dropdown',
-            domain: rtp_sponsors,
+            domain: [],
             value: 'Select All',
             multi: false
         }
@@ -158,8 +158,8 @@ class RTPProjectDataLayer extends LayerContainer {
         height: 5,
         width: 320,
         direction: "vertical",
-        show:true,
-        Title:""
+        show: true,
+        Title: ""
     }
     sources = [
         {
@@ -194,7 +194,7 @@ class RTPProjectDataLayer extends LayerContainer {
         }
     ]
     onHover = {
-        layers: ["county_lines", "county_polygons", 'poi-rail', 'poi-rail-metro', 'poi-us-interstate-truck-3', 'poi-bus', 'poi-bicycle-share', 'poi-ferry', 'poi-au-national-highway-3', 'poi-pitch-11', 'poi-college-11'],
+        layers: ["county_lines", "county_polygons", "tip_lines", "tip_symbols", ...Object.values(symbols_map).map(t => 'poi-' + t)],
         callback: (layerId, features, lngLat) => {
             const feature = features.reduce((a, c) => {
                 a = this.data.reduce((acc, curr) => {
@@ -214,27 +214,39 @@ class RTPProjectDataLayer extends LayerContainer {
 
             return [
                 ['Project ID:', feature['rtp_id']],
-                ['Year:', this.filters.year.value],
+                ['Year:', feature['year']],
                 ['Plan Portion:', feature['plan_portion']],
                 ['Sponsor:', feature['sponsor']],
                 ['Project Type:', feature['ptype']],
-                ['Cost:', feature['estimated_cost']],
+                ['Cost:', feature['estimated_cost'] ? feature['estimated_cost'].toString() + 'M' : ''],
                 ['Description:', feature['description'].toLowerCase()]
             ]
         },
         HoverComp: ({data, layer}) => {
             const theme = useTheme();
+
             return (
-                <div style={{maxHeight: '300px'}} className={`${theme.bg} rounded relative px-1 overflow-auto scrollbarXsm`}>
+                <div className={`${theme.bg} rounded relative px-1 break-all`}>
+                    <div key={'vit2'} className={`flex`}>
+                        <div key={'vit0'}
+                             style={{maxWidth: '250px'}}
+                             className={`flex-1 font-bold mr-4`}>
+                        </div>
+                        <div key={'vit1'}
+                             style={{maxWidth: '250px'}}
+                             className={`whitespace-pre-wrap`}>
+                            <Link to={`/views/${this.vid}/table?search=${data[0][1]}`}>view in table</Link>
+                        </div>
+                    </div>
                     {
                         data.map((row, i) =>
                             <div key={i} className="flex">
                                 {
                                     row.map((d, ii) =>
                                         <div key={ii}
-                                             style={{maxWidth: '200px'}}
+                                             style={{maxWidth: '250px'}}
                                              className={`
-                                                    ${ii === 0 ? "flex-1 font-bold" : "overflow-auto scrollbarXsm"}
+                                                    ${ii === 0 ? "flex-1 font-bold" : "whitespace-pre-wrap"}
                                                     ${row.length > 1 && ii === 0 ? "mr-4" : ""}
                                                     ${row.length === 1 && ii === 0 ? `border-b-2 text-lg ${i > 0 ? "mt-1" : ""}` : ""}
                                                     `}>
@@ -251,7 +263,38 @@ class RTPProjectDataLayer extends LayerContainer {
 
     }
 
-    download(){
+    infoBoxes = [
+        {
+            Component: ({layer}) => {
+
+                return (
+                    <div className="relative pt-1">
+                        <div className={'flex mt-5'}>
+                            <label className={'self-center pr-1'} htmlFor={'search'}>RTP Project Search: </label>
+                            <input
+                                className={'p-1'}
+                                id={'search'}
+                                type={'text'}
+                                name={'search'}
+                                onChange={e => {
+                                    let v = e.target.value
+                                    if(!e.target.value.length){
+                                        v = 'Select All'
+                                    }
+                                    layer.filters.rtp_id.onChange(v)
+                                    layer.onFilterChange('rtp_id', v)
+                                    layer.dispatchUpdate(layer, {rtp_id: v})
+                                }}
+                                placeholder={'search...'}/>
+                        </div>
+                    </div>
+                )
+            },
+            width: 450
+        }
+    ]
+
+    download() {
         const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
             (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
 
@@ -263,22 +306,22 @@ class RTPProjectDataLayer extends LayerContainer {
 
                 return d.geography && f
             })
-            .reduce((acc,curr) =>{
-            acc.push({
-                // geoid: data_tract.geoid,
-                ...{...curr.data},
-                geom: JSON.parse(curr.geom || '{}'),
-                area: curr.name,
-                "description": curr['description'],
-                "estimated_cost": curr['estimated_cost'],
-                "plan_portion": curr['plan_portion'],
-                "project_type": curr['ptype'],
-                "rtp_id": curr['rtp_id'],
-                "sponsor": curr['sponsor'],
-                "icon": symbols_map[curr['ptype']]
-            })
-            return acc
-        },[])
+            .reduce((acc, curr) => {
+                acc.push({
+                    // geoid: data_tract.geoid,
+                    ...{...curr.data},
+                    geom: JSON.parse(curr.geom || '{}'),
+                    area: curr.name,
+                    "description": curr['description'],
+                    "estimated_cost": curr['estimated_cost'],
+                    "plan_portion": curr['plan_portion'],
+                    "project_type": curr['ptype'],
+                    "rtp_id": curr['rtp_id'],
+                    "sponsor": curr['sponsor'],
+                    "icon": symbols_map[curr['ptype']]
+                })
+                return acc
+            }, [])
         let geoJSON = {
             type: 'FeatureCollection',
             features: []
@@ -288,27 +331,30 @@ class RTPProjectDataLayer extends LayerContainer {
             .map(t => {
                 return {
                     type: "feature",
-                    properties: Object.keys(t).filter(t => t !== 'geom').reduce((acc, curr) => ({...acc, [curr]: t[curr]}) , {}),
+                    properties: Object.keys(t).filter(t => t !== 'geom').reduce((acc, curr) => ({
+                        ...acc,
+                        [curr]: t[curr]
+                    }), {}),
                     geometry: t.geom
                 }
             })
             .forEach((feat) => {
-                let geom=feat.geometry;
-                let props=feat.properties;
+                let geom = feat.geometry;
+                let props = feat.properties;
 
-                if (geom.type === 'MultiPolygon'){
-                    for (var i=0; i < geom.coordinates.length; i++){
+                if (geom.type === 'MultiPolygon') {
+                    for (var i = 0; i < geom.coordinates.length; i++) {
                         var polygon = {
                             type: 'feature',
                             properties: props,
-                            geometry:  {
-                                'type':'Polygon',
-                                'coordinates':geom.coordinates[i],
+                            geometry: {
+                                'type': 'Polygon',
+                                'coordinates': geom.coordinates[i],
                             }
                         };
                         geoJSON.features.push(polygon)
                     }
-                }else{
+                } else {
                     geoJSON.features.push(feat)
                 }
             });
@@ -336,44 +382,51 @@ class RTPProjectDataLayer extends LayerContainer {
         this.legend.domain = symbology.map(d => d.value)
         this.legend.range = symbology.map(d => d.color)
     }
+
     updateLegendTitle() {
-        this.legend.Title = `${this.filters.dataset.domain.reduce((a,c) =>{
-            if(c.value === this.filters.dataset.value){
+        this.legend.Title = `${this.filters.dataset.domain.reduce((a, c) => {
+            if (c.value === this.filters.dataset.value) {
                 a = c.name
             }
             return a
-        },'')}
-                Year: ${this.filters.year.value === 'Select All' ? 'All':this.filters.year.value}, 
-                RTP Id: ${this.filters.rtp_id.value === 'Select All'? 'All':this.filters.rtp_id.value},
-                Project Type: ${this.filters.project_type.domain.reduce((a,c) =>{
-            if(c === this.filters.project_type.value){
-                a = c === 'Select All' ? 'All': c
+        }, '')}
+                Year: ${this.filters.year.value === 'Select All' ? 'All' : this.filters.year.value}, 
+                RTP Id: ${this.filters.rtp_id.value === 'Select All' ? 'All' : this.filters.rtp_id.value},
+                Project Type: ${this.filters.project_type.domain.reduce((a, c) => {
+            if (c === this.filters.project_type.value) {
+                a = c === 'Select All' ? 'All' : c
             }
             return a
-        },'')},
-                Plan Portion : ${this.filters.plan_portion.domain.reduce((a,c) =>{
-            if(c === this.filters.plan_portion.value){
-                a = c === 'Select All' ? 'All': c
+        }, '')},
+                Plan Portion : ${this.filters.plan_portion.domain.reduce((a, c) => {
+            if (c === this.filters.plan_portion.value) {
+                a = c === 'Select All' ? 'All' : c
             }
             return a
-        },'')},
-               Sponsor: ${this.filters.sponsor.domain.reduce((a,c) =>{
-            if(c === this.filters.sponsor.value){
-                a = c === 'Select All' ? 'All': c
+        }, '')},
+               Sponsor: ${this.filters.sponsor.domain.reduce((a, c) => {
+            if (c === this.filters.sponsor.value) {
+                a = c === 'Select All' ? 'All' : c
             }
             return a
-        },'')}
+        }, '')}
                 `
     }
+
     getBounds() {
         let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
-            filtered = this.geographies.filter(({ value }) => geoids.includes(value));
+            filtered = this.geographies.filter(({value}) => geoids.includes(value));
 
         return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
     }
 
-    zoomToGeography() {
+    zoomToGeography(value) {
         if (!this.mapboxMap) return;
+
+        if (value) {
+            this.mapboxMap.easeTo({center: value, zoom: 10})
+            return;
+        }
 
         const bounds = this.getBounds();
 
@@ -414,8 +467,7 @@ class RTPProjectDataLayer extends LayerContainer {
         if (window.localStorage) {
             if (geographies.length) {
                 window.localStorage.setItem("macro-view-geographies", JSON.stringify(geographies));
-            }
-            else {
+            } else {
                 window.localStorage.removeItem("macro-view-geographies")
             }
         }
@@ -423,6 +475,7 @@ class RTPProjectDataLayer extends LayerContainer {
 
 
     init(map, falcor) {
+<<<<<<< HEAD
         let states = ["36","34","09","42"]
         if(this.vid) {
             falcor.get(['tig', 'views', 'byLayer', 'rtp_project_data'], ["geo", states, "geoLevels"])
@@ -448,6 +501,35 @@ class RTPProjectDataLayer extends LayerContainer {
                     this.zoomToGeography();
                 })
         }
+=======
+        let states = ["36", "34", "09", "42"]
+
+        falcor.get(['tig', 'views', 'byLayer', 'rtp_project_data'], ["geo", states, "geoLevels"])
+            .then(res => {
+                let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
+
+                this.filters.dataset.domain = views.map(v => ({
+                    value: v.id,
+                    name: v.name
+                })).sort((a, b) => a.name.localeCompare(b.name));
+                this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
+
+                this.updateLegendDomain()
+
+                // geography setup
+                let geo = get(res, 'json.geo', {})
+                const geographies = flatten(states.map(s => geo[s].geoLevels));
+
+                this.geographies =
+                    geographies.map(geo => ({
+                        name: `${geo.geoname.toUpperCase()} ${geo.geolevel}`,
+                        geolevel: geo.geolevel,
+                        value: geo.geoid,
+                        bounding_box: geo.bounding_box
+                    }));
+                this.zoomToGeography();
+            })
+>>>>>>> 6ffb555bcd16dab896ef12d37839dd53cc24be02
     }
 
     fetchData(falcor) {
@@ -456,21 +538,36 @@ class RTPProjectDataLayer extends LayerContainer {
         return falcor.get(["tig", this.type, "byId", view, 'data_overlay'])
             .then(response => {
 
-                this.data = get(response, ['json', "tig", this.type, "byId", view, 'data_overlay'],[]);
+                this.data = get(response, ['json', "tig", this.type, "byId", view, 'data_overlay'], []);
+
+                this.filters.sponsor.domain = ['Select All', ..._.uniq(this.data.map(d => d.sponsor))]
+                this.filters.rtp_id.domain = ['Select All', ..._.uniq(this.data.map(d => d.rtp_id))]
+
                 this.updateLegendTitle()
-            
+
             })
     }
 
-    onFilterChange(filterName,value,preValue){
+    onFilterChange(filterName, value, preValue) {
         this.updateLegendTitle(value)
-        switch (filterName){
+        switch (filterName) {
             case "geography": {
-                this.zoomToGeography(value);
+                this.zoomToGeography();
                 this.saveToLocalStorage();
                 break;
             }
-            default:{
+            case "rtp_id": {
+                if (value === 'Select All') {
+                    this.zoomToGeography();
+                } else {
+                    let geom = JSON.parse(get(this.data.filter(d => d.rtp_id === value), [0, 'geom'], '{}'))
+                    if (geom && Object.keys(geom).length) {
+                        this.zoomToGeography(get(centroid(geom), ['geometry', 'coordinates']))
+                    }
+                }
+                break;
+            }
+            default: {
                 //do nothing
             }
         }
@@ -502,6 +599,13 @@ class RTPProjectDataLayer extends LayerContainer {
             features: []
         }
 
+        let iconSizes = {
+            rail: 1,
+            bus: 1,
+            ferry: 1,
+            parking: 1
+        }
+
         geojson.features = this.data
             .filter(d => {
                 let f = Object.keys(this.filters)
@@ -513,21 +617,21 @@ class RTPProjectDataLayer extends LayerContainer {
                 return d.geography && f
             }).map((d, i) => {
 
-            return {
-                type: 'Feature',
-                id: i,
-                properties: {
-                    "description": d['description'],
-                    "estimated_cost": d['estimated_cost'],
-                    "plan_portion": d['plan_portion'],
-                    "project_type": d['ptype'],
-                    "rtp_id": d['rtp_id'],
-                    "sponsor": d['sponsor'],
-                    "icon": symbols_map[d['ptype']]
-                },
-                geometry: parse(d['geography'])
-            }
-        })
+                return {
+                    type: 'Feature',
+                    id: i,
+                    properties: {
+                        "description": d['description'],
+                        "estimated_cost": d['estimated_cost'],
+                        "plan_portion": d['plan_portion'],
+                        "project_type": d['ptype'],
+                        "rtp_id": d['rtp_id'],
+                        "sponsor": d['sponsor'],
+                        "icon": symbols_map[d['ptype']]
+                    },
+                    geometry: parse(d['geography'])
+                }
+            })
 
         const symbols_geojson =
             {
@@ -550,14 +654,14 @@ class RTPProjectDataLayer extends LayerContainer {
             })
         }
 
-        polygon_geojson.features.forEach(feature =>{
+        polygon_geojson.features.forEach(feature => {
 
-            feature.properties['color'] = symbology.reduce((a,c) =>{
-                if(c.label === feature.properties.project_type){
+            feature.properties['color'] = symbology.reduce((a, c) => {
+                if (c.label === feature.properties.project_type) {
                     a = c.color
                 }
                 return a
-            },'')
+            }, '')
         })
 
         const line_geojson = {
@@ -571,14 +675,14 @@ class RTPProjectDataLayer extends LayerContainer {
         }
 
 
-        line_geojson.features.forEach(feature =>{
+        line_geojson.features.forEach(feature => {
 
-            feature.properties['color'] = symbology.reduce((a,c) =>{
-                if(c.label === feature.properties.project_type){
+            feature.properties['color'] = symbology.reduce((a, c) => {
+                if (c.label === feature.properties.project_type) {
                     a = c.color
                 }
                 return a
-            },'')
+            }, '')
         })
 
         if (map.getSource('county_lines')) {
@@ -592,8 +696,8 @@ class RTPProjectDataLayer extends LayerContainer {
                 type: 'line',
                 paint: {
                     'line-color': {
-                        type:'identity',
-                        property:'color'
+                        type: 'identity',
+                        property: 'color'
                     },
                     'line-width': 3,
 
@@ -612,8 +716,8 @@ class RTPProjectDataLayer extends LayerContainer {
                 type: 'fill',
                 paint: {
                     "fill-color": {
-                        type:'identity',
-                        property:'color'
+                        type: 'identity',
+                        property: 'color'
                     },
                     "fill-opacity": [
                         "interpolate",
@@ -632,20 +736,31 @@ class RTPProjectDataLayer extends LayerContainer {
             if (feature.properties.icon) {
                 let symbol = feature.properties.icon
                 let layerID = 'poi-' + symbol;
-                if (!map.getLayer(layerID)) {
-                    map.addLayer({
-                        'id': layerID,
-                        'type': 'symbol',
-                        'source': 'county_symbols',
-                        'layout': {
-                            'icon-image': symbol,
-                            'icon-allow-overlap': true
-                        },
-                        'filter': ['==', 'icon', symbol]
-                    })
+                if (!this.mapboxMap.getLayer(layerID)) {
+                    this.mapboxMap.loadImage(`mapIcons/${symbol}.png`,
+                        (error, image) => {
+                            if (error) return 0;
+                            if (!this.mapboxMap.hasImage(symbol)) {
+                                this.mapboxMap.addImage(symbol, image);
+                            }
+
+                            if (!this.mapboxMap.getLayer(layerID)) {
+                                this.mapboxMap.addLayer({
+                                    'id': layerID,
+                                    'type': 'symbol',
+                                    'source': 'county_symbols',
+                                    'layout': {
+                                        'icon-image': symbol,
+                                        'icon-allow-overlap': true,
+                                        'icon-size': iconSizes[symbol] || 0.4
+                                    },
+                                    'filter': ['==', 'icon', symbol]
+                                })
+                            }
+                        }
+                    )
 
                 }
-
             }
         })
 

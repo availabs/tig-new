@@ -7,38 +7,43 @@ import {HOST} from "../../map/layers/layerHost";
 import fetcher from "../../map/wrappers/fetcher";
 import {useParams} from "react-router-dom";
 
-const fetchData = (dataset, rtp_id='Select All', year='Select All', project_type='Select All', plan_portion='Select All', sponsor='Select All') => {
-    const url = `${HOST}/views/${dataset}/table.json`
-    const params = (len) => `?length=${len}&_=1640813298306`
-    return fetcher(url).then(res => fetcher(url + params(res.recordsFiltered || 50)))
+const columns = {rtp_id: 'rtp id', description: 'description', year: 'year', estimated_cost: 'estimated cost', ptype: 'project type', plan_portion: 'plan portion', sponsor: 'sponsor', name: 'county', actions: 'actions'}
+
+
+const fetchData = (view, falcor) => {
+    return falcor.get(["tig", 'rtp_project_data', "byId", view, 'data_overlay']).then(d => get(d, ['json', "tig", 'rtp_project_data', "byId", view, 'data_overlay'],[]))
 }
 
-const processData = (data) => {
-    const columns = ['rtp id', 'description', 'year', 'estimated cost', 'project type', 'plan portion', 'sponsor', 'county', 'actions']
-    data = data.map(row => {
-        return row.reduce((acc, r, rI) => {
-            acc[columns[rI]] = r
-            return acc
-        }, {})
-    }, [])
+const processData = (data, searchId, viewId) => {
+    data = data
+        .filter(r => !searchId || r.rtp_id === searchId)
+        .map(row => {
+            return Object.keys(row).reduce((acc, r, rI) => {
+                acc[columns[r]] = row[r]
+                return acc
+            }, {actions: `/views/${viewId}/map?search=${row.rtp_id}`})
+        }, [])
+    console.log(data)
     return data
 }
+
 const RenderTable = (data, pageSize) => useMemo(() =>
     <Table
         data={data}
         columns={
-            Object.keys(data[0] || {}).map(c => ({
-                Header: c,
-                accessor: c,
-                align: 'center'
-            }))
+            Object.values(columns)
+                .map(c => ({
+                    Header: c,
+                    accessor: c,
+                    align: 'center'
+                }))
         }
         initialPageSize={pageSize}
         pageSize={pageSize}
         striped={true}
     />, [data, pageSize])
 
-const RtpProjectDataTable = ({name}) => {
+const RtpProjectDataTable = ({name, searchId}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams()
     const [loading, setLoading] = useState(false)
@@ -66,10 +71,13 @@ const RtpProjectDataTable = ({name}) => {
     }
 
     useEffect(async () => {
-        let d = await fetchData(viewId)
-        setData(processData(get(d, 'data', [])))
+        setLoading(true)
+        let d = await fetchData(viewId, falcor)
+        setData(processData(d, searchId, viewId))
+        setLoading(false)
+
     }, []);
-    console.log('data', data)
+
     return (
         <div className='w-full'>
             <div> {name} </div>

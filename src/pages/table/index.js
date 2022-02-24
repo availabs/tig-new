@@ -29,7 +29,7 @@ const Table = withAuth(({ mapOptions,layers,views}) => {
     return (
         <TigLayout>
             <div className='w-full flex-1 flex'>   
-                <CurrTable name={name}/>
+                <CurrTable name={name} searchId={window.location.href.split('search=')[1]} />
             </div>
         </TigLayout>
     )

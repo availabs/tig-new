@@ -8,6 +8,7 @@ import mapboxgl from "mapbox-gl";
 import flatten from "lodash.flatten";
 import * as d3scale from "d3-scale"
 import counties from "../config/counties.json";
+import centroid from "@turf/centroid";
 
 class SED2040TazLevelForecastLayer extends LayerContainer {
     constructor(props) {
@@ -129,6 +130,34 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     }
 
     infoBoxes = [
+        {
+            Component: ({layer}) => {
+
+                return (
+                    <div className="relative pt-1">
+                        <div className={'flex mt-5'}>
+                            <label className={'self-center mr-1'} htmlFor={'search'}>Taz Search: </label>
+                            <input
+                                className={'p-1'}
+                                id={'search'}
+                                type={'text'}
+                                name={'search'}
+                                onChange={e => {
+                                    let v = e.target.value
+                                    if (!e.target.value.length) {
+                                        v = 'Select All'
+                                    }
+                                    layer.onFilterChange('taz', v)
+                                    layer.dispatchUpdate(layer, {taz: v})
+                                }}
+                                placeholder={'search...'}/>
+                        </div>
+                    </div>
+                )
+            },
+            width: 450
+        },
+
         {
             Component: ({layer}) => {
                 const setBubble = (range, bubble) => {
@@ -289,6 +318,12 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         }
 
         this.legend.domain = domains[this.filters.dataset.value] || (this.processedData || []).map(d => d.value).filter(d => d).sort()
+        this.updateLegendTitle()
+    }
+
+    updateLegendTitle() {
+        this.legend.Title = `${this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name}, 
+                                Year: ${this.filters.year.value}`
     }
 
     getBounds() {
@@ -298,8 +333,13 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
     }
 
-    zoomToGeography() {
+    zoomToGeography(value) {
         if (!this.mapboxMap) return;
+
+        if (value) {
+            this.mapboxMap.easeTo({center: value, zoom: 11})
+            return;
+        }
 
         const bounds = this.getBounds();
 
@@ -359,6 +399,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
 
                 this.updateLegendDomain()
 
+
                 // geography setup
                 let geo = get(res,'json.geo',{})
                 const geographies = flatten(states.map(s => geo[s].geoLevels));
@@ -379,9 +420,6 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         let view = this.filters.dataset.value || this.vid
         return falcor.get(["tig", "sed_taz", "byId", view, 'data_overlay'])
             .then(response =>{
-                this.legend.Title = this.filters.dataset.domain.filter(d => d.value.toString() === view.toString())[0].name
-                this.updateLegendDomain()
-
                 let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
 
                 this.data = get(response, ["json", "tig", "sed_taz", "byId", view, 'data_overlay'], [])
@@ -392,6 +430,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     this.filters.year.value = this.filters.year.domain[0];
                 }
 
+                this.updateLegendDomain()
             })
     }
 
@@ -409,14 +448,23 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                 break;
             }
             case "dataset":{
-                this.legend.Title = `${this.filters.dataset.domain.filter(d => d.value.toString() === value.toString())[0].name}`
                 this.updateLegendDomain()
                 break;
             }
 
             case "geography": {
-                this.zoomToGeography(value);
+                this.zoomToGeography();
                 this.saveToLocalStorage();
+                break;
+            }
+
+            case "taz": {
+                let geom = JSON.parse(get(this.data.filter(d => d.area === value), [0, 'geom'], '{}'))
+                if (geom && Object.keys(geom).length) {
+                    this.zoomToGeography(get(centroid(geom), ['geometry', 'coordinates']))
+                }else{
+                    this.zoomToGeography();
+                }
                 break;
             }
 
