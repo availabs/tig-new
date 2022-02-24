@@ -8,6 +8,7 @@ import {filters} from 'pages/map/layers/npmrds/filters.js'
 import flatten from "lodash.flatten";
 import mapboxgl from "mapbox-gl";
 import shpwrite from "../../../utils/shp-write";
+import centroid from "@turf/centroid";
 
 class SED2040CountyLevelForecastLayer extends LayerContainer {
     constructor(props) {
@@ -133,6 +134,104 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         }
     ]
 
+    infoBoxes = [
+        {
+            Component: ({layer}) => {
+
+                return (
+                    <div className="relative pt-1">
+                        <div className={'flex mt-5'}>
+                            <label className={'self-center mr-1'} htmlFor={'search'}>County Search: </label>
+                            <input
+                                className={'p-1'}
+                                id={'search'}
+                                type={'text'}
+                                name={'search'}
+                                onChange={e => {
+                                    let v = e.target.value
+                                    if (!e.target.value.length) {
+                                        v = 'Select All'
+                                    }
+                                    layer.onFilterChange('county', v)
+                                    layer.dispatchUpdate(layer, {county: v})
+                                }}
+                                placeholder={'search...'}/>
+                        </div>
+                    </div>
+                )
+            },
+            width: 450
+        },
+
+        {
+            Component: ({layer}) => {
+                const setBubble = (range, bubble) => {
+                    const val = range.value;
+                    const min = range.min ? range.min : 0;
+                    const max = range.max ? range.max : 100;
+                    const newVal = Number(((val - min) * 100) / (max - min));
+                    bubble.innerHTML = layer.filters.year.domain[val];
+
+                    // Sorta magic numbers based on size of the native UI thumb
+                    bubble.style.left = `calc(${newVal}% + (${50 - newVal}px))`;
+                }
+
+                let range = document.getElementById('yearRange'),
+                    bubble = document.getElementById('yearRangeBubble');
+
+                if(range){
+                    range.addEventListener("input", () => {
+                        setBubble(range, bubble);
+                    });
+                    setBubble(range, bubble);
+                }
+                return (
+                    <div className="relative pt-1">
+                        <label htmlFor="yearRange" className="form-label">Year</label>
+                        <output id="yearRangeBubble" className="bubble text-sm" style={{
+                            padding: '1px 14px',
+                            marginTop: '1.95rem',
+                            position: 'absolute',
+                            borderRadius: '2px',
+                            left: '50%',
+                            transform: 'translateX(-50%)'}}></output>
+
+                        <div className={'flex mt-10'}>
+                            <div>{layer.filters.year.domain[0]}</div>
+                            <input
+                                type="range"
+                                className="
+                                      form-range
+                                      appearance-none
+                                      w-full
+                                      h-6
+                                      p-0
+                                      bg-transparent
+                                      focus:outline-none focus:ring-0 focus:shadow-none
+                                    "
+                                min={0}
+                                max={layer.filters.year.domain.length - 1}
+                                step={1}
+                                defaultValue={0}
+                                id="yearRange"
+                                name="yearRange"
+                                onChange={e => {
+                                    // layer.filters.year.value = layer.filters.year.domain[e.target.value]
+                                    // document.getElementById('yearRange').value = e.target.value
+                                    layer.filters.year.onChange()
+                                    layer.onFilterChange('year', layer.filters.year.domain[e.target.value])
+                                    layer.dispatchUpdate(layer, {year: layer.filters.year.domain[e.target.value]})
+                                }}
+                            />
+                            <div>{layer.filters.year.domain[layer.filters.year.domain.length - 1]}</div>
+                        </div>
+                    </div>
+                )
+            },
+            width: 450
+        }
+    ]
+
     download(){
         const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
             (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
@@ -185,8 +284,6 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                     geoJSON.features.push(feat)
                 }
             });
-        console.log('counts', _.uniq(geoJSON.features.map(f => f.geometry.type)), geoJSON.features.filter(f => f.geometry.type === 'Polygon').length, geoJSON.features.filter(f => f.geometry.type === 'MultiPolygon').length)
-
 
         shpwrite.download(
             geoJSON,
@@ -239,15 +336,29 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         }
 
         this.legend.domain = domains[this.filters.dataset.value] || domains["45"]
+
+        this.updateLegendTitle()
     }
+
+    updateLegendTitle() {
+        this.legend.Title = `${this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name}, 
+                                Year: ${this.filters.year.value}`
+    }
+
     getBounds() {
         let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
             filtered = this.geographies.filter(({ value }) => geoids.includes(value));
 
         return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
     }
-    zoomToGeography() {
+
+    zoomToGeography(value) {
         if (!this.mapboxMap) return;
+
+        if (value) {
+            this.mapboxMap.easeTo({center: value, zoom: 9})
+            return;
+        }
 
         const bounds = this.getBounds();
 
@@ -325,21 +436,21 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
     fetchData(falcor) {
         let view = this.filters.dataset.value || this.vid
 
-        return falcor.get(["tig", this.type.includes('2055') ? this.type : "sed_county", "byId", view, 'data_overlay'])
+        return falcor.get(["tig", this.type.includes('2055') ? "sed_county" : "sed_county", "byId", view, 'data_overlay'])
             .then(response =>{
-                this.data = get(response, ["json", "tig", this.type.includes('2055') ? this.type : "sed_county", "byId", view, 'data_overlay'], [])
-
-                this.legend.Title = this.filters.dataset.domain.filter(d => d.value.toString() === view.toString())[0].name
-                this.updateLegendDomain()
+                this.data = get(response, ["json", "tig", this.type.includes('2055') ? "sed_county" : "sed_county", "byId", view, 'data_overlay'], [])
 
                 if(!this.filters.year.domain.length){
                     this.filters.year.domain = _.uniq(this.data.reduce((acc, curr) => [...acc, ...Object.keys(curr.data)], []));
                     this.filters.year.value = this.filters.year.domain[0];
                 }
+
+                this.updateLegendDomain()
+
                 let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
 
                 this.data_counties = this.data
-                    .filter(item => geoids.includes(counties.filter(c => c.name === item.area)[0].geoid))
+                    .filter(item => geoids.includes(get(counties.filter(c => c.name === item.area), [0], {}).geoid))
                     .map(item =>{
                     return counties
                         .reduce((a,c) =>{
@@ -361,19 +472,29 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 this.filters.year.domain = _.uniq(this.data.reduce((acc, curr) => [...acc, ...Object.keys(curr.data)], []));
                 this.filters.year.value = value;
 
+                if(value && document.getElementById('yearRange').value.toString() !== this.filters.year.domain.indexOf(value).toString()){
+                    document.getElementById('yearRange').value = this.filters.year.domain.indexOf(value).toString()
+                }
+                this.dispatchUpdate(this, {year: value})
                 this.updateLegendDomain()
                 break;
             }
             case "dataset":{
-                this.legend.Title = `${this.filters.dataset.domain.filter(d => d.value.toString() === value.toString())[0].name}`
-
                 this.updateLegendDomain()
                 break;
             }
             case "geography": {
-                //console.log('new geography', newValue)
-                this.zoomToGeography(value);
+                this.zoomToGeography();
                 this.saveToLocalStorage();
+                break;
+            }
+            case "county": {
+                let geom = JSON.parse(get(this.data.filter(d => d.area === value), [0, 'geom'], '{}'))
+                if (geom && Object.keys(geom).length) {
+                    this.zoomToGeography(get(centroid(geom), ['geometry', 'coordinates']))
+                }else{
+                    this.zoomToGeography();
+                }
                 break;
             }
             default:{
@@ -413,7 +534,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
             })
             return acc
         },[])
-        console.log('pd', this.processedData, this.data, this.data_counties, this.filters.year.value)
+
 
         const colorScale = this.getColorScale(this.processedData),
             colors = this.processedData.reduce((a,c) =>{
