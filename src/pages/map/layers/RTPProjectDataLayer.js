@@ -384,7 +384,8 @@ class RTPProjectDataLayer extends LayerContainer {
     }
 
     updateLegendTitle() {
-        this.legend.Title = `${this.filters.dataset.domain.reduce((a, c) => {
+        this.legend.Title = `${this.source},
+        ${this.filters.dataset.domain.reduce((a, c) => {
             if (c.value === this.filters.dataset.value) {
                 a = c.name
             }
@@ -480,7 +481,7 @@ class RTPProjectDataLayer extends LayerContainer {
         falcor.get(['tig', 'views', 'byLayer', 'rtp_project_data'], ["geo", states, "geoLevels"])
             .then(res => {
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
-
+                this.source = get(views, [0, 'source_name'], '')
                 this.filters.dataset.domain = views.map(v => ({
                     value: v.id,
                     name: v.name

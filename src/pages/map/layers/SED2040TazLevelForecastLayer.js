@@ -322,7 +322,9 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     }
 
     updateLegendTitle() {
-        this.legend.Title = `${this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name}, 
+        this.legend.Title = `
+        ${this.source},
+        ${this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name}, 
                                 Year: ${this.filters.year.value}`
     }
 
@@ -393,7 +395,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         falcor.get(['tig', 'views', 'byLayer', this.type], ["geo", states, "geoLevels"])
             .then(res => {
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
-
+                this.source = get(views, [0, 'source_name'], '')
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
 

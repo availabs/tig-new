@@ -281,6 +281,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
 
         falcor.get(['tig', 'views', 'byLayer', this.type], ["geo", states, "geoLevels"])
             .then(res => {
+                this.source = get(res, ['json', 'tig', 'views', 'byLayer', this.type, 'source_name'], '')
                 let geo = get(res, 'json.geo', {})
                 const geographies = flatten(states.map(s => geo[s].geoLevels));
 
@@ -330,7 +331,8 @@ class HubBoundTravelDataLayer extends LayerContainer {
     }
 
     updateLegendTitle(value) {
-        this.legend.Title = `${this.name} 
+        this.legend.Title = `
+                ${this.name},
                 Mode:${this.filters.mode_name.value},
                 Year:${this.filters.year.value},
                 From:${this.filters.from.value} to ${this.filters.to.value}, 

@@ -247,6 +247,14 @@ class ACSCensusLayer extends LayerContainer {
         }
 
         this.legend.domain = domains[this.filters.dataset.value + '-' + this.filters.column.value]
+        this.updateLegendTitle()
+    }
+
+    updateLegendTitle() {
+        this.legend.Title = `${this.source},
+        ${this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name},
+        ${this.filters.column.domain.reduce((acc, d) => d.value === this.filters.column.value ? d.name : acc, '')}
+        `
     }
 
     init(map, falcor) {
@@ -254,6 +262,7 @@ class ACSCensusLayer extends LayerContainer {
         return falcor.get(['tig', 'views', 'byLayer', 'acs_census'], ["geo", states, "geoLevels"])
             .then(res => {
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', 'acs_census'], [])
+                this.source = get(views, [0, 'source_name'], '')
                 this.filters.dataset.domain = views.map(v => ({
                     value: v.id,
                     name: v.name
@@ -287,7 +296,6 @@ class ACSCensusLayer extends LayerContainer {
                 .then(response => {
                     this.data = get(response, ['json', "tig", "acs_census", "byId", categoryValue, 'data_overlay'], [])
 
-                    this.legend.Title = this.filters.dataset.domain.filter(d => d.value === categoryValue)[0].name
                     this.updateLegendDomain()
 
                     let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
@@ -380,10 +388,9 @@ class ACSCensusLayer extends LayerContainer {
         }
         switch (filterName) {
             case "dataset": {
-                this.legend.Title = `${this.filters.dataset.domain.filter(d => d.value === value)[0].name}`
                 // this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
-
                 this.updateColumnNames()
+                this.updateLegendTitle()
                 break;
             }
             case "column": {
