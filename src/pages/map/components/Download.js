@@ -23,8 +23,8 @@ const Download = ({inactiveLayers, activeLayers, MapActions, ...rest}) => {
                     </div>
 
                     {loading && (
-                        <div id={lI} className={'flex'}>
-                            <ScalableLoading scale={0.3}/>
+                        <div id={lI} className={'flex text-xs'}>
+                            <div className={'self-center'}><ScalableLoading scale={0.3}/></div>
                             The exporting task has been created, it may take a short while to get processed. Please
                             don't navigate away from page.</div>
                     )}

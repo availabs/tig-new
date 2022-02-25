@@ -7,8 +7,9 @@ import _ from 'lodash'
 import {filters} from 'pages/map/layers/npmrds/filters.js'
 import flatten from "lodash.flatten";
 import mapboxgl from "mapbox-gl";
-import shpwrite from "../../../utils/shp-write";
 import centroid from "@turf/centroid";
+import {download as shpDownload} from "../../../utils/shp-write";
+
 
 class SED2040CountyLevelForecastLayer extends LayerContainer {
     constructor(props) {
@@ -259,7 +260,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         d
             .map(t => {
                 return {
-                    type: "feature",
+                    type: "Feature",
                     properties: Object.keys(t).filter(t => t !== 'geom').reduce((acc, curr) => ({...acc, [curr]: t[curr]}) , {}),
                     geometry: t.geom
                 }
@@ -285,7 +286,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 }
             });
 
-        return Promise.resolve(shpwrite.download(
+        return Promise.resolve(shpDownload(
             geoJSON,
             {
                 file: filename,

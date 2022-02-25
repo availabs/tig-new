@@ -158,6 +158,7 @@ class TestTipLayer extends LayerContainer {
         type: "ordinal",
         domain: [],
         range: [],
+        icons: [],
         height: 5,
         width: 350,
         direction: "vertical",
@@ -369,6 +370,7 @@ class TestTipLayer extends LayerContainer {
     updateLegendDomain() {
         this.legend.domain = symbology.map(d => d.value)
         this.legend.range = symbology.map(d => d.color)
+        this.legend.icons = this.legend.domain.map(i => `mapIcons/${symbols_map[i]}.png`)
     }
 
     getBounds() {

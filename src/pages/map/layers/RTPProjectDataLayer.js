@@ -3,7 +3,7 @@ import {useTheme} from "@availabs/avl-components";
 import {filters} from 'pages/map/layers/npmrds/filters.js'
 import get from "lodash.get";
 import flatten from "lodash.flatten";
-import shpwrite from "../../../utils/shp-write";
+import {download as shpDownload} from "../../../utils/shp-write";
 import mapboxgl from "mapbox-gl";
 import {Link} from "react-router-dom";
 import _ from "lodash";
@@ -155,6 +155,7 @@ class RTPProjectDataLayer extends LayerContainer {
         type: "ordinal",
         domain: [],
         range: [],
+        icons: [],
         height: 5,
         width: 320,
         direction: "vertical",
@@ -359,8 +360,7 @@ class RTPProjectDataLayer extends LayerContainer {
                 }
             });
 
-
-        return Promise.resolve(shpwrite.download(
+        return Promise.resolve(shpDownload(
             geoJSON,
             {
                 file: filename,
@@ -379,6 +379,7 @@ class RTPProjectDataLayer extends LayerContainer {
     updateLegendDomain() {
         this.legend.domain = symbology.map(d => d.value)
         this.legend.range = symbology.map(d => d.color)
+        this.legend.icons = this.legend.domain.map(i => `mapIcons/${symbols_map[i]}.png`)
     }
 
     updateLegendTitle() {

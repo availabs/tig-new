@@ -192,8 +192,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                     type: "Feature",
                     id: item['id'],
                     properties: {
-                        "name": item['loc_name'],
-                        "sector": item['sector_name'],
+                        ...item
                     },
                     geometry: {
                         type: "Point",
