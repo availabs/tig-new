@@ -175,7 +175,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         }
     ]
 
-    download() {
+    download(setLoading) {
         const filename = this.filters.dataset.domain.reduce((acc, d) => {
             if(d.value === this.filters.dataset.value){
                 acc = d.name
@@ -240,7 +240,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                 }
             });
 
-        shpwrite.download(
+        return Promise.resolve(shpwrite.download(
             geoJSON,
             {
                 file: filename,
@@ -253,9 +253,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                     polygonm: filename + ' multiPolygon',
                 }
             }
-        );
-
-        return Promise.resolve()
+        )).then(setLoading(false))
     }
 
     getBounds() {

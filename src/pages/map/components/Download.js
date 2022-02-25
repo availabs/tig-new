@@ -1,41 +1,38 @@
 import React from "react"
-
-import { Select, useTheme,/*CollapsibleSidebar*/ } from "@availabs/avl-components"
-
+import {ScalableLoading} from "@availabs/avl-components";
 
 
-const Download = ({ inactiveLayers, activeLayers, MapActions, ...rest }) => {
-  const [loading, setLoading] = React.useState(false)
-  const theme = useTheme();
+const Download = ({inactiveLayers, activeLayers, MapActions, ...rest}) => {
+    const [loading, setLoading] = React.useState(false);
+    const [layer, setLayer] = React.useState();
 
-  const download = (layer) => {
-      if(layer.download) {
-        setLoading(true)
-        layer
-          .download()
-          .then(d => {
-            console.log('done')
-            setLoading(false)
-          })
-      }
-  }
+    React.useEffect(() => {
+        return layer && layer.download ? layer.download(setLoading) : ''
+    }, [layer])
+    return (
+        <>
+            <h4>Download</h4>
+            {activeLayers.map((layer, lI) =>
+                <div key={layer.name}>
+                    <div className='cursor-pointer' onClick={async (e) => {
+                        e.preventDefault();
+                        setLayer(layer)
+                        setLoading(true)
+                    }}>
+                        {layer.name}
+                    </div>
 
-  return (
-    <>
-      <h4>Download</h4>
-      { activeLayers.map(layer =>
-          <div key={layer.name}>
-            <div className='cursor-pointer' onClick={e => download(layer)}>
-            {layer.name}
-            </div>
-            {
-              loading ? <div> download processing ... </div> : ''
+                    {loading && (
+                        <div id={lI} className={'flex'}>
+                            <ScalableLoading scale={0.3}/>
+                            The exporting task has been created, it may take a short while to get processed. Please
+                            don't navigate away from page.</div>
+                    )}
+                </div>
+            )
             }
-          </div>
-        )
-      }
-    </>
-  )
+        </>
+    )
 }
 
 export default Download

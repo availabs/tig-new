@@ -284,7 +284,7 @@ class TestTipLayer extends LayerContainer {
         }
     ]
 
-    download() {
+    download(setLoading) {
         const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
             (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
 
@@ -350,7 +350,7 @@ class TestTipLayer extends LayerContainer {
             });
 
 
-        shpwrite.download(
+        return Promise.resolve(shpwrite.download(
             geoJSON,
             {
                 file: filename,
@@ -363,9 +363,7 @@ class TestTipLayer extends LayerContainer {
                     polygonm: filename + ' multiPolygon',
                 }
             }
-        );
-
-        return Promise.resolve()
+        )).then(setLoading(false))
     }
 
     updateLegendDomain() {

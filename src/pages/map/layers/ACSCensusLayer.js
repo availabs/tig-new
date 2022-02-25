@@ -8,9 +8,7 @@ import {filters} from 'pages/map/layers/npmrds/filters.js'
 import mapboxgl from "mapbox-gl";
 import flatten from "lodash.flatten";
 import centroid from "@turf/centroid";
-
-var shpwrite = require('utils/shp-write');
-
+import {download as shpDownload} from "utils/shp-write";
 
 class ACSCensusLayer extends LayerContainer {
     constructor(props) {
@@ -148,7 +146,7 @@ class ACSCensusLayer extends LayerContainer {
         }
     ]
 
-    download() {
+    download(setLoading) {
         const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
             (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
 
@@ -204,7 +202,7 @@ class ACSCensusLayer extends LayerContainer {
         console.log('counts', _.uniq(geoJSON.features.map(f => f.geometry.type)), geoJSON.features.filter(f => f.geometry.type === 'Polygon').length, geoJSON.features.filter(f => f.geometry.type === 'MultiPolygon').length)
 
 
-        shpwrite.download(
+        return Promise.resolve(shpDownload(
             geoJSON,
             {
                 file: filename,
@@ -216,9 +214,7 @@ class ACSCensusLayer extends LayerContainer {
                     polygonm: filename,
                 }
             }
-        );
-
-        return Promise.resolve()
+        )).then(setLoading(false));
     }
 
     updateColumnNames() {
@@ -246,7 +242,7 @@ class ACSCensusLayer extends LayerContainer {
             '143-value': [0, 142, 276, 483, 902, 5520], '143-percentage': [0, 3.89, 7.36, 12.87, 23.01, 100]
         }
 
-        this.legend.domain = domains[this.filters.dataset.value + '-' + this.filters.column.value]
+        this.legend.domain = domains[this.filters.dataset.value + '-' + this.filters.column.value] || domains['22-value']
         this.updateLegendTitle()
     }
 

@@ -170,7 +170,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
         }
     ]
 
-    download() {
+    download(setLoading) {
         const filename = `hub_bound_travel_data__${this.filters.year.domain[0]}_${this.filters.year.domain[this.filters.year.domain.length - 1]}_year${this.filters.year.value}_hour${this.filters.from.value}_${this.filters.to.value}_${this.filters.mode_name.value}_${this.filters.direction.value}`
 
         let data = this.data
@@ -203,7 +203,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
             })
         };
 
-        shpwrite.download(
+        return Promise.resolve(shpwrite.download(
             geoJSON,
             {
                 file: filename,
@@ -216,9 +216,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                     polygonm: filename + ' multiPolygon',
                 }
             }
-        );
-
-        return Promise.resolve()
+        )).then(setLoading(false))
     }
 
     getBounds() {

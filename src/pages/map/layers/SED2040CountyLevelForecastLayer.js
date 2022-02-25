@@ -232,7 +232,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         }
     ]
 
-    download(){
+    download(setLoading){
         const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
             (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
 
@@ -285,7 +285,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 }
             });
 
-        shpwrite.download(
+        return Promise.resolve(shpwrite.download(
             geoJSON,
             {
                 file: filename,
@@ -297,9 +297,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                     polygonm: filename,
                 }
             }
-        );
-
-        return Promise.resolve()
+        )).then(setLoading(false));
     }
 
     updateLegendDomain() {
