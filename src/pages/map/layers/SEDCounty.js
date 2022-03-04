@@ -140,11 +140,12 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
             Component: ({layer}) => {
 
                 return (
-                    <div className="relative pt-1">
-                        <div className={'flex mt-5'}>
-                            <label className={'self-center mr-1'} htmlFor={'search'}>County Search: </label>
+                    <div className="relative border-top">
+                        <div className={''}>
+                            <label className={'self-center mr-1 text-sm font-light'} htmlFor={'search'}>County Search:</label>
+                            
                             <input
-                                className={'p-1'}
+                                className={'p-1 w-full border'}
                                 id={'search'}
                                 type={'text'}
                                 name={'search'}
@@ -156,7 +157,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                                     layer.onFilterChange('county', v)
                                     layer.dispatchUpdate(layer, {county: v})
                                 }}
-                                placeholder={'search...'}/>
+                                placeholder={'ex: Queens'}/>
                         </div>
                     </div>
                 )
@@ -187,8 +188,8 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                     setBubble(range, bubble);
                 }
                 return (
-                    <div className="relative pt-1">
-                        <label htmlFor="yearRange" className="form-label">Year</label>
+                    <div className="relative  p-4">
+                        <label htmlFor="yearRange" className="form-label text-sm font-light">Year</label>
                         <output id="yearRangeBubble" className="bubble text-sm" style={{
                             padding: '1px 14px',
                             marginTop: '1.95rem',
@@ -340,10 +341,17 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
     }
 
     updateLegendTitle() {
-        this.legend.Title = `
-        ${this.source},
-        ${this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name}, 
-                                Year: ${this.filters.year.value}`
+        this.legend.Title = <div>
+                <div>{this.source}</div>
+                <div className='text-sm text-italic font-light'>{this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name}</div>
+                <div className='text-sm text-italic font-light'>Year: {this.filters.year.value}</div>
+                <div></div>
+        </div>
+
+        // `
+        // ,
+        // , 
+        //                         `
     }
 
     getBounds() {
@@ -414,7 +422,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
 
                 this.source = get(views, [0, 'source_name'], '')
-                console.log('hello', this.source )
+                //console.log('hello', this.source, views)
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
 
