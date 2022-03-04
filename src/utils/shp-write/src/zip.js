@@ -10,14 +10,14 @@ module.exports = function(gj, options, aliasString, tmcMetaString) {
     [geojson.point(gj), geojson.line(gj), geojson.multiline(gj), geojson.polygon(gj), geojson.polygonm(gj)]
         .forEach(function(l) {
         if (l.geometries.length && l.geometries[0].length) {
-            console.log('l.geo',l)
+            // console.log('l.geo',l.geometries)
             write(
                 // field definitions
                 l.properties,
                 // geometry type
                 l.type,
                 // geometries
-                l.geometries[0].map(d => [d]),
+                (l.type === 'POINT' ? l.geometries : l.type === 'POLYLINE' ? l.geometries : l.geometries[0].map(d => [d])),
                 function(err, files) {
                     var fileName = options && options.types[l.type.toLowerCase()] ? options.types[l.type.toLowerCase()] : l.type;
                     layers.file(fileName + '.shp', files.shp.buffer, { binary: true });

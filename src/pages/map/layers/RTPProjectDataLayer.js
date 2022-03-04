@@ -3,7 +3,7 @@ import {useTheme} from "@availabs/avl-components";
 import {filters} from 'pages/map/layers/npmrds/filters.js'
 import get from "lodash.get";
 import flatten from "lodash.flatten";
-import shpwrite from "../../../utils/shp-write";
+import {download as shpDownload} from "../../../utils/shp-write";
 import mapboxgl from "mapbox-gl";
 import {Link} from "react-router-dom";
 import _ from "lodash";
@@ -155,6 +155,7 @@ class RTPProjectDataLayer extends LayerContainer {
         type: "ordinal",
         domain: [],
         range: [],
+        icons: [],
         height: 5,
         width: 320,
         direction: "vertical",
@@ -294,7 +295,7 @@ class RTPProjectDataLayer extends LayerContainer {
         }
     ]
 
-    download() {
+    download(setLoading) {
         const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
             (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
 
@@ -359,8 +360,7 @@ class RTPProjectDataLayer extends LayerContainer {
                 }
             });
 
-
-        shpwrite.download(
+        return Promise.resolve(shpDownload(
             geoJSON,
             {
                 file: filename,
@@ -373,18 +373,18 @@ class RTPProjectDataLayer extends LayerContainer {
                     polygonm: filename + ' multiPolygon',
                 }
             }
-        );
-
-        return Promise.resolve()
+        )).then(setLoading(false))
     }
 
     updateLegendDomain() {
         this.legend.domain = symbology.map(d => d.value)
         this.legend.range = symbology.map(d => d.color)
+        this.legend.icons = this.legend.domain.map(i => `mapIcons/${symbols_map[i]}.png`)
     }
 
     updateLegendTitle() {
-        this.legend.Title = `${this.filters.dataset.domain.reduce((a, c) => {
+        this.legend.Title = `${this.source},
+        ${this.filters.dataset.domain.reduce((a, c) => {
             if (c.value === this.filters.dataset.value) {
                 a = c.name
             }
@@ -480,7 +480,7 @@ class RTPProjectDataLayer extends LayerContainer {
         falcor.get(['tig', 'views', 'byLayer', 'rtp_project_data'], ["geo", states, "geoLevels"])
             .then(res => {
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
-
+                this.source = get(views, [0, 'source_name'], '')
                 this.filters.dataset.domain = views.map(v => ({
                     value: v.id,
                     name: v.name

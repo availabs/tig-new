@@ -158,6 +158,7 @@ class TestTipLayer extends LayerContainer {
         type: "ordinal",
         domain: [],
         range: [],
+        icons: [],
         height: 5,
         width: 350,
         direction: "vertical",
@@ -284,7 +285,7 @@ class TestTipLayer extends LayerContainer {
         }
     ]
 
-    download() {
+    download(setLoading) {
         const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
             (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
 
@@ -350,7 +351,7 @@ class TestTipLayer extends LayerContainer {
             });
 
 
-        shpwrite.download(
+        return Promise.resolve(shpwrite.download(
             geoJSON,
             {
                 file: filename,
@@ -363,14 +364,13 @@ class TestTipLayer extends LayerContainer {
                     polygonm: filename + ' multiPolygon',
                 }
             }
-        );
-
-        return Promise.resolve()
+        )).then(setLoading(false))
     }
 
     updateLegendDomain() {
         this.legend.domain = symbology.map(d => d.value)
         this.legend.range = symbology.map(d => d.color)
+        this.legend.icons = this.legend.domain.map(i => `mapIcons/${symbols_map[i]}.png`)
     }
 
     getBounds() {
@@ -439,7 +439,7 @@ class TestTipLayer extends LayerContainer {
         falcor.get(['tig', 'views', 'byLayer', 'tip'], ["geo", states, "geoLevels"])
             .then(res => {
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
-
+                this.source = get(views, [0, 'source_name'], '')
                 this.filters.dataset.domain = views.map(v => ({
                     value: v.id,
                     name: v.name
@@ -447,6 +447,7 @@ class TestTipLayer extends LayerContainer {
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
 
                 this.updateLegendDomain()
+                this.updateLegendTitle()
 
                 // geography setup
                 let geo = get(res, 'json.geo', {})
@@ -467,7 +468,8 @@ class TestTipLayer extends LayerContainer {
     }
 
     updateLegendTitle() {
-        this.legend.Title = `${this.filters.dataset.domain.reduce((a, c) => {
+        this.legend.Title = `${this.source},
+        ${this.filters.dataset.domain.reduce((a, c) => {
             if (c.value === this.filters.dataset.value) {
                 a = c.name
             }

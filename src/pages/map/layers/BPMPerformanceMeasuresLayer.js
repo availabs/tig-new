@@ -175,7 +175,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         }
     ]
 
-    download() {
+    download(setLoading) {
         const filename = this.filters.dataset.domain.reduce((acc, d) => {
             if(d.value === this.filters.dataset.value){
                 acc = d.name
@@ -240,7 +240,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                 }
             });
 
-        shpwrite.download(
+        return Promise.resolve(shpwrite.download(
             geoJSON,
             {
                 file: filename,
@@ -253,9 +253,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                     polygonm: filename + ' multiPolygon',
                 }
             }
-        );
-
-        return Promise.resolve()
+        )).then(setLoading(false))
     }
 
     getBounds() {
@@ -343,6 +341,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
             .then(res => {
 
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', 'bpm_performance'], [])
+                this.source = get(views, [0, 'source_name'], '')
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
 
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
@@ -386,7 +385,8 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
     }
 
     updateLegendTitle(value){
-        this.legend.Title = `${this.filters.dataset.domain.reduce((acc, curr) => {
+        this.legend.Title = `${this.source},
+        ${this.filters.dataset.domain.reduce((acc, curr) => {
             if(curr.value === this.filters.dataset.value){
                 acc = curr.name
             }
