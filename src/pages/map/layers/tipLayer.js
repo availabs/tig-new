@@ -436,35 +436,10 @@ class TestTipLayer extends LayerContainer {
     init(map, falcor) {
         let states = ["36", "34", "09", "42"]
 
-        if(this.vid){
-            console.log('view id', this.vid)
-            falcor.get(['tig', 'views', 'byLayer', 'tip'], ["geo", states, "geoLevels"])
-                .then(res => {
-                    let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
-                    console.log(res, views)
+        falcor.get(['tig', 'views', 'byLayer', 'tip'], ["geo", states, "geoLevels"])
+            .then(res => {
+                let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
 
-                    this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
-                    this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
-
-                    this.updateLegendDomain()
-
-                    // geography setup
-                    let geo = get(res,'json.geo',{})
-                    const geographies = flatten(states.map(s => geo[s].geoLevels));
-
-                    this.geographies =
-                        geographies.map(geo => ({
-                            name: `${geo.geoname.toUpperCase()} ${geo.geolevel}`,
-                            geolevel: geo.geolevel,
-                            value: geo.geoid,
-                            bounding_box: geo.bounding_box
-                        }));
-                    this.zoomToGeography();
-
-<<<<<<< HEAD
-                })
-        }
-=======
                 this.filters.dataset.domain = views.map(v => ({
                     value: v.id,
                     name: v.name
@@ -487,7 +462,6 @@ class TestTipLayer extends LayerContainer {
                 this.zoomToGeography();
 
             })
->>>>>>> 6ffb555bcd16dab896ef12d37839dd53cc24be02
 
 
     }
@@ -707,4 +681,3 @@ class TestTipLayer extends LayerContainer {
 
 
 export const TestTipLayerFactory = (options = {}) => new TestTipLayer(options);
-
