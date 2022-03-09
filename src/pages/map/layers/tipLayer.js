@@ -162,7 +162,7 @@ class TestTipLayer extends LayerContainer {
         height: 5,
         width: 350,
         direction: "vertical",
-        show: true,
+        show: false,
         Title: ""
     }
     onHover = {
@@ -259,6 +259,19 @@ class TestTipLayer extends LayerContainer {
             Component: ({layer}) => {
 
                 return (
+                    <div className="relative border-top">
+                        <div className={'p-1 w-full'}>
+                            {layer.Title}
+                        </div>
+                    </div>
+                )
+            },
+            width: 450
+        },
+        {
+            Component: ({layer}) => {
+
+                return (
                     <div className="relative pt-1">
                         <div className={'flex mt-5'}>
                             <label className={'self-center pr-1'} htmlFor={'search'}>TIP Project Search: </label>
@@ -276,7 +289,7 @@ class TestTipLayer extends LayerContainer {
                                     layer.onFilterChange('tip_id', v)
                                     layer.dispatchUpdate(layer, {tip_id: v})
                                 }}
-                                placeholder={'search...'}/>
+                                placeholder={'ex: ST210694'}/>
                         </div>
                     </div>
                 )
@@ -468,28 +481,24 @@ class TestTipLayer extends LayerContainer {
     }
 
     updateLegendTitle() {
-        this.legend.Title = `${this.source},
-        ${this.filters.dataset.domain.reduce((a, c) => {
-            if (c.value === this.filters.dataset.value) {
-                a = c.name
-            }
-            return a
-        }, '')}
-                TIP Id: ${this.filters.tip_id.value === 'Select All' ? 'All' : this.filters.tip_id.value},
-                Project Type: ${this.filters.project_type.domain.reduce((a, c) => {
-            if (c === this.filters.project_type.value) {
-                a = c === 'Select All' ? 'All' : c
-            }
-            return a
-        }, '')},
-                MPO Name: ${this.filters.mpo_name.domain.reduce((a, c) => {
-            if (c === this.filters.mpo_name.value) {
-                a = c === 'Select All' ? 'All' : c
-            }
-            return a
-        }, '')},
-               sponsor: ${this.filters.sponsor.value === 'Select All' ? 'All' : ''}
-                `
+        this.Title = <div>
+            <div>{this.source}</div>
+            <div className='text-sm text-italic font-light'>{this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name}</div>
+            <div className='text-sm text-italic font-light'>TIP Id: {this.filters.tip_id.value === 'Select All' ? 'All' : this.filters.tip_id.value}</div>
+            <div className='text-sm text-italic font-light'>Project Type: {this.filters.project_type.domain.reduce((a, c) => {
+                if (c === this.filters.project_type.value) {
+                    a = c === 'Select All' ? 'All' : c
+                }
+                return a
+            }, '')}</div>
+            <div className='text-sm text-italic font-light'>MPO Name: {this.filters.mpo_name.domain.reduce((a, c) => {
+                if (c === this.filters.mpo_name.value) {
+                    a = c === 'Select All' ? 'All' : c
+                }
+                return a
+            }, '')}</div>
+            <div className='text-sm text-italic font-light'>Sponsor: {this.filters.sponsor.value === 'Select All' ? 'All' : ''}</div>
+        </div>
     }
 
     fetchData(falcor) {

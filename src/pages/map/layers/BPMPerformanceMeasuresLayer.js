@@ -93,7 +93,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         type: "quantile",
         range: getColorRange(5, "YlOrRd", true),
         domain: [],
-        show: true,
+        show: false,
         Title: "",
         format: ',d',
 
@@ -173,6 +173,22 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                 ]
             }
         }
+    ]
+
+    infoBoxes = [
+        {
+            Component: ({layer}) => {
+
+                return (
+                    <div className="relative border-top">
+                        <div className={'p-1 w-full'}>
+                            {layer.Title}
+                        </div>
+                    </div>
+                )
+            },
+            width: 450
+        },
     ]
 
     download(setLoading) {
@@ -385,31 +401,34 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
     }
 
     updateLegendTitle(value){
-        this.legend.Title = `${this.source},
-        ${this.filters.dataset.domain.reduce((acc, curr) => {
-            if(curr.value === this.filters.dataset.value){
-                acc = curr.name
-            }
-            return acc
-        }, '')}-${this.filters.column.domain.reduce((a,c) => {
-            if(c.value === this.filters.column.value){
-                a = c.name
-            }
-            return a
-        },'')}, 
-        Period: ${this.filters.period.domain.reduce((a,c) => {
-            if(c.value === this.filters.period.value){
-                a = c.name
-            }
-            return a
-        },'')},
-        Functional Class: ${this.filters.functional_class.domain.reduce((a,c) => {
-            if(c.value === this.filters.functional_class.value){
-                a = c.name
-            }
-            return a
-        },'')}
-        `
+        this.Title = <div>
+            <div>{this.source}</div>
+            <div className='text-sm text-italic font-light'>{this.filters.dataset.domain.reduce((acc, curr) => {
+                if(curr.value === this.filters.dataset.value){
+                    acc = curr.name
+                }
+                return acc
+            }, '')}</div>
+            <div className='text-sm text-italic font-light'>Column: {this.filters.column.domain.reduce((a,c) => {
+                if(c.value === this.filters.column.value){
+                    a = c.name
+                }
+                return a
+            },'')}</div>
+            <div className='text-sm text-italic font-light'>Period: {this.filters.period.domain.reduce((a,c) => {
+                if(c.value === this.filters.period.value){
+                    a = c.name
+                }
+                return a
+            },'')}</div>
+            <div className='text-sm text-italic font-light'>Functional Class: {this.filters.functional_class.domain.reduce((a,c) => {
+                if(c.value === this.filters.functional_class.value){
+                    a = c.name
+                }
+                return a
+            },'')}</div>
+        </div>
+
         this.updateLegendDomain()
     }
 

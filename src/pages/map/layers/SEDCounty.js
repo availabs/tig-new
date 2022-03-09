@@ -63,7 +63,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         type: "quantile",
         range: getColorRange(5, "YlOrRd", true),
         domain: [],
-        show: true,
+        show: false,
         Title: "",
 
     }
@@ -130,9 +130,25 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                     ["zoom"],
                     5, 0.5,
                     20, 0.1
+                ],
+            }
+        },
+        {
+            id: "Counties-line",
+            filter: false,
+            "source-layer": "counties",
+            source: "counties",
+            type: "line",
+            paint: {
+                "line-color": '#000',
+                "line-width": [
+                    "case",
+                    ["boolean", ["feature-state", "hover"], false],
+                    2,
+                    0
                 ]
             }
-        }
+        },
     ]
 
     infoBoxes = [
@@ -141,9 +157,22 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
                 return (
                     <div className="relative border-top">
+                        <div className={'p-1 w-full'}>
+                            {layer.Title}
+                        </div>
+                    </div>
+                )
+            },
+            width: 450
+        },
+        {
+            Component: ({layer}) => {
+
+                return (
+                    <div className="relative border-top">
                         <div className={''}>
                             <label className={'self-center mr-1 text-sm font-light'} htmlFor={'search'}>County Search:</label>
-                            
+
                             <input
                                 className={'p-1 w-full border'}
                                 id={'search'}
@@ -178,8 +207,8 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                     bubble.style.left = `calc(${newVal}% + (${50 - newVal}px))`;
                 }
 
-                let range = document.getElementById('yearRange'),
-                    bubble = document.getElementById('yearRangeBubble');
+                let range = document.getElementById(`yearRange-${layer.id}`),
+                    bubble = document.getElementById(`yearRangeBubble-${layer.id}`);
 
                 if(range){
                     range.addEventListener("input", () => {
@@ -189,8 +218,8 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 }
                 return (
                     <div className="relative  p-4">
-                        <label htmlFor="yearRange" className="form-label text-sm font-light">Year</label>
-                        <output id="yearRangeBubble" className="bubble text-sm" style={{
+                        <label htmlFor={`yearRange-${layer.id}`} className="form-label text-sm font-light">Year</label>
+                        <output id={`yearRangeBubble-${layer.id}`} className="bubble text-sm" style={{
                             padding: '1px 14px',
                             marginTop: '1.95rem',
                             position: 'absolute',
@@ -215,11 +244,9 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                                 max={layer.filters.year.domain.length - 1}
                                 step={1}
                                 defaultValue={0}
-                                id="yearRange"
-                                name="yearRange"
+                                id={`yearRange-${layer.id}`}
+                                name={`yearRange-${layer.id}`}
                                 onChange={e => {
-                                    // layer.filters.year.value = layer.filters.year.domain[e.target.value]
-                                    // document.getElementById('yearRange').value = e.target.value
                                     layer.filters.year.onChange()
                                     layer.onFilterChange('year', layer.filters.year.domain[e.target.value])
                                     layer.dispatchUpdate(layer, {year: layer.filters.year.domain[e.target.value]})
@@ -341,11 +368,10 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
     }
 
     updateLegendTitle() {
-        this.legend.Title = <div>
+        this.Title = <div>
                 <div>{this.source}</div>
                 <div className='text-sm text-italic font-light'>{this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name}</div>
                 <div className='text-sm text-italic font-light'>Year: {this.filters.year.value}</div>
-                <div></div>
         </div>
 
         // `
@@ -422,9 +448,10 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
 
                 this.source = get(views, [0, 'source_name'], '')
-                //console.log('hello', this.source, views)
+
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
+                console.log('hello', this.source, views, this.filters.dataset.value, parseInt(this.vid))
 
                 this.updateLegendDomain()
 
@@ -455,6 +482,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 if(!this.filters.year.domain.length){
                     this.filters.year.domain = _.uniq(this.data.reduce((acc, curr) => [...acc, ...Object.keys(curr.data)], []));
                     this.filters.year.value = this.filters.year.domain[0];
+                    console.log('l?', this)
                 }
 
                 this.updateLegendDomain()
@@ -484,8 +512,8 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 this.filters.year.domain = _.uniq(this.data.reduce((acc, curr) => [...acc, ...Object.keys(curr.data)], []));
                 this.filters.year.value = value;
 
-                if(value && document.getElementById('yearRange').value.toString() !== this.filters.year.domain.indexOf(value).toString()){
-                    document.getElementById('yearRange').value = this.filters.year.domain.indexOf(value).toString()
+                if(value && document.getElementById(`yearRange-${this.id}`) && document.getElementById(`yearRange-${this.id}`).value.toString() !== this.filters.year.domain.indexOf(value).toString()){
+                    document.getElementById(`yearRange-${this.id}`).value = this.filters.year.domain.indexOf(value).toString()
                 }
                 this.dispatchUpdate(this, {year: value})
                 this.updateLegendDomain()
@@ -501,10 +529,26 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 break;
             }
             case "county": {
-                let geom = JSON.parse(get(this.data.filter(d => d.area === value), [0, 'geom'], '{}'))
+                let geom = JSON.parse(get(this.data.filter(d => d.area.toLowerCase() === value.toLowerCase()), [0, 'geom'], '{}'))
                 if (geom && Object.keys(geom).length) {
+                    let featId =
+                        get(this.mapboxMap.queryRenderedFeatures()
+                            .filter(feats => feats.properties.geoid === get(this.data_counties.filter(dc => dc.name.toLowerCase() === value.toLowerCase()), [0, 'geoid'])), [0, 'id'])
+                   if(featId){
+                       this.mapboxMap.setFeatureState(
+                           { source: 'counties', id: featId, sourceLayer: 'counties'},
+                           { hover: true }
+                       );
+                       this.featId = featId;
+                   }
                     this.zoomToGeography(get(centroid(geom), ['geometry', 'coordinates']))
                 }else{
+                    this.mapboxMap.setFeatureState(
+                        { source: 'counties', id: this.featId, sourceLayer: 'counties'},
+                        { hover: false }
+                    );
+
+                    this.featId = null;
                     this.zoomToGeography();
                 }
                 break;
@@ -530,9 +574,11 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         }
         if (this.data_counties && this.data_counties.length) {
             map.setFilter("Counties", ["in", ["get", "geoid"], ["literal", this.data_counties.map(d => d.geoid)]]);
+            map.setFilter("Counties-line", ["in", ["get", "geoid"], ["literal", this.data_counties.map(d => d.geoid)]]);
         }
         else {
             map.setFilter("Counties", false);
+            map.setFilter("Counties-line", false);
         }
 
         this.processedData = this.data.reduce((acc,curr) =>{

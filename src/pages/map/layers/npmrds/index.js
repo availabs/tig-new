@@ -66,6 +66,19 @@ class NPMRDSLayer extends LayerContainer {
 
     infoBoxes = [
         {
+            Component: ({layer}) => {
+
+                return (
+                    <div className="relative border-top">
+                        <div className={'p-1 w-full'}>
+                            {layer.Title}
+                        </div>
+                    </div>
+                )
+            },
+            width: 450
+        },
+        {
             Component: ({layer}) => (
                 <div className='w-full bg-npmrds-600 w-full text-npmrds-100'>
 
@@ -85,16 +98,7 @@ class NPMRDSLayer extends LayerContainer {
         range: ['rgb(255,0,0)', 'rgb(255,100,0)', 'rgb(255,255,0)', 'rgb(0,100,255)', 'rgb(0,0,255)', 'rgb(0,255,255)', 'rgb(0,255,0)'],//['#d73027', '#fc8d59', '#fee090', '#e0f3f8', '#91bfdb', '#4575b4'],//['#4575b4', '#91bfdb', '#e0f3f8', '#fee090', '#fc8d59', '#d73027'],
         format: ",.1f",
         direction: 'horizontal',
-        show: true,
-        Title: ({layer}) => {
-            if (!layer) return
-            return (<div className='text-gray-800'>
-                <div>NPMRDS - {this.filters.vehicles.value}</div>
-                <div
-                    className='text-sm font-light'> {this.filters.month.value} / {this.filters.year.value} {this.filters.hour.value}:00
-                    - {this.filters.hour.value + 1}:00 {this.filters.dow.value}</div>
-            </div>)
-        },
+        show: false,
         units: "Average Speed (mph)"
     }
     onHover = {
@@ -213,6 +217,15 @@ class NPMRDSLayer extends LayerContainer {
 
     }
 
+    updateLegendTitle() {
+        this.Title = (
+            <div className='text-gray-800'>
+                <div>NPMRDS - {this.filters.vehicles.value}</div>
+                <div
+                    className='text-sm font-light'> {this.filters.month.value} / {this.filters.year.value} {this.filters.hour.value}:00
+                    - {this.filters.hour.value + 1}:00 {this.filters.dow.value}</div>
+            </div>)
+    }
     init(map, falcor) {
 
         let states = ["36", "34", "09", "42"]
@@ -241,6 +254,7 @@ class NPMRDSLayer extends LayerContainer {
     }
 
     onFilterChange(filterName, newValue, prevValue) {
+        this.updateLegendTitle()
         switch (filterName) {
 
 
@@ -284,8 +298,7 @@ class NPMRDSLayer extends LayerContainer {
             a.push(["geo", c.geolevel.toLowerCase(), c.value, "geometry"]);
             return a;
         }, [])
-
-        return falcor.get(...requests)
+        return falcor.get(...requests).then(() => this.updateLegendTitle())
         // .then((data) => {
         //   //console.log('fetchData gem requests',data)
         //   console.log('got data', data)

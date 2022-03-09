@@ -48,7 +48,7 @@ class ACSCensusLayer extends LayerContainer {
         type: "quantile",
         range: getColorRange(5, "YlOrRd", true),
         domain: [],
-        show: true,
+        show: false,
         Title: "",
         format: ',d',
     }
@@ -112,10 +112,39 @@ class ACSCensusLayer extends LayerContainer {
                     20, 0.1
                 ]
             }
+        },
+        {
+            id: "tracts-line",
+            filter: false,
+            "source-layer": "census_tracts",
+            source: "nymtc_census_tracts",
+            type: "line",
+            paint: {
+                "line-color": '#000',
+                "line-width": [
+                    "case",
+                    ["boolean", ["feature-state", "hover"], false],
+                    2,
+                    0
+                ]
+            }
         }
     ]
 
     infoBoxes = [
+        {
+            Component: ({layer}) => {
+
+                return (
+                    <div className="relative border-top">
+                        <div className={'p-1 w-full'}>
+                            {layer.Title}
+                        </div>
+                    </div>
+                )
+            },
+            width: 450
+        },
         {
             Component: ({layer}) => {
 
@@ -137,7 +166,7 @@ class ACSCensusLayer extends LayerContainer {
                                     layer.onFilterChange('census_tract', v)
                                     layer.dispatchUpdate(layer, {census_tract: v})
                                 }}
-                                placeholder={'search...'}/>
+                                placeholder={'ex: Ulster:9517'}/>
                         </div>
                     </div>
                 )
@@ -247,10 +276,12 @@ class ACSCensusLayer extends LayerContainer {
     }
 
     updateLegendTitle() {
-        this.legend.Title = `${this.source},
-        ${this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name},
-        ${this.filters.column.domain.reduce((acc, d) => d.value === this.filters.column.value ? d.name : acc, '')}
-        `
+        this.Title = <div>
+            <div>{this.source}</div>
+            <div className='text-sm text-italic font-light'>{this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name}</div>
+            <div className='text-sm text-italic font-light'>Column: {this.filters.column.value}</div>
+            <div></div>
+        </div>
     }
 
     init(map, falcor) {
@@ -410,11 +441,33 @@ class ACSCensusLayer extends LayerContainer {
             }
 
             case "census_tract": {
-                let geom = JSON.parse(get(this.data.filter(d => d.area === value), [0, 'geom'], '{}'))
+                let geom = JSON.parse(get(this.data.filter(d => d.area.toLowerCase() === value.toLowerCase()), [0, 'geom'], '{}'))
 
                 if (geom && Object.keys(geom).length) {
+                    let featId =
+                        get(this.mapboxMap.queryRenderedFeatures()
+                            .filter(feats => feats.properties.GEOID === get(this.data_tracts.filter(dc => dc.name.toLowerCase() === value.toLowerCase()), [0, 'geoid'])), [0, 'id'])
+
+                    if(featId){
+                        this.mapboxMap.setFeatureState(
+                            { source: 'nymtc_census_tracts', id: this.featId, sourceLayer: 'census_tracts'},
+                            { hover: false }
+                        );
+                        this.mapboxMap.setFeatureState(
+                            { source: 'nymtc_census_tracts', id: featId, sourceLayer: 'census_tracts'},
+                            { hover: true }
+                        );
+                        this.featId = featId;
+                    }
                     this.zoomToGeography(get(centroid(geom), ['geometry', 'coordinates']))
                 }else{
+                    console.
+                    this.mapboxMap.setFeatureState(
+                        { source: 'nymtc_census_tracts', id: this.featId, sourceLayer: 'census_tracts'},
+                        { hover: false }
+                    );
+
+                    this.featId = null;
                     this.zoomToGeography();
                 }
                 break;
@@ -443,8 +496,10 @@ class ACSCensusLayer extends LayerContainer {
         }
         if (this.data_tracts.length) {
             map.setFilter("tracts", ["in", ["get", "GEOID"], ["literal", this.data_tracts.map(d => d.geoid)]]);
+            map.setFilter("tracts-line", ["in", ["get", "GEOID"], ["literal", this.data_tracts.map(d => d.geoid)]]);
         } else {
             map.setFilter("tracts", false);
+            map.setFilter("tracts-line", false);
         }
         //
         this.processedData = this.data.reduce((acc, curr) => {

@@ -142,7 +142,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
         height: 5,
         width: 320,
         direction: "vertical",
-        show: true,
+        show: false,
         Title: ""
     }
     sources = [
@@ -170,6 +170,21 @@ class HubBoundTravelDataLayer extends LayerContainer {
         }
     ]
 
+    infoBoxes = [
+        {
+            Component: ({layer}) => {
+
+                return (
+                    <div className="relative border-top">
+                        <div className={'p-1 w-full'}>
+                            {layer.Title}
+                        </div>
+                    </div>
+                )
+            },
+            width: 450
+        },
+    ]
     download(setLoading) {
         const filename = `hub_bound_travel_data__${this.filters.year.domain[0]}_${this.filters.year.domain[this.filters.year.domain.length - 1]}_year${this.filters.year.value}_hour${this.filters.from.value}_${this.filters.to.value}_${this.filters.mode_name.value}_${this.filters.direction.value}`
 
@@ -328,12 +343,13 @@ class HubBoundTravelDataLayer extends LayerContainer {
     }
 
     updateLegendTitle(value) {
-        this.legend.Title = `
-                ${this.name},
-                Mode:${this.filters.mode_name.value},
-                Year:${this.filters.year.value},
-                From:${this.filters.from.value} to ${this.filters.to.value}, 
-                Direction: ${this.filters.direction.value}`
+        this.Title = <div>
+            <div>{this.source}</div>
+            <div className='text-sm text-italic font-light'>Mode: {this.filters.mode_name.value}</div>
+            <div className='text-sm text-italic font-light'>Year: {this.filters.year.value}</div>
+            <div className='text-sm text-italic font-light'>From: {this.filters.from.value} To: {this.filters.to.value}</div>
+            <div className='text-sm text-italic font-light'>Direction: {this.filters.direction.value}</div>
+        </div>
     }
 
     onFilterChange(filterName, value, preValue) {

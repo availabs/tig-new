@@ -159,7 +159,7 @@ class RTPProjectDataLayer extends LayerContainer {
         height: 5,
         width: 320,
         direction: "vertical",
-        show: true,
+        show: false,
         Title: ""
     }
     sources = [
@@ -265,6 +265,19 @@ class RTPProjectDataLayer extends LayerContainer {
     }
 
     infoBoxes = [
+        {
+            Component: ({layer}) => {
+
+                return (
+                    <div className="relative border-top">
+                        <div className={'p-1 w-full'}>
+                            {layer.Title}
+                        </div>
+                    </div>
+                )
+            },
+            width: 450
+        },
         {
             Component: ({layer}) => {
 
@@ -383,34 +396,35 @@ class RTPProjectDataLayer extends LayerContainer {
     }
 
     updateLegendTitle() {
-        this.legend.Title = `${this.source},
-        ${this.filters.dataset.domain.reduce((a, c) => {
-            if (c.value === this.filters.dataset.value) {
-                a = c.name
-            }
-            return a
-        }, '')}
-                Year: ${this.filters.year.value === 'Select All' ? 'All' : this.filters.year.value}, 
-                RTP Id: ${this.filters.rtp_id.value === 'Select All' ? 'All' : this.filters.rtp_id.value},
-                Project Type: ${this.filters.project_type.domain.reduce((a, c) => {
-            if (c === this.filters.project_type.value) {
-                a = c === 'Select All' ? 'All' : c
-            }
-            return a
-        }, '')},
-                Plan Portion : ${this.filters.plan_portion.domain.reduce((a, c) => {
-            if (c === this.filters.plan_portion.value) {
-                a = c === 'Select All' ? 'All' : c
-            }
-            return a
-        }, '')},
-               Sponsor: ${this.filters.sponsor.domain.reduce((a, c) => {
-            if (c === this.filters.sponsor.value) {
-                a = c === 'Select All' ? 'All' : c
-            }
-            return a
-        }, '')}
-                `
+        this.Title = <div>
+            <div>{this.source}</div>
+            <div className='text-sm text-italic font-light'>{this.filters.dataset.domain.reduce((a, c) => {
+                if (c.value === this.filters.dataset.value) {
+                    a = c.name
+                }
+                return a
+            }, '')}</div>
+            <div className='text-sm text-italic font-light'>Year: {this.filters.year.value === 'Select All' ? 'All' : this.filters.year.value}</div>
+            <div className='text-sm text-italic font-light'>RTP Id: {this.filters.rtp_id.value === 'Select All' ? 'All' : this.filters.rtp_id.value}</div>
+            <div className='text-sm text-italic font-light'>Project Type: {this.filters.project_type.domain.reduce((a, c) => {
+                if (c === this.filters.project_type.value) {
+                    a = c === 'Select All' ? 'All' : c
+                }
+                return a
+            }, '')}</div>
+            <div className='text-sm text-italic font-light'>Plan Portion: {this.filters.plan_portion.domain.reduce((a, c) => {
+                if (c === this.filters.plan_portion.value) {
+                    a = c === 'Select All' ? 'All' : c
+                }
+                return a
+            }, '')}</div>
+            <div className='text-sm text-italic font-light'>Sponsor: {this.filters.sponsor.domain.reduce((a, c) => {
+                if (c === this.filters.sponsor.value) {
+                    a = c === 'Select All' ? 'All' : c
+                }
+                return a
+            }, '')}</div>
+        </div>
     }
 
     getBounds() {
