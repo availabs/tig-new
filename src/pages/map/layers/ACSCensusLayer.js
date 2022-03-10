@@ -449,7 +449,7 @@ class ACSCensusLayer extends LayerContainer {
                             .filter(feats => feats.properties.GEOID === get(this.data_tracts.filter(dc => dc.name.toLowerCase() === value.toLowerCase()), [0, 'geoid'])), [0, 'id'])
 
                     if(featId){
-                        this.mapboxMap.setFeatureState(
+                        this.featId && this.mapboxMap.setFeatureState(
                             { source: 'nymtc_census_tracts', id: this.featId, sourceLayer: 'census_tracts'},
                             { hover: false }
                         );
@@ -461,8 +461,7 @@ class ACSCensusLayer extends LayerContainer {
                     }
                     this.zoomToGeography(get(centroid(geom), ['geometry', 'coordinates']))
                 }else{
-                    console.
-                    this.mapboxMap.setFeatureState(
+                    this.featId && this.mapboxMap.setFeatureState(
                         { source: 'nymtc_census_tracts', id: this.featId, sourceLayer: 'census_tracts'},
                         { hover: false }
                     );

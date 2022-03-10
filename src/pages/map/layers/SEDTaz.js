@@ -509,9 +509,9 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     let featId =
                         get(this.mapboxMap.queryRenderedFeatures()
                             .filter(feats => feats.properties.name === value), [0, 'id'])
-                    console.log('fid', featId)
+
                     if(featId){
-                        this.mapboxMap.setFeatureState(
+                        this.featId && this.mapboxMap.setFeatureState(
                             { source: 'nymtc_taz_2005-93y4h2', id: this.featId, sourceLayer: 'nymtc_taz_2005'},
                             { hover: false }
                         );
@@ -523,7 +523,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     }
                     this.zoomToGeography(get(centroid(geom), ['geometry', 'coordinates']))
                 }else{
-                    this.mapboxMap.setFeatureState(
+                    this.featId && this.mapboxMap.setFeatureState(
                         { source: 'nymtc_taz_2005-93y4h2', id: this.featId, sourceLayer: 'nymtc_taz_2005'},
                         { hover: false }
                     );
@@ -548,6 +548,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     }
 
     render(map, falcor) {
+        this.features = this.mapboxMap.queryRenderedFeatures();
         if (!this.data){
             return this.fetchData(falcor)
         }

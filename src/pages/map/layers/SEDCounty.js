@@ -485,7 +485,6 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 if(!this.filters.year.domain.length){
                     this.filters.year.domain = _.uniq(this.data.reduce((acc, curr) => [...acc, ...Object.keys(curr.data)], []));
                     this.filters.year.value = this.filters.year.domain[0];
-                    console.log('l?', this)
                 }
 
                 this.updateLegendDomain()
@@ -538,6 +537,11 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                         get(this.mapboxMap.queryRenderedFeatures()
                             .filter(feats => feats.properties.geoid === get(this.data_counties.filter(dc => dc.name.toLowerCase() === value.toLowerCase()), [0, 'geoid'])), [0, 'id'])
                    if(featId){
+                       this.featId &&  this.mapboxMap.setFeatureState(
+                           { source: 'counties', id: this.featId, sourceLayer: 'counties'},
+                           { hover: false }
+                       );
+
                        this.mapboxMap.setFeatureState(
                            { source: 'counties', id: featId, sourceLayer: 'counties'},
                            { hover: true }
@@ -546,7 +550,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                    }
                     this.zoomToGeography(get(centroid(geom), ['geometry', 'coordinates']))
                 }else{
-                    this.mapboxMap.setFeatureState(
+                    this.featId && this.mapboxMap.setFeatureState(
                         { source: 'counties', id: this.featId, sourceLayer: 'counties'},
                         { hover: false }
                     );

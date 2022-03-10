@@ -22,7 +22,7 @@ const TypeAhead = ({suggestions, setParentState, className, classNameMenu, place
         setFilteredSuggestions(unLinked);
         setActiveSuggestionIndex(0);
         setShowSuggestions(true);
-        setParentState(e.target.value)
+        !e.target.value && setParentState(e.target.value)
     };
 
     const onClick = (e) => {
