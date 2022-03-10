@@ -9,7 +9,7 @@ import flatten from "lodash.flatten";
 import mapboxgl from "mapbox-gl";
 import centroid from "@turf/centroid";
 import {download as shpDownload} from "../../../utils/shp-write";
-
+import TypeAhead from "../../../components/tig/TypeAhead";
 
 class SED2040CountyLevelForecastLayer extends LayerContainer {
     constructor(props) {
@@ -173,20 +173,21 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                         <div className={''}>
                             <label className={'self-center mr-1 text-sm font-light'} htmlFor={'search'}>County Search:</label>
 
-                            <input
-                                className={'p-1 w-full border'}
-                                id={'search'}
-                                type={'text'}
-                                name={'search'}
-                                onChange={e => {
-                                    let v = e.target.value
-                                    if (!e.target.value.length) {
-                                        v = 'Select All'
-                                    }
-                                    layer.onFilterChange('county', v)
-                                    layer.dispatchUpdate(layer, {county: v})
-                                }}
-                                placeholder={'ex: Queens'}/>
+                            <div>
+                               <TypeAhead
+                                   className={'p-1 w-full border'}
+                                   classNameMenu={'border-b hover:bg-blue-300'}
+                                   suggestions={layer.data_counties.map(c => c.name)}
+                                   setParentState={e => {
+                                       if (!e.length) {
+                                           e = 'Select All'
+                                       }
+                                       layer.onFilterChange('county', e)
+                                       layer.dispatchUpdate(layer, {county: e})
+                                   }}
+                                   placeholder={'ex: Queens'}
+                               />
+                            </div>
                         </div>
                     </div>
                 )

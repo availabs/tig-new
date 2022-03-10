@@ -9,6 +9,7 @@ import flatten from "lodash.flatten";
 import * as d3scale from "d3-scale"
 import counties from "../config/counties.json";
 import centroid from "@turf/centroid";
+import TypeAhead from "../../../components/tig/TypeAhead";
 
 class SED2040TazLevelForecastLayer extends LayerContainer {
     constructor(props) {
@@ -166,20 +167,19 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     <div className="relative border-top">
                         <div className={''}>
                             <label className={'self-center mr-1 text-sm font-light'} htmlFor={'search'}>TAZ Search:</label>
-                            <input
+                            <TypeAhead
                                 className={'p-1 w-full border'}
-                                id={'search'}
-                                type={'text'}
-                                name={'search'}
-                                onChange={e => {
-                                    let v = e.target.value
-                                    if (!e.target.value.length) {
-                                        v = 'Select All'
+                                classNameMenu={'border-b hover:bg-blue-300'}
+                                suggestions={layer.taz_ids}
+                                setParentState={e => {
+                                    if (!e.length) {
+                                        e = 'Select All'
                                     }
-                                    layer.onFilterChange('taz', v)
-                                    layer.dispatchUpdate(layer, {taz: v})
+                                    layer.onFilterChange('taz', e)
+                                    layer.dispatchUpdate(layer, {taz: e})
                                 }}
-                                placeholder={'ex: 2464'}/>
+                                placeholder={'ex: 2464'}
+                            />
                         </div>
                     </div>
                 )

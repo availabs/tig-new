@@ -9,6 +9,7 @@ import mapboxgl from "mapbox-gl";
 import flatten from "lodash.flatten";
 import centroid from "@turf/centroid";
 import {download as shpDownload} from "utils/shp-write";
+import TypeAhead from "../../../components/tig/TypeAhead";
 
 class ACSCensusLayer extends LayerContainer {
     constructor(props) {
@@ -149,24 +150,22 @@ class ACSCensusLayer extends LayerContainer {
             Component: ({layer}) => {
 
                 return (
-                    <div className="relative pt-1">
-                        <div className={'flex mt-5'}>
-                            <label className={'self-center mr-1'} htmlFor={'search'}>Tract Search: </label>
-                            <input
-                                className={'p-1'}
-                                id={'search'}
-                                type={'text'}
-                                name={'search'}
-                                onChange={e => {
-                                    let v = e.target.value
-                                    if (!e.target.value.length) {
-                                        v = 'Select All'
+                    <div className="relative border-top">
+                        <div className={''}>
+                            <label className={'self-center mr-1 text-sm font-light'} htmlFor={'search'}>Tract Search:</label>
+                            <TypeAhead
+                                className={'p-1 w-full border'}
+                                classNameMenu={'border-b hover:bg-blue-300'}
+                                suggestions={layer.data_tracts.map(t => t.name)}
+                                setParentState={e => {
+                                    if (!e.length) {
+                                        e = 'Select All'
                                     }
-                                    // layer.filters.census_tract.onChange(v)
-                                    layer.onFilterChange('census_tract', v)
-                                    layer.dispatchUpdate(layer, {census_tract: v})
+                                    layer.onFilterChange('census_tract', e)
+                                    layer.dispatchUpdate(layer, {census_tract: e})
                                 }}
-                                placeholder={'ex: Ulster:9517'}/>
+                                placeholder={'ex: Ulster:9517'}
+                            />
                         </div>
                     </div>
                 )
