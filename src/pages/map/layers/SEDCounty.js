@@ -454,7 +454,9 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : get(views, [0, 'id'])
-                // console.log('hello', this.source, views, this.filters.dataset.value, parseInt(this.vid))
+
+                //console.log('hello', this.type, this.source, views, this.filters.dataset.value, parseInt(this.vid))
+
 
                 this.updateLegendDomain()
 
@@ -485,6 +487,11 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 if(!this.filters.year.domain.length){
                     this.filters.year.domain = _.uniq(this.data.reduce((acc, curr) => [...acc, ...Object.keys(curr.data)], []));
                     this.filters.year.value = this.filters.year.domain[0];
+
+                    // this.filters.year.onChange()
+                    // this.onFilterChange('year', this.filters.year.domain[0])
+                    // this.dispatchUpdate(this, {year: this.filters.year.value})
+
                 }
 
                 this.updateLegendDomain()
@@ -577,7 +584,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
     render(map, falcor) {
         if (!this.data){
-            return this.fetchData(falcor)
+            return this.fetchData(falcor).then(() => this.data && this.render(map, falcor))
         }
         if (this.data_counties && this.data_counties.length) {
             map.setFilter("Counties", ["in", ["get", "geoid"], ["literal", this.data_counties.map(d => d.geoid)]]);
