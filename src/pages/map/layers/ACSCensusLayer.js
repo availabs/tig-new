@@ -21,6 +21,7 @@ class ACSCensusLayer extends LayerContainer {
 
     setActive = !!this.viewId
     name = 'ACS Census Layer'
+    data_tracts = []
     filters = {
         geography: {...filters.geography},
         dataset: {

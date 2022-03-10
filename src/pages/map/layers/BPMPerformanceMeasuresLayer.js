@@ -340,7 +340,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                 'avg_speed': [15.31, 22.24, 28.49, 31.74, 34.66, 37.45]
             }
         }
-        this.legend.domain = domains[this.filters.dataset.value][this.filters.column.value] || domains["58"]['vehicle_miles_traveled']
+        this.legend.domain = get(domains, [this.filters.dataset.value, this.filters.column.value]) || domains["58"]['vehicle_miles_traveled']
     }
 
     getColorScale(data) {
@@ -360,7 +360,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                 this.source = get(views, [0, 'source_name'], '')
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name}))
 
-                this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
+                this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : get(views, [0, 'id'])
 
                 this.updateLegendDomain()
                 

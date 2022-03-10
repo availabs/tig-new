@@ -22,6 +22,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         this.name = `${props.type.split('_')[2]} SED TAZ Level Forecast`
     }
     setActive = !!this.viewId
+    taz_ids = []
     filters = {
         geography: {...filters.geography},
         dataset: {
@@ -351,7 +352,14 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     updateLegendTitle() {
         this.Title = <div>
                 <div>{this.source}</div>
-                <div className='text-sm text-italic font-light'>{this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name}</div>
+                <div className='text-sm text-italic font-light'>{
+                    this.filters.dataset.domain.reduce((acc, d) => {
+                        if(d.value === this.filters.dataset.value){
+                            acc = d.name
+                        }
+                        return acc;
+                    }, '')
+                }</div>
                 <div className='text-sm text-italic font-light'>Year: {this.filters.year.value}</div>
                 <div></div>
         </div>
@@ -431,7 +439,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                 let views = get(res, ['json', 'tig', 'views', 'byLayer', this.type], [])
                 this.source = get(views, [0, 'source_name'], '')
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
-                this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
+                this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : get(views, [0, 'id'])
                 console.log('hello', this.source, views, this.filters.dataset.value, parseInt(this.vid))
 
                 this.updateLegendDomain()

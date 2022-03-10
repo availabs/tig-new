@@ -499,7 +499,7 @@ class RTPProjectDataLayer extends LayerContainer {
                     value: v.id,
                     name: v.name
                 })).sort((a, b) => a.name.localeCompare(b.name));
-                this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
+                this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : get(views, [0, 'id'])
 
                 this.updateLegendDomain()
 

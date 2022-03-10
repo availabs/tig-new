@@ -47,7 +47,7 @@ const TypeAhead = ({suggestions, setParentState, className, classNameMenu, place
             </div>
         ) : (
             <div className="no-suggestions">
-                <em>No suggestions, you're on your own!</em>
+                <em></em>
             </div>
         );
     };
