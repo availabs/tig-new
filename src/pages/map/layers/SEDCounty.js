@@ -454,7 +454,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : get(views, [0, 'id'])
-                console.log('hello', this.source, views, this.filters.dataset.value, parseInt(this.vid))
+                // console.log('hello', this.source, views, this.filters.dataset.value, parseInt(this.vid))
 
                 this.updateLegendDomain()
 

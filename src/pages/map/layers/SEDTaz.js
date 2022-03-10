@@ -3,13 +3,13 @@ import { getColorRange } from "@availabs/avl-components"
 import get from "lodash.get"
 import _ from 'lodash'
 import {filters} from 'pages/map/layers/npmrds/filters.js'
-import shpwrite from "../../../utils/shp-write";
+import shpwrite from "utils/shp-write";
 import mapboxgl from "mapbox-gl";
 import flatten from "lodash.flatten";
 import * as d3scale from "d3-scale"
 import counties from "../config/counties.json";
 import centroid from "@turf/centroid";
-import TypeAhead from "../../../components/tig/TypeAhead";
+import TypeAhead from "components/tig/TypeAhead";
 
 class SED2040TazLevelForecastLayer extends LayerContainer {
     constructor(props) {

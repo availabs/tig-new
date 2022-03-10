@@ -101,18 +101,18 @@ const MapPage = {
         type: Map,
         props: {
             mapOptions: {
-                zoom: 8.5,
+                zoom: 9.5,
                 center: [-73.911895, 40.88],
                 styles: [
                     {name: "Streets",
                     style: 'mapbox://styles/am3081/ckt3271or0nnu17oikkvl0eme' },
                     {
-                        name: "Topgraphic",
+                        name: "Topographic",
                         style: 'mapbox://styles/am3081/ckidwyrw22uak19pboub25qix'
                     },
-                     {name: "Sattelite",
+                     {name: "Satellite",
                     style: 'mapbox://styles/am3081/cjya6wla3011q1ct52qjcatxg' },
-                     {name: "Sattelite Streets",
+                     {name: "Satellite Streets",
                     style: 'mapbox://styles/am3081/cjya70364016g1cpmbetipc8u' },
                     {name: "Light",
                     style: 'mapbox://styles/am3081/ckm86j4bw11tj18o5zf8y9pou' },
