@@ -550,7 +550,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     render(map, falcor) {
         this.features = this.mapboxMap.queryRenderedFeatures();
         if (!this.data){
-            return this.fetchData(falcor)
+            return this.fetchData(falcor).then(() => this.data && this.render(map, falcor))
         }
         if (this.taz_ids.length) {
             map.setFilter("nymtc_taz_2005", ["in", ["get", "name"], ["literal", this.taz_ids]]);
