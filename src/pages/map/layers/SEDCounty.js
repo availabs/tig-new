@@ -8,8 +8,8 @@ import {filters} from 'pages/map/layers/npmrds/filters.js'
 import flatten from "lodash.flatten";
 import mapboxgl from "mapbox-gl";
 import centroid from "@turf/centroid";
-import {download as shpDownload} from "../../../utils/shp-write";
-import TypeAhead from "../../../components/tig/TypeAhead";
+import {download as shpDownload} from "utils/shp-write";
+import TypeAhead from "components/tig/TypeAhead";
 
 class SED2040CountyLevelForecastLayer extends LayerContainer {
     constructor(props) {

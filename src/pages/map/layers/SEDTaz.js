@@ -56,14 +56,15 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                 if(c.area === area_id){
 
                     a.push(
-                        [this.filters.dataset.domain.reduce((a,c) => {
-                            if(c.value === this.filters.dataset.value){
-                                a = c.name
-                            }
-                            return a
-                        },'')],
-                        ["Year:", this.filters.year.value],
-                        ["Taz id:",c.area],["Value:",c.data[this.filters.year.value]]
+                            [this.filters.dataset.domain.reduce((a,c) => {
+                                if(c.value === this.filters.dataset.value){
+                                    a = c.name
+                                }
+                                return a
+                            },'')],
+                            ["Year:", this.filters.year.value],
+                            ["Taz id:",c.area],
+                            ["Value:",get(c.data, `[${this.filters.year.value}]`,0).toLocaleString()]
                     )
                 }
 
@@ -141,7 +142,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         type: "quantile",
         domain: [],
         range: getColorRange(5, "YlOrRd", true),
-        show: true,
+        show: false,
         Title: "",
         format: ",d",
 
@@ -227,7 +228,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                                 type="range"
                                 className="
                                       form-range
-                                      appearance-none
+                                      
                                       w-full
                                       h-6
                                       p-0
@@ -373,6 +374,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     getBounds() {
         let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
             filtered = this.geographies.filter(({ value }) => geoids.includes(value));
+        console.log('get bounds',filtered)
 
         return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
     }
@@ -381,6 +383,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         if (!this.mapboxMap) return;
 
         if (value) {
+            console.log('zooming to ', value)
             this.mapboxMap.easeTo({center: value, zoom: 11})
             return;
         }
@@ -392,9 +395,9 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         const options = {
             padding: {
                 top: 25,
-                right: 200,
+                right: 25,
                 bottom: 25,
-                left: 200
+                left: 25
             },
             bearing: 0,
             pitch: 0,
@@ -440,7 +443,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                 this.source = get(views, [0, 'source_name'], '')
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : get(views, [0, 'id'])
-                console.log('hello', this.source, views, this.filters.dataset.value, parseInt(this.vid))
+                // console.log('hello', this.source, views, this.filters.dataset.value, parseInt(this.vid))
 
                 this.updateLegendDomain()
 
@@ -463,8 +466,11 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
 
     fetchData(falcor) {
         let view = this.filters.dataset.value || this.vid
+        console.time('SED TAZ DATA Fetch')
         return falcor.get(["tig", "sed_taz", "byId", view, 'data_overlay'])
             .then(response =>{
+                console.timeEnd('SED TAZ DATA Fetch')
+                console.log('sed taze data response', response)
                 let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
 
                 this.data = get(response, ["json", "tig", "sed_taz", "byId", view, 'data_overlay'], [])
