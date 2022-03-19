@@ -43,7 +43,10 @@ class HubBoundTravelDataLayer extends LayerContainer {
         this.vid = props.vid
         this.type = props.type
     }
-
+    attribution = <div className={'text-sm grid grid-col-1 gap-4'}>
+        <p id="attribution-MQ66mo">Hub Bound Travel Data - 2007-2019 data © <a href="http://nymtc.org/">NY Metropolitan Transportation Council</a></p>
+        <p id="attribution-63">Hub Boundary map data © <a href="http://nymtc.org/">NY Metropolitan Transportation Council</a></p>
+    </div>
     setActive = !!this.viewId
     name = 'Hub Bound Travel Data'
     filters = {
@@ -182,7 +185,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         },
     ]
     download(setLoading) {

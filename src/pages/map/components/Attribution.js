@@ -15,7 +15,7 @@ const Attribution = ({ inactiveLayers, activeLayers, MapActions, ...rest }) => {
       <h4>Attribution</h4>
       { activeLayers.map(layer =>
           <div key={layer.name}>
-            <div>
+            <div className={'pb-2'}>
             {layer.name}
             </div>
             {layer.attribution}

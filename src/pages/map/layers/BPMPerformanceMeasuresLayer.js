@@ -25,6 +25,10 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         this.type = props.type
     }
 
+    attribution = <div className={'text-sm grid grid-col-1 gap-4'}>
+        <p id="attribution-faKpS8">Highway network data © <a href="http://nymtc.org/">NY Metropolitan Transportation Council</a></p>
+        <p id="attribution-42">County map data © <a href="http://census.gov/">US Census Bureau</a></p>
+    </div>
     setActive = !!this.viewId
     name = 'BPM Performance Measures'
     filters = {
@@ -187,7 +191,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         },
     ]
 

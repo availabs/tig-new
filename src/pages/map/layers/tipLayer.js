@@ -93,7 +93,9 @@ class TestTipLayer extends LayerContainer {
         this.type = props.type
 
     }
-
+    attribution = <div className={'text-sm grid grid-col-1 gap-4'}>
+        <p id="attribution-q2k04B">Project data © <a href="http://nymtc.org/">NY Metropolitan Transportation Council</a></p>
+    </div>
     setActive = !!this.viewId
     name = 'TIP Mappable Projects'
     filters = {
@@ -266,7 +268,7 @@ class TestTipLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         },
         {
             Component: ({layer}) => {
@@ -294,7 +296,7 @@ class TestTipLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         }
     ]
 

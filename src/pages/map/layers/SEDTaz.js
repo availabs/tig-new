@@ -9,6 +9,7 @@ import flatten from "lodash.flatten";
 import * as d3scale from "d3-scale"
 import counties from "../config/counties.json";
 import centroid from "@turf/centroid";
+import {ckmeans, equalIntervalBreaks} from 'simple-statistics'
 import TypeAhead from "../../../components/tig/TypeAhead";
 
 class SED2040TazLevelForecastLayer extends LayerContainer {
@@ -21,6 +22,12 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         
         this.name = `${props.type.split('_')[2]} SED TAZ Level Forecast`
     }
+
+    attribution = <div className={'text-sm grid grid-col-1 gap-4'}>
+        <p id="attribution-VB4LXV">Urban Area Boundary map data © <a href="http://nymtc.org/">NY Metropolitan Transportation Council</a></p>
+        <p id="attribution-42">TAZ map data © <a href="http://nymtc.org/">NY Metropolitan Transportation Council</a></p>
+    </div>
+
     setActive = !!this.viewId
     taz_ids = []
     filters = {
@@ -159,7 +166,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         },
         {
             Component: ({layer}) => {
@@ -185,7 +192,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         },
 
         {
@@ -211,7 +218,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     setBubble(range, bubble);
                 }
                 return (
-                    <div className="relative  p-4">
+                    <div className="relative  p-1">
                         <label htmlFor={`yearRange-${layer.id}`} className="form-label text-sm font-light">Year</label>
                         <output id={`yearRangeBubble-${layer.id}`} className="bubble text-sm" style={{
                             padding: '1px 14px',
@@ -253,7 +260,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         }
     ]
 
@@ -345,7 +352,20 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
             38:[0, 1, 670, 2586, 8143, 51583]
         }
 
-        this.legend.domain = domains[this.filters.dataset.value] || (this.processedData || []).map(d => d.value).filter(d => d).sort()
+        this.legend.domain = domains[this.filters.dataset.value] ||
+            ckmeans(
+                _.uniq(
+                    (this.data || []).map(d => get(d, ['data', this.filters.year.value], 0))
+                ),
+                5
+            ).reduce((acc, d, dI) => {
+                if(dI === 0){
+                    acc.push(d[0], d[d.length - 1])
+                }else{
+                    acc.push(d[d.length - 1])
+                }
+                return acc
+            } , [])
         this.updateLegendTitle()
     }
 
@@ -548,7 +568,6 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     }
 
     render(map, falcor) {
-        this.features = this.mapboxMap.queryRenderedFeatures();
         if (!this.data){
             return this.fetchData(falcor).then(() => this.data && this.render(map, falcor))
         }
