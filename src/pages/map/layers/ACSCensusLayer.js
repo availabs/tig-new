@@ -77,7 +77,7 @@ class ACSCensusLayer extends LayerContainer {
                 if (c.area === graph['name']) {
                     a.push(
                         ['Tract', `${c.area}-${graph['state_code']}`],
-                        [col, this.filters.column.value === 'percentage' ? c[this.filters.column.value].toFixed(2) + '%' : c[this.filters.column.value]]
+                        [col, this.filters.column.value === 'percentage' ? c[this.filters.column.value].toFixed(2) + '%' : c[this.filters.column.value].toLocaleString()]
                     )
                 }
                 return a

@@ -137,7 +137,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                         return a
                     },'')}`],
                         ['County:',`${c.name}-${graph['state_code']}`],
-                        ["Value:",c[this.filters.column.value]] ]
+                        ["Value:",c[this.filters.column.value].toLocaleString()] ]
                 }
                 return a
             },[]).sort()

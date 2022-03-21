@@ -190,7 +190,7 @@ class TestTipLayer extends LayerContainer {
                 ['MPO:', feature['mpo']],
                 ['Sponsor:', feature['sponsor']],
                 ['Project Type:', feature['ptype']],
-                ['Cost:', feature['cost']],
+                ['Cost:', feature['cost'] ? feature['cost'].toString() + 'M' : ''],
                 ['Description:', feature['description'].toLowerCase()]
             ]
         },

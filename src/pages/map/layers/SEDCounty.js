@@ -96,7 +96,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                         },'')],
                         ["Year:", this.filters.year.value],
                         ['County:',`${c.area}-${graph['state_code']}`],
-                        ["Value:",c.data[this.filters.year.value]]
+                        ["Value:",c.data[this.filters.year.value].toLocaleString()]
                     )
                 }
                 return a

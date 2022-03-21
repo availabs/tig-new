@@ -135,7 +135,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                     'Vehicles': 0,
                 })
 
-            return Object.keys(c).map((curr) => ([curr, c[curr]]))
+            return Object.keys(c).map((curr) => ([curr, typeof c[curr] === 'number' ? c[curr].toLocaleString() : c[curr]]))
         }
     }
     legend = {

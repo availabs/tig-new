@@ -70,7 +70,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                             return a
                         },'')],
                         ["Year:", this.filters.year.value],
-                        ["Taz id:",c.area],["Value:",c.data[this.filters.year.value]]
+                        ["Taz id:",c.area],["Value:",c.data[this.filters.year.value].toLocaleString()]
                     )
                 }
 
