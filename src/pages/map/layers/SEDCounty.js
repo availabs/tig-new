@@ -153,6 +153,19 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 ]
             }
         },
+
+        { id: 'counties-labels',
+            source: 'counties',
+            'source-layer': 'counties',
+            type: 'symbol',
+            layout: {
+                "symbol-placement": "point",
+                "text-size": 12
+            },
+            paint: {
+                "text-color": "#000"
+            }
+        }
     ]
 
     infoBoxes = [
@@ -618,12 +631,23 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 return a
             },{});
 
+
         map.setPaintProperty("Counties", "fill-color", [
             "case",
             ["boolean", ["feature-state", "hover"], false],
             "#090",
             ["get", ["get", "geoid"], ["literal", colors]]
         ])
+
+        const nameMapping = this.data_counties.reduce((acc, curr) => {
+            acc[curr.geoid.toString()] = curr.name
+            return acc;
+        }, {})
+
+        map.setLayoutProperty("counties-labels", "text-field",
+            ["get", ["get", "geoid"], ["literal", nameMapping]]
+        )
+
     }
 
 
