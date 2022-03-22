@@ -9,8 +9,8 @@ import flatten from "lodash.flatten";
 import * as d3scale from "d3-scale"
 import counties from "../config/counties.json";
 import centroid from "@turf/centroid";
-import {ckmeans, equalIntervalBreaks} from 'simple-statistics'
-import TypeAhead from "../../../components/tig/TypeAhead";
+import {ckmeans} from 'simple-statistics'
+import TypeAhead from "components/tig/TypeAhead";
 
 class SED2040TazLevelForecastLayer extends LayerContainer {
     constructor(props) {

@@ -1,5 +1,3 @@
-import get from 'lodash.get'
-import { getColorRange } from "../../utils"
 const filters = {
   geography: {
     name: 'Geography',
@@ -102,12 +100,12 @@ const updateLegend = (filters, legend) => {
 }
 
 
-const getNetwork = (filters) => {
-  if(filters.network.value == 'con') {
-    return filters.conflation.value
-  }
-  return filters.network.value
-}
+// const getNetwork = (filters) => {
+//   if(filters.network.value == 'con') {
+//     return filters.conflation.value
+//   }
+//   return filters.network.value
+// }
 
 
 

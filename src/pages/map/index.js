@@ -19,7 +19,7 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
 
     useEffect(() => {
         falcor.get([ "tig", "byViewId", viewId, 'layer'])
-    }, [viewId])
+    }, [viewId, falcor])
 
     useEffect(() => {
         let allLayers = Object.keys(layers).map(l => {
@@ -27,7 +27,7 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
         }) 
         setLayer(allLayers)
 
-    },[]) // only run on first load
+    },[layers, viewId]) // only run on first load
 
     useMemo(() => {
         let l = get(falcorCache, [ "tig", "byViewId", viewId, 'layer', 'value'], null)
@@ -40,7 +40,7 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
             viewLayer[0].setActive = true;
            }
         }
-    }, [viewId, falcorCache])
+    }, [viewId, falcorCache, layer])
 
     return (
         <TigLayout>
