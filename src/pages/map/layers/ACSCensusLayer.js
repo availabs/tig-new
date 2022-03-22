@@ -342,6 +342,7 @@ class ACSCensusLayer extends LayerContainer {
 
 
                     // this.filters.census_tract.domain = this.data_tracts.map(dt => dt.name)
+                    console.log('data', response)
                     return response
                 })
         }
