@@ -148,7 +148,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         type: "quantile",
         domain: [],
         range: getColorRange(5, "YlOrRd", true),
-        show: true,
+        show: false,
         Title: "",
         format: ",d",
 
@@ -381,7 +381,6 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     }, '')
                 }</div>
                 <div className='text-sm text-italic font-light'>Year: {this.filters.year.value}</div>
-                <div></div>
         </div>
 
         // `
@@ -436,6 +435,8 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
 
         options.center = tr.unproject(nw.add(se).div(2));
         options.zoom = Math.min(tr.scaleZoom(tr.scale * Math.min(scaleX, scaleY)), tr.maxZoom);
+
+        this.defaultZoom = options;
 
         this.mapboxMap.easeTo(options);
     }

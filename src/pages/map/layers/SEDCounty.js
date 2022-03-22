@@ -160,7 +160,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
             type: 'symbol',
             layout: {
                 "symbol-placement": "point",
-                "text-size": 12
+                "text-size": 15
             },
             paint: {
                 "text-color": "#000"
@@ -451,6 +451,8 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
         options.center = tr.unproject(nw.add(se).div(2));
         options.zoom = Math.min(tr.scaleZoom(tr.scale * Math.min(scaleX, scaleY)), tr.maxZoom);
+
+        this.defaultZoom = options;
 
         this.mapboxMap.easeTo(options);
     }
