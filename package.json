@@ -5,7 +5,7 @@
   "homepage": ".",
   "dependencies": {
     "@availabs/ams": "^1.0.5",
-    "@availabs/avl-components": "^1.0.86",
+    "@availabs/avl-components": "^1.1.0",
     "@availabs/avl-map": "^1.0.8",
     "@headlessui/react": "^1.2.0",
     "@heroicons/react": "^1.0.5",
@@ -36,7 +36,7 @@
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "shp-write": "^0.3.2",
-    "simple-statistics": "^7.7.0",
+    "simple-statistics": "^7.7.5",
     "source-map-explorer": "^2.5.2",
     "styled-components": "^5.3.1",
     "terraformer-wkt-parser": "^1.2.1",

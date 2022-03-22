@@ -8,8 +8,8 @@ import {filters} from 'pages/map/layers/npmrds/filters.js'
 import flatten from "lodash.flatten";
 import mapboxgl from "mapbox-gl";
 import centroid from "@turf/centroid";
-import {download as shpDownload} from "../../../utils/shp-write";
-import TypeAhead from "../../../components/tig/TypeAhead";
+import {download as shpDownload} from "utils/shp-write";
+import TypeAhead from "components/tig/TypeAhead";
 
 class SED2040CountyLevelForecastLayer extends LayerContainer {
     constructor(props) {
@@ -404,6 +404,11 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
             filtered = this.geographies.filter(({ value }) => geoids.includes(value));
 
+        console.log('get Bounds', filtered)
+        let test = filtered.filter((d) => d.bounding_box[0][1] > 42.3 || d.bounding_box[1][1] > 42,3)
+
+        console.log('who dunnit',test)
+
         return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
     }
 
@@ -471,7 +476,9 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : get(views, [0, 'id'])
-                console.log('hello', this.type, this.source, views, this.filters.dataset.value, parseInt(this.vid))
+
+                //console.log('hello', this.type, this.source, views, this.filters.dataset.value, parseInt(this.vid))
+
 
                 this.updateLegendDomain()
 
