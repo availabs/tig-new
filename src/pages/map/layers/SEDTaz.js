@@ -3,13 +3,14 @@ import { getColorRange } from "@availabs/avl-components"
 import get from "lodash.get"
 import _ from 'lodash'
 import {filters} from 'pages/map/layers/npmrds/filters.js'
-import shpwrite from "utils/shp-write";
+import shpwrite from "../../../utils/shp-write";
 import mapboxgl from "mapbox-gl";
 import flatten from "lodash.flatten";
 import * as d3scale from "d3-scale"
 import counties from "../config/counties.json";
 import centroid from "@turf/centroid";
-import TypeAhead from "components/tig/TypeAhead";
+import {ckmeans, equalIntervalBreaks} from 'simple-statistics'
+import TypeAhead from "../../../components/tig/TypeAhead";
 
 class SED2040TazLevelForecastLayer extends LayerContainer {
     constructor(props) {
@@ -21,6 +22,12 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         
         this.name = `${props.type.split('_')[2]} SED TAZ Level Forecast`
     }
+
+    attribution = <div className={'text-sm grid grid-col-1 gap-4'}>
+        <p id="attribution-VB4LXV">Urban Area Boundary map data © <a href="http://nymtc.org/">NY Metropolitan Transportation Council</a></p>
+        <p id="attribution-42">TAZ map data © <a href="http://nymtc.org/">NY Metropolitan Transportation Council</a></p>
+    </div>
+
     setActive = !!this.viewId
     taz_ids = []
     filters = {
@@ -56,15 +63,14 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                 if(c.area === area_id){
 
                     a.push(
-                            [this.filters.dataset.domain.reduce((a,c) => {
-                                if(c.value === this.filters.dataset.value){
-                                    a = c.name
-                                }
-                                return a
-                            },'')],
-                            ["Year:", this.filters.year.value],
-                            ["Taz id:",c.area],
-                            ["Value:",get(c.data, `[${this.filters.year.value}]`,0).toLocaleString()]
+                        [this.filters.dataset.domain.reduce((a,c) => {
+                            if(c.value === this.filters.dataset.value){
+                                a = c.name
+                            }
+                            return a
+                        },'')],
+                        ["Year:", this.filters.year.value],
+                        ["Taz id:",c.area],["Value:",c.data[this.filters.year.value].toLocaleString()]
                     )
                 }
 
@@ -142,7 +148,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         type: "quantile",
         domain: [],
         range: getColorRange(5, "YlOrRd", true),
-        show: false,
+        show: true,
         Title: "",
         format: ",d",
 
@@ -160,7 +166,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         },
         {
             Component: ({layer}) => {
@@ -186,7 +192,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         },
 
         {
@@ -212,7 +218,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     setBubble(range, bubble);
                 }
                 return (
-                    <div className="relative  p-4">
+                    <div className="relative  p-1">
                         <label htmlFor={`yearRange-${layer.id}`} className="form-label text-sm font-light">Year</label>
                         <output id={`yearRangeBubble-${layer.id}`} className="bubble text-sm" style={{
                             padding: '1px 14px',
@@ -228,7 +234,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                                 type="range"
                                 className="
                                       form-range
-                                      
+                                      appearance-none
                                       w-full
                                       h-6
                                       p-0
@@ -254,7 +260,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         }
     ]
 
@@ -346,7 +352,20 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
             38:[0, 1, 670, 2586, 8143, 51583]
         }
 
-        this.legend.domain = domains[this.filters.dataset.value] || (this.processedData || []).map(d => d.value).filter(d => d).sort()
+        this.legend.domain = domains[this.filters.dataset.value] ||
+            ckmeans(
+                _.uniq(
+                    (this.data || []).map(d => get(d, ['data', this.filters.year.value], 0))
+                ),
+                5
+            ).reduce((acc, d, dI) => {
+                if(dI === 0){
+                    acc.push(d[0], d[d.length - 1])
+                }else{
+                    acc.push(d[d.length - 1])
+                }
+                return acc
+            } , [])
         this.updateLegendTitle()
     }
 
@@ -374,7 +393,6 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     getBounds() {
         let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
             filtered = this.geographies.filter(({ value }) => geoids.includes(value));
-        console.log('get bounds',filtered)
 
         return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
     }
@@ -383,7 +401,6 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         if (!this.mapboxMap) return;
 
         if (value) {
-            console.log('zooming to ', value)
             this.mapboxMap.easeTo({center: value, zoom: 11})
             return;
         }
@@ -395,9 +412,9 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         const options = {
             padding: {
                 top: 25,
-                right: 25,
+                right: 200,
                 bottom: 25,
-                left: 25
+                left: 200
             },
             bearing: 0,
             pitch: 0,
@@ -443,7 +460,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                 this.source = get(views, [0, 'source_name'], '')
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : get(views, [0, 'id'])
-                // console.log('hello', this.source, views, this.filters.dataset.value, parseInt(this.vid))
+                console.log('hello', this.source, views, this.filters.dataset.value, parseInt(this.vid))
 
                 this.updateLegendDomain()
 
@@ -466,11 +483,8 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
 
     fetchData(falcor) {
         let view = this.filters.dataset.value || this.vid
-        console.time('SED TAZ DATA Fetch')
         return falcor.get(["tig", "sed_taz", "byId", view, 'data_overlay'])
             .then(response =>{
-                console.timeEnd('SED TAZ DATA Fetch')
-                console.log('sed taze data response', response)
                 let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
 
                 this.data = get(response, ["json", "tig", "sed_taz", "byId", view, 'data_overlay'], [])
@@ -554,7 +568,6 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     }
 
     render(map, falcor) {
-        this.features = this.mapboxMap.queryRenderedFeatures();
         if (!this.data){
             return this.fetchData(falcor).then(() => this.data && this.render(map, falcor))
         }

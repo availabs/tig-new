@@ -76,7 +76,7 @@ class NPMRDSLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         },
         {
             Component: ({layer}) => (

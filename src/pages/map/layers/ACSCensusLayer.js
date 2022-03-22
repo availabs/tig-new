@@ -19,6 +19,9 @@ class ACSCensusLayer extends LayerContainer {
         this.vid = props.vid
     }
 
+    attribution = <div className={'text-sm grid grid-col-1 gap-4'}>
+        <p id="attribution-41">Census tract map data © <a href="http://nymtc.org/">NY Metropolitan Transportation Council</a></p>
+    </div>
     setActive = !!this.viewId
     name = 'ACS Census Layer'
     data_tracts = []
@@ -74,7 +77,7 @@ class ACSCensusLayer extends LayerContainer {
                 if (c.area === graph['name']) {
                     a.push(
                         ['Tract', `${c.area}-${graph['state_code']}`],
-                        [col, this.filters.column.value === 'percentage' ? c[this.filters.column.value].toFixed(2) + '%' : c[this.filters.column.value]]
+                        [col, this.filters.column.value === 'percentage' ? c[this.filters.column.value].toFixed(2) + '%' : c[this.filters.column.value].toLocaleString()]
                     )
                 }
                 return a
@@ -145,7 +148,7 @@ class ACSCensusLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         },
         {
             Component: ({layer}) => {
@@ -171,7 +174,7 @@ class ACSCensusLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         }
     ]
 
@@ -294,7 +297,7 @@ class ACSCensusLayer extends LayerContainer {
                     value: v.id,
                     name: v.name
                 })).sort((a, b) => a.name.localeCompare(b.name))
-                this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : views[0].id
+                this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : get(views, [0, 'id'])
 
                 this.updateColumnNames()
                 this.updateLegendDomain()

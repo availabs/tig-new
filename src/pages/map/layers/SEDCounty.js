@@ -21,6 +21,10 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         this.name = `${props.type.split('_')[2]} SED County Level Forecast`
     }
 
+    attribution = <div className={'text-sm grid grid-col-1 gap-4'}>
+        <p id="attribution-TzOHvL">Urban Area Boundary map data © <a href="http://nymtc.org/">NY Metropolitan Transportation Council</a></p>
+        <p id="attribution-42">County map data © <a href="http://census.gov/">US Census Bureau</a></p>
+    </div>
     data_counties = []
     filters = {
         geography: {...filters.geography},
@@ -92,7 +96,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                         },'')],
                         ["Year:", this.filters.year.value],
                         ['County:',`${c.area}-${graph['state_code']}`],
-                        ["Value:",c.data[this.filters.year.value]]
+                        ["Value:",c.data[this.filters.year.value].toLocaleString()]
                     )
                 }
                 return a
@@ -163,7 +167,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         },
         {
             Component: ({layer}) => {
@@ -192,7 +196,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         },
 
         {
@@ -218,7 +222,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                     setBubble(range, bubble);
                 }
                 return (
-                    <div className="relative  p-4">
+                    <div className="relative  p-1">
                         <label htmlFor={`yearRange-${layer.id}`} className="form-label text-sm font-light">Year</label>
                         <output id={`yearRangeBubble-${layer.id}`} className="bubble text-sm" style={{
                             padding: '1px 14px',
@@ -258,7 +262,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                     </div>
                 )
             },
-            width: 450
+            width: 250
         }
     ]
 
