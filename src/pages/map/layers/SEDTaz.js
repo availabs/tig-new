@@ -233,6 +233,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                             <input
                                 type="range"
                                 className="
+                                      z-50
                                       form-range
                                       appearance-none
                                       w-full
@@ -257,6 +258,26 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                             />
                             <div>{layer.filters.year.domain[layer.filters.year.domain.length - 1]}</div>
                         </div>
+
+
+                        <div className={'flex justify-between rounded-lg z-10'}
+                             style={{
+                                 padding: '1px 2px',
+                                 marginTop: '-1.3499rem',
+                                 position: 'absolute',
+                                 borderRadius: '2px',
+                                 left: '50%',
+                                 width: '70%',
+                                 transform: 'translateX(-50%)',
+                                 backgroundColor: 'rgba(82,78,78,0.4)'
+                             }}
+                        >
+                            {
+                                _.range(Math.ceil(layer.filters.year.domain.length / 3))
+                                    .map(i => <span id={i} className={'fa fa-caret-up'} />)
+                            }
+                        </div>
+
                     </div>
                 )
             },
