@@ -1,3 +1,4 @@
+import React from 'react'
 import {LayerContainer} from "components/avl-map/src"
 import { getColorRange } from "@availabs/avl-components"
 import get from "lodash.get"
@@ -70,7 +71,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                             return a
                         },'')],
                         ["Year:", this.filters.year.value],
-                        ["Taz id:",c.area],["Value:",c.data[this.filters.year.value].toLocaleString()]
+                        ["Taz id:",c.area],["Value:",c.value.toLocaleString()]
                     )
                 }
 
@@ -197,6 +198,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
 
         {
             Component: ({layer}) => {
+                const tickers = React.useMemo(() => _.range(Math.ceil(layer.filters.year.domain.length / 3)).map(i => <span id={i} className={'fa fa-caret-up'} />))
                 const setBubble = (range, bubble) => {
                     const val = range.value;
                     const min = range.min ? range.min : 0;
@@ -273,8 +275,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                              }}
                         >
                             {
-                                _.range(Math.ceil(layer.filters.year.domain.length / 3))
-                                    .map(i => <span id={i} className={'fa fa-caret-up'} />)
+                                tickers
                             }
                         </div>
 
@@ -373,20 +374,23 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
             38:[0, 1, 670, 2586, 8143, 51583]
         }
 
-        this.legend.domain = domains[this.filters.dataset.value] ||
-            ckmeans(
-                _.uniq(
-                    (this.data || []).map(d => get(d, ['data', this.filters.year.value], 0))
-                ),
-                5
-            ).reduce((acc, d, dI) => {
-                if(dI === 0){
-                    acc.push(d[0], d[d.length - 1])
-                }else{
-                    acc.push(d[d.length - 1])
-                }
-                return acc
-            } , [])
+        let values = _.uniq((this.data || []).map(d => get(d, ['value'], 0)))
+
+        if(!domains[this.filters.dataset.value] && values.length){
+            this.legend.domain =
+                ckmeans(values, Math.min(values.length, 5)
+                ).reduce((acc, d, dI) => {
+                    if(dI === 0){
+                        acc.push(d[0], d[d.length - 1])
+                    }else{
+                        acc.push(d[d.length - 1])
+                    }
+                    return acc
+                } , [])
+        }else if(domains[this.filters.dataset.value]){
+            this.legend.domain = domains[this.filters.dataset.value]
+        }
+
         this.updateLegendTitle()
     }
 
@@ -406,7 +410,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
 
         // `
         // ${this.source},
-        // ${this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name}, 
+        // ${this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name},
         //                         Year: ${this.filters.year.value}`
     }
 
@@ -505,17 +509,29 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
 
     fetchData(falcor) {
         let view = this.filters.dataset.value || this.vid
-        return falcor.get(["tig", "sed_taz", "byId", view, 'data_overlay'])
-            .then(response =>{
-                let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
-
-                this.data = get(response, ["json", "tig", "sed_taz", "byId", view, 'data_overlay'], [])
-                this.taz_ids = this.data.filter(item => geoids.includes(counties.filter(c => c.name === item.enclosing_name)[0].geoid)).map(d => d.area).filter(d => d)
+        return falcor.get(
+            // ["tig", "sed_taz", "byId", view, 'data_overlay'],
+            ['tig', 'source', `${this.type.split('_')[2]} SED Taz Level Forecast`, 'view', view]
+        )
+            .then(async (response) =>{
+                let newData =  get(response, ['json', 'tig', 'source', `${this.type.split('_')[2]} SED Taz Level Forecast`, 'view', view], {});
 
                 if(!this.filters.year.domain.length){
-                    this.filters.year.domain = _.uniq(this.data.reduce((acc, curr) => [...acc, ...Object.keys(curr.data)], []));
+                    this.filters.year.domain = Object.keys(newData);
                     this.filters.year.value = this.filters.year.domain[0];
                 }
+                console.log('??', newData)
+                this.fullData = newData || {};
+                this.data = newData[this.filters.year.value] || []
+
+                console.time('getting geoms')
+                let geoms = await falcor.get(['tig', 'geoms', 'gid', this.data.map(d => d.gid)])
+                this.geoms = get(geoms, ['json', 'tig', 'geoms', 'gid'], [])
+                console.timeEnd('getting geoms')
+
+                let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
+
+                this.taz_ids = this.data.filter(item => geoids.includes(counties.filter(c => c.name === item.enclosing_name)[0].geoid)).map(d => d.area).filter(d => d)
 
                 this.updateLegendDomain()
             })
@@ -524,8 +540,8 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     onFilterChange(filterName,value,preValue){
         switch (filterName){
             case "year" : {
-                this.filters.year.domain = _.uniq(this.data.reduce((acc, curr) => [...acc, ...Object.keys(curr.data)], []));
                 this.filters.year.value = value;
+                this.data = this.fullData[this.filters.year.value] || [];
 
                 if(value && document.getElementById(`yearRange-${this.id}`) && document.getElementById(`yearRange-${this.id}`).value.toString() !== this.filters.year.domain.indexOf(value).toString()){
                     document.getElementById(`yearRange-${this.id}`).value = this.filters.year.domain.indexOf(value).toString()
@@ -546,7 +562,9 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
             }
 
             case "taz": {
-                let geom = JSON.parse(get(this.data.filter(d => d.area === value), [0, 'geom'], '{}'))
+                let geom = JSON.parse(
+                    this.geoms[get(this.data.filter(d => d.area === value), [0, 'gid'])] || '{}'
+                )
                 if (geom && Object.keys(geom).length) {
                     let featId =
                         get(this.mapboxMap.queryRenderedFeatures()
@@ -604,7 +622,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
         this.processedData = this.data.reduce((acc,curr) =>{
             acc.push({
                 'id': curr['area'] || '',
-                'value': curr.data[this.filters.year.value]
+                'value': curr.value
             })
             return acc
         },[])
