@@ -354,25 +354,6 @@ class SEDTazLayer extends LayerContainer {
     }
 
     updateLegendDomain() {
-<<<<<<< HEAD
-        
-        let domainData= _.uniq(
-                    (this.data || []).map(d => get(d, ['data', this.filters.year.value], 0))
-                )
-        
-        if(domainData.length >= 5) {
-            this.legend.domain = ckmeans(domainData,5).reduce((acc, d, dI) => {
-                if(dI === 0){
-                    acc.push(d[0], d[d.length - 1])
-                }else{
-                    acc.push(d[d.length - 1])
-                }
-                return acc
-            } , [])
-        } else {
-            this.legend.domain = [0,10,25,50,100]
-        }
-=======
         const domains = {
             // 2040
             37:[0, 35696, 40620, 45755, 53519, 202112],
@@ -408,9 +389,9 @@ class SEDTazLayer extends LayerContainer {
                 } , [])
         }else if(domains[this.filters.dataset.value]){
             this.legend.domain = domains[this.filters.dataset.value]
+        }else{
+            this.legend.domain = [0,10,25,50,100]
         }
-
->>>>>>> 12d59e0a71f1066911ad2843ac02a77d62fd07a5
         this.updateLegendTitle()
     }
 
@@ -427,11 +408,6 @@ class SEDTazLayer extends LayerContainer {
                 }</div>
                 <div className='text-sm text-italic font-light'>Year: {this.filters.year.value}</div>
         </div>
-
-        // `
-        // ${this.source},
-        // ${this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name},
-        //                         Year: ${this.filters.year.value}`
     }
 
     getBounds() {
