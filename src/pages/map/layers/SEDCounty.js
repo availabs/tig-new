@@ -96,7 +96,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                         },'')],
                         ["Year:", this.filters.year.value],
                         ['County:',`${c.area}-${graph['state_code']}`],
-                        ["Value:",c.data[this.filters.year.value].toLocaleString()]
+                        ["Value:",c.value.toLocaleString()]
                     )
                 }
                 return a
@@ -499,9 +499,6 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : get(views, [0, 'id'])
 
-                //console.log('hello', this.type, this.source, views, this.filters.dataset.value, parseInt(this.vid))
-
-
                 this.updateLegendDomain()
 
                 // geography setup
@@ -524,21 +521,27 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
     fetchData(falcor) {
         let view = this.filters.dataset.value || this.vid
 
-        return falcor.get(["tig", this.type.includes('2055') ? "sed_county" : "sed_county", "byId", view, 'data_overlay'])
-            .then(response =>{
-                this.data = get(response, ["json", "tig", this.type.includes('2055') ? "sed_county" : "sed_county", "byId", view, 'data_overlay'], [])
+        return falcor.get(
+            ["tig", this.type.includes('2055') ? "sed_county" : "sed_county", "byId", view, 'data_overlay'],
+            ['tig', 'source', `${this.type.split('_')[2]} SED County Level Forecast`, 'view', view]
+        )
+            .then(async (response) =>{
+                let newData =  get(response, ['json', 'tig', 'source', `${this.type.split('_')[2]} SED County Level Forecast`, 'view', view], {});
 
                 if(!this.filters.year.domain.length){
-                    this.filters.year.domain = _.uniq(this.data.reduce((acc, curr) => [...acc, ...Object.keys(curr.data)], []));
+                    this.filters.year.domain = Object.keys(newData);
                     this.filters.year.value = this.filters.year.domain[0];
-
-                    // this.filters.year.onChange()
-                    // this.onFilterChange('year', this.filters.year.domain[0])
-                    // this.dispatchUpdate(this, {year: this.filters.year.value})
-
                 }
 
+                this.fullData = newData || {};
+                this.data = newData[this.filters.year.value] || []
+
                 this.updateLegendDomain()
+
+                console.time('getting geoms')
+                let geoms = await falcor.get(['tig', 'geoms', 'gid', this.data.map(d => d.gid)])
+                this.geoms = get(geoms, ['json', 'tig', 'geoms', 'gid'], [])
+                console.timeEnd('getting geoms')
 
                 let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
 
@@ -562,8 +565,9 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
         switch (filterName){
             case "year" : {
-                this.filters.year.domain = _.uniq(this.data.reduce((acc, curr) => [...acc, ...Object.keys(curr.data)], []));
+
                 this.filters.year.value = value;
+                this.data = this.fullData[this.filters.year.value] || []
 
                 if(value && document.getElementById(`yearRange-${this.id}`) && document.getElementById(`yearRange-${this.id}`).value.toString() !== this.filters.year.domain.indexOf(value).toString()){
                     document.getElementById(`yearRange-${this.id}`).value = this.filters.year.domain.indexOf(value).toString()
@@ -582,7 +586,9 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 break;
             }
             case "county": {
-                let geom = JSON.parse(get(this.data.filter(d => d.area.toLowerCase() === value.toLowerCase()), [0, 'geom'], '{}'))
+                let geom = JSON.parse(
+                    this.geoms[get(this.data.filter(d => d.area.toLowerCase() === value.toLowerCase()), [0, 'gid'])] || '{}'
+                )
                 if (geom && Object.keys(geom).length) {
                     let featId =
                         get(this.mapboxMap.queryRenderedFeatures()
@@ -644,7 +650,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 if(curr.area === data_county.name){
                     acc.push({
                         id: data_county.geoid,
-                        value: curr.data[this.filters.year.value]
+                        value: curr.value
                     })
                 }
             })

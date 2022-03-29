@@ -1,3 +1,4 @@
+import React from 'react'
 import {LayerContainer} from "components/avl-map/src"
 import { getColorRange } from "@availabs/avl-components"
 import get from "lodash.get"
@@ -70,7 +71,7 @@ class SEDTazLayer extends LayerContainer {
                             return a
                         },'')],
                         ["Year:", this.filters.year.value],
-                        ["Taz id:",c.area],["Value:",c.data[this.filters.year.value].toLocaleString()]
+                        ["Taz id:",c.area],["Value:",c.value.toLocaleString()]
                     )
                 }
 
@@ -197,6 +198,7 @@ class SEDTazLayer extends LayerContainer {
 
         {
             Component: ({layer}) => {
+                const tickers = React.useMemo(() => _.range(Math.ceil(layer.filters.year.domain.length / 3)).map(i => <span id={i} className={'fa fa-caret-up'} />))
                 const setBubble = (range, bubble) => {
                     const val = range.value;
                     const min = range.min ? range.min : 0;
@@ -273,8 +275,7 @@ class SEDTazLayer extends LayerContainer {
                              }}
                         >
                             {
-                                _.range(Math.ceil(layer.filters.year.domain.length / 3))
-                                    .map(i => <span id={i} className={'fa fa-caret-up'} />)
+                                tickers
                             }
                         </div>
 
@@ -353,6 +354,7 @@ class SEDTazLayer extends LayerContainer {
     }
 
     updateLegendDomain() {
+<<<<<<< HEAD
         
         let domainData= _.uniq(
                     (this.data || []).map(d => get(d, ['data', this.filters.year.value], 0))
@@ -370,6 +372,45 @@ class SEDTazLayer extends LayerContainer {
         } else {
             this.legend.domain = [0,10,25,50,100]
         }
+=======
+        const domains = {
+            // 2040
+            37:[0, 35696, 40620, 45755, 53519, 202112],
+            34:[0, 1351, 2054, 2782, 3910, 78160],
+            30:[0, 1, 3, 11, 50, 1201],
+            29:[0, 1, 22, 118, 253, 12050],
+            31:[0, 1, 7, 16, 56, 10503],
+            28:[0, 11, 40, 200, 12050],
+            26:[0, 44787, 61304, 80355, 113880, 1109731],
+            27:[0, 2995, 4270, 5680, 7883, 117220],
+            32:[0, 1112, 1588, 2112, 2958, 56390],
+            33:[0, 2.3, 2.62, 2.83, 3.08, 7],
+            36:[0, 66, 142, 276, 670, 48061],
+            35:[0, 30, 78, 167, 385, 13225],
+            13:[0, 489, 791, 1119, 1632, 42294],
+            25:[0, 560, 1005, 1699, 3555, 80093],
+            24:[0, 3090, 4361, 5816, 8083, 181241],
+            38:[0, 1, 670, 2586, 8143, 51583]
+        }
+
+        let values = _.uniq((this.data || []).map(d => get(d, ['value'], 0)))
+
+        if(!domains[this.filters.dataset.value] && values.length){
+            this.legend.domain =
+                ckmeans(values, Math.min(values.length, 5)
+                ).reduce((acc, d, dI) => {
+                    if(dI === 0){
+                        acc.push(d[0], d[d.length - 1])
+                    }else{
+                        acc.push(d[d.length - 1])
+                    }
+                    return acc
+                } , [])
+        }else if(domains[this.filters.dataset.value]){
+            this.legend.domain = domains[this.filters.dataset.value]
+        }
+
+>>>>>>> 12d59e0a71f1066911ad2843ac02a77d62fd07a5
         this.updateLegendTitle()
     }
 
@@ -389,7 +430,7 @@ class SEDTazLayer extends LayerContainer {
 
         // `
         // ${this.source},
-        // ${this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name}, 
+        // ${this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name},
         //                         Year: ${this.filters.year.value}`
     }
 
@@ -488,17 +529,27 @@ class SEDTazLayer extends LayerContainer {
 
     fetchData(falcor) {
         let view = this.filters.dataset.value || this.vid
-        return falcor.get(["tig", "sed_taz", "byId", view, 'data_overlay'])
-            .then(response =>{
-                let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
-
-                this.data = get(response, ["json", "tig", "sed_taz", "byId", view, 'data_overlay'], [])
-                this.taz_ids = this.data.filter(item => geoids.includes(counties.filter(c => c.name === item.enclosing_name)[0].geoid)).map(d => d.area).filter(d => d)
+        return falcor.get(
+            // ["tig", "sed_taz", "byId", view, 'data_overlay'],
+            ['tig', 'source', `${this.type.split('_')[2]} SED Taz Level Forecast`, 'view', view]
+        )
+            .then(async (response) =>{
+                let newData =  get(response, ['json', 'tig', 'source', `${this.type.split('_')[2]} SED Taz Level Forecast`, 'view', view], {});
 
                 if(!this.filters.year.domain.length){
-                    this.filters.year.domain = _.uniq(this.data.reduce((acc, curr) => [...acc, ...Object.keys(curr.data)], []));
+                    this.filters.year.domain = Object.keys(newData);
                     this.filters.year.value = this.filters.year.domain[0];
                 }
+
+                this.fullData = newData || {};
+                this.data = newData[this.filters.year.value] || []
+
+                let geoms = await falcor.get(['tig', 'geoms', 'gid', this.data.map(d => d.gid)])
+                this.geoms = get(geoms, ['json', 'tig', 'geoms', 'gid'], [])
+
+                let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
+
+                this.taz_ids = this.data.filter(item => geoids.includes(counties.filter(c => c.name === item.enclosing_name)[0].geoid)).map(d => d.area).filter(d => d)
 
                 this.updateLegendDomain()
             })
@@ -507,8 +558,8 @@ class SEDTazLayer extends LayerContainer {
     onFilterChange(filterName,value,preValue){
         switch (filterName){
             case "year" : {
-                this.filters.year.domain = _.uniq(this.data.reduce((acc, curr) => [...acc, ...Object.keys(curr.data)], []));
                 this.filters.year.value = value;
+                this.data = this.fullData[this.filters.year.value] || [];
 
                 if(value && document.getElementById(`yearRange-${this.id}`) && document.getElementById(`yearRange-${this.id}`).value.toString() !== this.filters.year.domain.indexOf(value).toString()){
                     document.getElementById(`yearRange-${this.id}`).value = this.filters.year.domain.indexOf(value).toString()
@@ -529,11 +580,21 @@ class SEDTazLayer extends LayerContainer {
             }
 
             case "taz": {
-                let geom = JSON.parse(get(this.data.filter(d => d.area === value), [0, 'geom'], '{}'))
+                let geom = JSON.parse(
+                    this.geoms[get(this.data.filter(d => d.area === value), [0, 'gid'])] || '{}'
+                )
                 if (geom && Object.keys(geom).length) {
-                    let featId =
-                        get(this.mapboxMap.queryRenderedFeatures()
-                            .filter(feats => feats.properties.name === value), [0, 'id'])
+                    let featId;
+                    if(this.featMapping){
+                        featId = this.featMapping.get(value)
+                    }else{
+                        this.featMapping = new Map();
+                        this.mapboxMap.queryRenderedFeatures()
+                            .filter(feats => feats.properties.name)
+                            .map(feats => this.featMapping.set(feats.properties.name, feats.id))
+
+                        featId = this.featMapping.get(value)
+                    }
 
                     if(featId){
                         this.featId && this.mapboxMap.setFeatureState(
@@ -572,7 +633,7 @@ class SEDTazLayer extends LayerContainer {
             .range(this.legend.range);
     }
 
-    render(map, falcor) {
+    async render(map, falcor) {
         if (!this.data){
             return this.fetchData(falcor).then(() => this.data && this.render(map, falcor))
         }
@@ -587,7 +648,7 @@ class SEDTazLayer extends LayerContainer {
         this.processedData = this.data.reduce((acc,curr) =>{
             acc.push({
                 'id': curr['area'] || '',
-                'value': curr.data[this.filters.year.value]
+                'value': curr.value
             })
             return acc
         },[])
