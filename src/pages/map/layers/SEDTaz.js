@@ -567,19 +567,13 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     let featId;
                     if(this.featMapping){
                         featId = this.featMapping.get(value)
-                        // featId = this.featMapping.filter(f => f.name === value)[0].id
-                        // featId = this.featMapping[value]
                     }else{
                         this.featMapping = new Map();
                         this.mapboxMap.queryRenderedFeatures()
                             .filter(feats => feats.properties.name)
                             .map(feats => this.featMapping.set(feats.properties.name, feats.id))
-                            // .map(feats => ({name: feats.properties.name, id: feats.id}))
-                            // .reduce((acc, feats) => ({...acc, ...{[feats.properties.name] : feats.id}}), {})
 
                         featId = this.featMapping.get(value)
-                        // featId = this.featMapping.filter(f => f.name === value)[0].id
-                        // featId = this.featMapping[value]
                     }
 
                     if(featId){
