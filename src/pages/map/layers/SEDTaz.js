@@ -520,14 +520,12 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     this.filters.year.domain = Object.keys(newData);
                     this.filters.year.value = this.filters.year.domain[0];
                 }
-                console.log('??', newData)
+
                 this.fullData = newData || {};
                 this.data = newData[this.filters.year.value] || []
 
-                console.time('getting geoms')
                 let geoms = await falcor.get(['tig', 'geoms', 'gid', this.data.map(d => d.gid)])
                 this.geoms = get(geoms, ['json', 'tig', 'geoms', 'gid'], [])
-                console.timeEnd('getting geoms')
 
                 let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
 
@@ -566,9 +564,23 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                     this.geoms[get(this.data.filter(d => d.area === value), [0, 'gid'])] || '{}'
                 )
                 if (geom && Object.keys(geom).length) {
-                    let featId =
-                        get(this.mapboxMap.queryRenderedFeatures()
-                            .filter(feats => feats.properties.name === value), [0, 'id'])
+                    let featId;
+                    if(this.featMapping){
+                        featId = this.featMapping.get(value)
+                        // featId = this.featMapping.filter(f => f.name === value)[0].id
+                        // featId = this.featMapping[value]
+                    }else{
+                        this.featMapping = new Map();
+                        this.mapboxMap.queryRenderedFeatures()
+                            .filter(feats => feats.properties.name)
+                            .map(feats => this.featMapping.set(feats.properties.name, feats.id))
+                            // .map(feats => ({name: feats.properties.name, id: feats.id}))
+                            // .reduce((acc, feats) => ({...acc, ...{[feats.properties.name] : feats.id}}), {})
+
+                        featId = this.featMapping.get(value)
+                        // featId = this.featMapping.filter(f => f.name === value)[0].id
+                        // featId = this.featMapping[value]
+                    }
 
                     if(featId){
                         this.featId && this.mapboxMap.setFeatureState(
@@ -607,7 +619,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
             .range(this.legend.range);
     }
 
-    render(map, falcor) {
+    async render(map, falcor) {
         if (!this.data){
             return this.fetchData(falcor).then(() => this.data && this.render(map, falcor))
         }

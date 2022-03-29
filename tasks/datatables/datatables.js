@@ -1,5 +1,3 @@
-const  fs = require('fs');
-const _ = require('lodash');
 const db = require('./db.js');
 var sql = require('sql');
 
