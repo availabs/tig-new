@@ -10,8 +10,8 @@ const ppdaf = () => {
     graphColors: [ '#1e40af','#93c5fd','#1d4ed8','#bfdbfe',],
     graphCategorical:  ['#eff6ff','#dbeafe','#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb','#1d4ed8','#1e40af','#1e3a8a'], //
 
-    sidenav: ({color='white',size='compact'}) =>  {
-      
+    sidenav: (opts={}) =>  {
+      const {color='white',size='compact'} = opts
       let colors = {
         white: {
           contentBg: `bg-${highlight}`,
@@ -113,11 +113,11 @@ const ppdaf = () => {
     /* -----
          Top Nav Theme Components Minimal
         ------*/
-    topnav: ({color='white',size='compact'}) => {
-          
-          let colors = {
+   topnav:  (opts={}) =>  {
+      const {color='white',size='compact'} = opts
+      let colors = {
         white: {
-          contentBg: `bg-gray-100`,
+          contentBg: `bg-gray-50`,
           accentColor: `${accent}-600`,
           accentBg: `hover:bg-${accent}-600`,
           borderColor: `border-${primary}-100`,
@@ -150,29 +150,25 @@ const ppdaf = () => {
 
 
       return {
-        topnavWrapper: `w-full ${colors[color].contentBg}`,
+        topnavWrapper: `w-full ${colors[color].contentBg} `,
         topnavContent: `flex w-full h-full`,
         topnavMenu: `hidden md:flex flex-1 justify-end h-full overflow-x-auto overflow-y-hidden scrollbar-sm`,
         menuIconTop: `text-${colors[color].accentColor} ${sizes[size].icon} group-hover:${colors[color].highlightColor}`,
         menuOpenIcon: `fa fa-bars`,
         menuCloseIcon: `os-icon os-icon-x`,
-        navitemTop: `
-            group font-sans 
+        navitemTop: `group font-sans 
+            ${sizes[size].topItem} ${colors[color].textColor} ${colors[color].borderColor} 
+            ${colors[color].accentBg} hover:${colors[color].highlightColor} 
+            focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
+            transition cursor-pointer`,
+        //`px-4 text-sm font-medium tracking-widest uppercase inline-flex items-center  border-transparent  leading-5 text-white hover:bg-white hover:text-darkblue-500 border-gray-200 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out h-full`,
+        topmenuRightNavContainer: "hidden md:block h-full",
+        navitemTopActive: `group font-sans
             ${sizes[size].topItem} ${colors[color].textColor} ${colors[color].borderColor} 
             ${colors[color].accentBg} hover:${colors[color].highlightColor} 
             focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
             transition cursor-pointer
         `,
-        //`px-4 text-sm font-medium tracking-widest uppercase inline-flex items-center  border-transparent  leading-5 text-white hover:bg-white hover:text-darkblue-500 border-gray-200 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out h-full`,
-        topmenuRightNavContainer: "hidden md:block h-full",
-        navitemTopActive: 
-          `
-          group font-sans
-            ${sizes[size].topItem} ${colors[color].textColor} ${colors[color].borderColor} 
-            ${colors[color].accentBg} hover:${colors[color].highlightColor} 
-            focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
-            transition cursor-pointer
-          `,
         mobileButton:
           `md:hidden ${colors[color].contentBg} inline-flex items-center justify-center p-2  text-gray-400 hover:bg-gray-100 `,
         vars: {
@@ -190,12 +186,12 @@ const ppdaf = () => {
         transparent: 'gray-100'
       }
       return {
-        menuWrapper: `bg-${colors[color]} my-1`,
-        menuItemActive: `px-4 py-2 cursor-not-allowed bg-${accent}-200 border-1 border-${colors[color]} focus:border-${accent}-300`,
-        menuItem: `px-4 py-2 cursor-pointer hover:bg-blue-100 border-1 border-${colors[color]} focus:border-blue-300`,
-        select: `bg-${colors[color]} w-full flex flex-row flex-wrap justify-between px-4 py-2 cursor-pointer border-2 border-${colors[color]} focus:border-blue-300`,
-        selectIcon: `fa fa-angle-down text-gray-400 pt-2`
-      }
+          menuWrapper: `bg-${colors[color]} my-1 text-sm `,
+          menuItemActive: `px-2 py-2 cursor-not-allowed bg-${accent}-200 border-1 border-${colors[color]} focus:border-${accent}-300`,
+          menuItem: `px-2 py-2 cursor-pointer hover:bg-blue-100 border-1 border-${colors[color]} focus:border-blue-300`,
+          select: `z-60 bg-${colors[color]} w-full flex flex-row justify-between truncate px-4 py-2 cursor-pointer border-2 border-${colors[color]} focus:border-blue-300`,
+          selectIcon: `fa fa-angle-down text-gray-400 pt-2 px-2`
+        }
     },
 
     /* ------------------------- */

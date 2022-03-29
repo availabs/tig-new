@@ -12,7 +12,7 @@ import centroid from "@turf/centroid";
 import {ckmeans} from 'simple-statistics'
 import TypeAhead from "components/tig/TypeAhead";
 
-class SED2040TazLevelForecastLayer extends LayerContainer {
+class SEDTazLayer extends LayerContainer {
     constructor(props) {
         super(props);
         this.viewId = props.viewId
@@ -353,33 +353,13 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     }
 
     updateLegendDomain() {
-        const domains = {
-            // 2040
-            37:[0, 35696, 40620, 45755, 53519, 202112],
-            34:[0, 1351, 2054, 2782, 3910, 78160],
-            30:[0, 1, 3, 11, 50, 1201],
-            29:[0, 1, 22, 118, 253, 12050],
-            31:[0, 1, 7, 16, 56, 10503],
-            28:[0, 11, 40, 200, 12050],
-            26:[0, 44787, 61304, 80355, 113880, 1109731],
-            27:[0, 2995, 4270, 5680, 7883, 117220],
-            32:[0, 1112, 1588, 2112, 2958, 56390],
-            33:[0, 2.3, 2.62, 2.83, 3.08, 7],
-            36:[0, 66, 142, 276, 670, 48061],
-            35:[0, 30, 78, 167, 385, 13225],
-            13:[0, 489, 791, 1119, 1632, 42294],
-            25:[0, 560, 1005, 1699, 3555, 80093],
-            24:[0, 3090, 4361, 5816, 8083, 181241],
-            38:[0, 1, 670, 2586, 8143, 51583]
-        }
-
-        this.legend.domain = domains[this.filters.dataset.value] ||
-            ckmeans(
-                _.uniq(
+        
+        let domainData= _.uniq(
                     (this.data || []).map(d => get(d, ['data', this.filters.year.value], 0))
-                ),
-                5
-            ).reduce((acc, d, dI) => {
+                )
+        
+        if(domainData.length >= 5) {
+            this.legend.domain = ckmeans(domainData,5).reduce((acc, d, dI) => {
                 if(dI === 0){
                     acc.push(d[0], d[d.length - 1])
                 }else{
@@ -387,6 +367,9 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                 }
                 return acc
             } , [])
+        } else {
+            this.legend.domain = [0,10,25,50,100]
+        }
         this.updateLegendTitle()
     }
 
@@ -482,7 +465,7 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
                 this.source = get(views, [0, 'source_name'], '')
                 this.filters.dataset.domain = views.map(v => ({value: v.id, name: v.name})).sort((a,b) => a.name.localeCompare(b.name));
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : get(views, [0, 'id'])
-                console.log('hello', this.source, views, this.filters.dataset.value, parseInt(this.vid))
+                //console.log('hello', this.source, views, this.filters.dataset.value, parseInt(this.vid))
 
                 this.updateLegendDomain()
 
@@ -626,4 +609,4 @@ class SED2040TazLevelForecastLayer extends LayerContainer {
     }
 }
 
-export const SED2040TazLevelForecastLayerFactory = (options = {}) => new SED2040TazLevelForecastLayer(options);
+export const SEDTazLayerFactory = (options = {}) => new SEDTazLayer(options);

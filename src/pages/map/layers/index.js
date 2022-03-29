@@ -1,6 +1,6 @@
 import {TestTipLayerFactory} from "./tipLayer";
 import {SED2040CountyLevelForecastLayerFactory} from "./SEDCounty";
-import {SED2040TazLevelForecastLayerFactory} from "./SEDTaz";
+import {SEDTazLayerFactory} from "./SEDTaz";
 
 import {ACSCensusLayerFactory} from "./ACSCensusLayer";
 import {BPMPerformanceMeasuresLayerFactory} from "./BPMPerformanceMeasuresLayer";
@@ -15,9 +15,9 @@ export const layers = {
     "sed_county_2050": SED2040CountyLevelForecastLayerFactory, //done
     "sed_county_2055": SED2040CountyLevelForecastLayerFactory, // taz?
 
-    "sed_taz_2040": SED2040TazLevelForecastLayerFactory, //done
-    "sed_taz_2050": SED2040TazLevelForecastLayerFactory, //done
-    "sed_taz_2055": SED2040TazLevelForecastLayerFactory, // no data!
+    "sed_taz_2040": SEDTazLayerFactory, //done
+    "sed_taz_2050": SEDTazLayerFactory, //done
+    "sed_taz_2055": SEDTazLayerFactory, // no data!
 
     "tip": TestTipLayerFactory,
     'bpm_performance': BPMPerformanceMeasuresLayerFactory,

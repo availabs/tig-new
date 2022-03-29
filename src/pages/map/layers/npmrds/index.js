@@ -26,7 +26,7 @@ X - All Years Working
 3 - Overview Graph through time
 4- test measures by geography
    ---------------- */
-console.log('what text', getColorRange(6, "RdYlBu"), getColorRange(6, "RdYlBu").reverse())
+// console.log('what text', getColorRange(6, "RdYlBu"), getColorRange(6, "RdYlBu").reverse())
 const getMonths = {
     1: 'January',
     2: 'February',
@@ -397,7 +397,7 @@ class NPMRDSLayer extends LayerContainer {
             return a;
         }, {});
 
-        console.log('colors', colors)
+        // console.log('colors', colors)
 
         map.setPaintProperty(`tmc-${year}`, "line-color", [
             "case",

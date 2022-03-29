@@ -5,7 +5,7 @@ let AUTH_HOST = 'https://availauth.availabs.org';
 let CLIENT_HOST = 'https://tigtest2.nymtc.org';
 
 if (process.env.NODE_ENV === 'development') {
-  //API_HOST = 'http://localhost:4445';
+  API_HOST = 'http://localhost:4445';
   // AUTH_HOST = 'http://localhost:3457';
   CLIENT_HOST = 'http://localhost:3000';
 }

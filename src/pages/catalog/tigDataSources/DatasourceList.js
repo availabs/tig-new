@@ -39,13 +39,13 @@ const DatasourceList = () => {
     }, [])
 
     const sourcesList = React.useMemo(() => {
-        console.log('Data source list process data')
+        // console.log('Data source list process data')
         let sourcesById = get(falcorCache, ['tig', 'datasources', 'byId'], null)
         let data = []
         if (sourcesById) {
             data = Object.keys(sourcesById).map(id => sourcesById[id]).sort((a,b) => a.name.value.localeCompare(b.name.value))
         }
-        console.log('sourcesList', data)
+        // console.log('sourcesList', data)
         return data
 
     },[falcorCache])

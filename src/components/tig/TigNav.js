@@ -1,12 +1,9 @@
 import React from "react"
-import { withAuth, TopNav } from '@availabs/avl-components'
-import { Link } from 'react-router-dom'
+import { withAuth, TopNav, /*useTheme*/ } from '@availabs/avl-components'
+// import { Link } from 'react-router-dom'
 
 
 const TigNav = withAuth(() => {
-    
-
-
     return (
         <div className='w-full'>
             <TopNav 

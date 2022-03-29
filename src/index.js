@@ -31,7 +31,7 @@ import {
 
 import 'index.css';
 
-console.log('index theme', TDS_THEME)
+// console.log('index theme', TDS_THEME)
 
 // addComponents(DmsComponents);
 // addWrappers(DmsWrappers);

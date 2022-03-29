@@ -424,10 +424,10 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
             filtered = this.geographies.filter(({ value }) => geoids.includes(value));
 
-        console.log('get Bounds', filtered)
-        let test = filtered.filter((d) => d.bounding_box[0][1] > 42.3 || d.bounding_box[1][1] > 42,3)
+        //console.log('get Bounds', filtered)
+        //let test = filtered.filter((d) => d.bounding_box[0][1] > 42.3 || d.bounding_box[1][1] > 42,3)
 
-        console.log('who dunnit',test)
+        //console.log('who dunnit',test)
 
         return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
     }
