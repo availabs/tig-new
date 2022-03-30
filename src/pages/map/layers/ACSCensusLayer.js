@@ -194,33 +194,27 @@ class ACSCensusLayer extends LayerContainer {
         const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
             (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
 
-        let d = this.data.reduce((acc, curr) => {
-            this.data_tracts.forEach(data_tract => {
-                if (curr.area === data_tract.name) {
-                    acc.push({
-                        id: data_tract.geoid,
-                        value: curr.value,
-                        percentage: curr.percentage,
-                        geom: JSON.parse(curr.geom),
-                        name: curr.area,
-                        type: curr.type
-                    })
-                }
-            })
-            return acc
-        }, [])
+        let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || [];
 
         let geoJSON = {
             type: 'FeatureCollection',
             features: []
         };
 
-        d
-            .map(t => {
+        this.data
+            .filter(c => geoids.includes(c.fips.slice(0, 5)))
+            .map((d, i) => {
                 return {
-                    type: "feature",
-                    properties: {geoid: t.id, value: t.value, percent: t.percentage, area: t.name, area_type: t.type},
-                    geometry: t.geom
+                    type: "Feature",
+                    id: i,
+                    properties: {
+                        area: d.area,
+                        type: d.type,
+                        geoid: d.fips,
+                        value: d.value,
+                        percentage: d.percentage,
+                    },
+                    geometry: JSON.parse(d.geom)
                 }
             })
             .forEach((feat) => {
