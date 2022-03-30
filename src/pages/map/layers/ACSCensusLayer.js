@@ -63,12 +63,12 @@ class ACSCensusLayer extends LayerContainer {
         layers: ["tracts", 'nymtc_source_boundaries'],
         callback: (layerId, features, lngLat) => {
             const geoid = features.reduce((a, c) => {
-                a = get(c, ['properties', 'geoid'], '')
+                a = get(c, ['properties', 'area'], '')
                 return a
             }, '')
 
             const graph = tracts.reduce((a, c) => {
-                if (c.geoid === geoid) {
+                if (c.name === geoid) {
                     a = c
                 }
                 return a
@@ -202,7 +202,7 @@ class ACSCensusLayer extends LayerContainer {
         };
 
         this.data
-            .filter(c => geoids.includes(c.fips.slice(0, 5)))
+            // .filter(c => geoids.includes(c.fips.slice(0, 5)))
             .map((d, i) => {
                 return {
                     type: "Feature",
@@ -210,7 +210,7 @@ class ACSCensusLayer extends LayerContainer {
                     properties: {
                         area: d.area,
                         type: d.type,
-                        geoid: d.fips,
+                        // geoid: d.fips,
                         value: d.value,
                         percentage: d.percentage,
                     },
@@ -505,14 +505,14 @@ class ACSCensusLayer extends LayerContainer {
         }
 
         let features = this.data
-            .filter(c => geoids.includes(c.fips.slice(0, 5)))
+            // .filter(c => geoids.includes(c.fips.slice(0, 5)))
             .map((d, i) => {
                 return {
                     type: "Feature",
                     id: i,
                     properties: {
                         area: d.area,
-                        geoid: d.fips
+                        // geoid: d.fips
                     },
                     geometry: JSON.parse(d.geom)
                 }
@@ -525,7 +525,7 @@ class ACSCensusLayer extends LayerContainer {
 
         this.processedData = this.data.map((d) => {
             return {
-                id: d.fips,
+                id: d.area,
                 value: d[this.filters.column.value]
             }
         })
@@ -540,7 +540,7 @@ class ACSCensusLayer extends LayerContainer {
             "case",
             ["boolean", ["feature-state", "hover"], false],
             "#090",
-            ["get", ["get", "geoid"], ["literal", colors]]
+            ["get", ["get", "area"], ["literal", colors]]
         ])
     }
 
