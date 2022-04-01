@@ -202,7 +202,9 @@ class ACSCensusLayer extends LayerContainer {
         };
 
         this.data
-            // .filter(c => geoids.includes(c.fips.slice(0, 5)))
+            .filter(c => geoids.includes(
+                get(tracts.filter(tract => tract.name === c.area), [0, 'geoid'], '').slice(0, 5)
+            ))
             .map((d, i) => {
                 return {
                     type: "Feature",
@@ -384,6 +386,8 @@ class ACSCensusLayer extends LayerContainer {
         options.center = tr.unproject(nw.add(se).div(2));
         options.zoom = Math.min(tr.scaleZoom(tr.scale * Math.min(scaleX, scaleY)), tr.maxZoom);
 
+        this.defaultZoom = options;
+
         this.mapboxMap.easeTo(options);
     }
 
@@ -499,13 +503,14 @@ class ACSCensusLayer extends LayerContainer {
         this.data = get(falcorCache, ["tig", "acs_census", "byId", categoryValue, 'data_overlay', 'value'], [])
 
         let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
-
         if (this.data.length === 0 || !map) {
             return this.fetchData(falcor)
         }
 
         let features = this.data
-            // .filter(c => geoids.includes(c.fips.slice(0, 5)))
+            .filter(c => geoids.includes(
+                get(tracts.filter(tract => tract.name === c.area), [0, 'geoid'], '').slice(0, 5)
+            ))
             .map((d, i) => {
                 return {
                     type: "Feature",
@@ -530,9 +535,9 @@ class ACSCensusLayer extends LayerContainer {
             }
         })
 
-        const colorScale = this.getColorScale(this.processedData),
+        let colorScale = this.getColorScale(this.processedData),
             colors = this.processedData.filter(c => c.value).reduce((a, c) => {
-                a[c.id] = colorScale(c.value)
+                a[c.id] = colorScale(c.value || 0)
                 return a
             }, {});
 
@@ -540,7 +545,7 @@ class ACSCensusLayer extends LayerContainer {
             "case",
             ["boolean", ["feature-state", "hover"], false],
             "#090",
-            ["get", ["get", "area"], ["literal", colors]]
+            ['coalesce', ["get", ["get", "area"], ["literal", colors]], colorScale(0)]
         ])
     }
 

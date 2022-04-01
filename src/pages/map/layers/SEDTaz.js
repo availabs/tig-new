@@ -292,11 +292,15 @@ class SEDTazLayer extends LayerContainer {
 
         let d = this.data.reduce((acc,curr) =>{
             this.taz_ids.forEach(data_tract =>{
+                let values = Object.keys(this.fullData).reduce((acc, year) => {
+                    acc[year] = get(this.fullData[year].filter(data => data.area === data_tract), [0, 'value']);
+                    return acc;
+                } , {})
                 if(curr.area === data_tract){
+                    console.log('?', this.geoms[curr.gid], curr, this.geoms)
                     acc.push({
-                        geoid: data_tract.geoid,
-                        ...{...curr.data},
-                        geom: JSON.parse(curr.geom),
+                        ...values,
+                        geom: JSON.parse(this.geoms[curr.gid]),
                         area: curr.area,
                         area_type: curr.type
                     })

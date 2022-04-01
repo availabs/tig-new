@@ -296,7 +296,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
 
         falcor.get(['tig', 'views', 'byLayer', this.type], ["geo", states, "geoLevels"])
             .then(res => {
-                this.source = get(res, ['json', 'tig', 'views', 'byLayer', this.type, 'source_name'], '')
+                this.source = get(res, ['json', 'tig', 'views', 'byLayer', this.type, 0, 'source_name'], '')
                 let geo = get(res, 'json.geo', {})
                 const geographies = flatten(states.map(s => geo[s].geoLevels));
 
