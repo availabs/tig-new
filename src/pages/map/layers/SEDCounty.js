@@ -692,4 +692,4 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
 }
 
-export const SED2040CountyLevelForecastLayerFactory = (options = {}) => new SED2040CountyLevelForecastLayer(options);
+export const SEDCountyLayerFactory = (options = {}) => new SED2040CountyLevelForecastLayer(options);

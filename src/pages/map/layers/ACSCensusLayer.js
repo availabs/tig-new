@@ -10,6 +10,7 @@ import flatten from "lodash.flatten";
 import centroid from "@turf/centroid";
 import {download as shpDownload} from "utils/shp-write";
 import TypeAhead from "components/tig/TypeAhead";
+import {ckmeans} from "simple-statistics";
 
 class ACSCensusLayer extends LayerContainer {
     constructor(props) {
@@ -271,18 +272,23 @@ class ACSCensusLayer extends LayerContainer {
     }
 
     updateLegendDomain() {
-        const domains = {
-            '22-value': [0, 300, 756, 1432, 2553, 21552], '22-percentage': [0, 8.03, 19.34, 39.08, 70.41, 100],
-            '132-value': [0, 370, 861, 1573, 2728, 23217], '132-percentage': [0, 9.92, 22, 42.67, 73.73, 100],
-            '134-value': [0, 400, 883, 1608, 2738, 23665], '134-percentage': [0, 10.45, 22.51, 42.90, 73.93, 100],
-            '142-value': [0, 410, 897, 1610, 2736, 24223], '142-percentage': [0, 10.81, 22.80, 42.95, 73.53, 100],
-            '18-value': [0, 129, 257, 459, 897, 4959], '18-percentage': [0, 3.53, 6.9, 12.63, 22.92, 100],
-            '128-value': [0, 140, 273, 474, 903, 5264], '128-percentage': [0, 3.81, 7.32, 12.85, 23, 100],
-            '133-value': [0, 142, 276, 487, 911, 5610], '133-percentage': [0, 3, 94, 7.34, 13.03, 23.31, 100],
-            '143-value': [0, 142, 276, 483, 902, 5520], '143-percentage': [0, 3.89, 7.36, 12.87, 23.01, 100]
+        let values = _.uniq((this.data || []).map(d => get(d, [this.filters.column.value], 0)))
+
+        if(values.length){
+            this.legend.domain =
+                ckmeans(values, Math.min(values.length, 5)
+                ).reduce((acc, d, dI) => {
+                    if(dI === 0){
+                        acc.push(d[0], d[d.length - 1])
+                    }else{
+                        acc.push(d[d.length - 1])
+                    }
+                    return acc
+                } , [])
+        }else{
+            this.legend.domain = [0, 300, 756, 1432, 2553, 21552]
         }
 
-        this.legend.domain = domains[this.filters.dataset.value + '-' + this.filters.column.value] || domains['22-value']
         this.updateLegendTitle()
     }
 
