@@ -233,7 +233,7 @@ const ppdaf = () => {
 
     bg: "bg-gray-50",
 
-    menuBg: "bg-white z-50",
+    menuBg: "bg-white z-39",
     menuBgHover: "",
     menuBgActive: "bg-blue-200",
     menuBgActiveHover: "hover:bg-blue-300",
