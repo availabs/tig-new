@@ -435,6 +435,8 @@ class TestTipLayer extends LayerContainer {
         options.center = tr.unproject(nw.add(se).div(2));
         options.zoom = Math.min(tr.scaleZoom(tr.scale * Math.min(scaleX, scaleY)), tr.maxZoom);
 
+        this.defaultZoom = options;
+
         this.mapboxMap.easeTo(options);
     }
 

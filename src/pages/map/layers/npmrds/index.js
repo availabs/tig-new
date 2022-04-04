@@ -165,6 +165,7 @@ class NPMRDSLayer extends LayerContainer {
 
 
     zoomToGeography() {
+        console.log('called zoomTogeom')
         if (!this.mapboxMap) return;
 
         const bounds = this.getBounds();
@@ -201,6 +202,8 @@ class NPMRDSLayer extends LayerContainer {
         options.center = tr.unproject(nw.add(se).div(2));
         options.zoom = Math.min(tr.scaleZoom(tr.scale * Math.min(scaleX, scaleY)), tr.maxZoom);
 
+        this.defaultZoom = options;
+        console.log('setting zoom', this.defaultZoom)
         this.mapboxMap.easeTo(options);
     }
 
@@ -210,7 +213,7 @@ class NPMRDSLayer extends LayerContainer {
                 .filter(({value}) => geoids.includes(value));
 
         return filtered
-            .reduce((a, c) => a.extend(c.bounds), new mapboxgl.LngLatBounds())
+            .reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
     }
 
     setActiveStation = () => {
