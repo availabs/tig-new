@@ -26,4 +26,4 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-tasks/datatables/lor.config.json
+tasks/datatables/*.config.json

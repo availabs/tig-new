@@ -5,14 +5,25 @@ sql.setDialect('postgres');
 
 
 const fetch = async () => {
-    let sources = [
-        '2040 SED County Level Forecast Data',
-        '2050 SED County Level Forecast Data',
+    let allSrc = {
+        local: [
+            '2040 SED County Level Forecast Data',
+            '2050 SED County Level Forecast Data',
 
-        '2040 SED TAZ Level Forecast Data',
-        //     // '2050 SED TAZ Level Forecast Data', -- no data
-        '2055 SED TAZ Level Forecast Data'
-    ]
+            '2040 SED TAZ Level Forecast Data',
+            // '2050 SED TAZ Level Forecast Data', -- no data
+            '2055 SED TAZ Level Forecast Data'
+        ],
+        tigtet2: [
+            "2040 SED County Level Forecast Data",
+            "2040 SED TAZ Level Forecast Data",
+            "2050 SED County Level Forecast Data",
+            "2050 SED TAZ Level Forecast Data",
+            "2055 SED COUNTY LEVEL DATA",
+            "2055 SED TAZ LEVEL FORECAST"
+        ]
+    }
+    let sources = allSrc.tigtet2;
 
     for (const s of sources) {
         console.log('source', s);
@@ -70,7 +81,7 @@ const fetch = async () => {
                 ${res.map(r => `"${r.view_id}" json`).join(', ')}
             )
     `;
-
+        console.log('create table', createSql)
         let insertSql = `
             INSERT INTO public.${tableName}( ${res.map(r => `"${r.view_id}"`).join(', ')} )
             VALUES (
@@ -80,8 +91,8 @@ const fetch = async () => {
                     )
     `;
 
-        await db.query(createSql);
-        await db.query(insertSql);
+        // await db.query(createSql);
+        // await db.query(insertSql);
 
     }
 }

@@ -272,7 +272,7 @@ class ACSCensusLayer extends LayerContainer {
     }
 
     updateLegendDomain() {
-        let values = _.uniq((this.data || []).map(d => get(d, [this.filters.column.value], 0)))
+        let values = _.uniq((this.data || []).map(d => get(d, [this.filters.column.value], 0))).filter(v => v)
 
         if(values.length){
             this.legend.domain =
@@ -297,7 +297,9 @@ class ACSCensusLayer extends LayerContainer {
             <div>{this.source}</div>
             <div
                 className='text-sm text-italic font-light'>{this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name}</div>
-            <div className='text-sm text-italic font-light'>Column: {this.filters.column.value}</div>
+            <div className='text-sm text-italic font-light'>Column: {
+                get(this.filters.column.domain.filter(c => c.value === this.filters.column.value), [0, 'name'], '')
+            }</div>
             <div></div>
         </div>
     }
@@ -315,7 +317,8 @@ class ACSCensusLayer extends LayerContainer {
                 this.filters.dataset.value = views.find(v => v.id === parseInt(this.vid)) ? parseInt(this.vid) : get(views, [0, 'id'])
 
                 this.updateColumnNames()
-                this.updateLegendDomain()
+                this.updateLegendTitle()
+                // this.updateLegendDomain()
 
                 // geography setup
                 let geo = get(res, 'json.geo', {})
@@ -416,6 +419,7 @@ class ACSCensusLayer extends LayerContainer {
                 // this.legend.domain = this.processedData.map(d => d.value).filter(d => d).sort()
                 this.updateColumnNames()
                 this.updateLegendTitle()
+                this.updateLegendDomain()
                 break;
             }
             case "column": {
@@ -507,6 +511,8 @@ class ACSCensusLayer extends LayerContainer {
         const categoryValue = this.filters.dataset.value
         let falcorCache = falcor.getCache()
         this.data = get(falcorCache, ["tig", "acs_census", "byId", categoryValue, 'data_overlay', 'value'], [])
+
+        this.updateLegendDomain();
 
         let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
         if (this.data.length === 0 || !map) {
