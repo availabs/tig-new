@@ -9,6 +9,11 @@ import _ from 'lodash'
 
 const color_scheme = [
     {
+        "color": "rgb(0, 0, 0)",
+        "value": "Boundary Line",
+        "label": "Boundary Line"
+    },
+    {
         "color": "rgb(0, 255, 255)",
         "value": "60th Street Sector",
         "label": "60th Street Sector"
@@ -140,8 +145,9 @@ class HubBoundTravelDataLayer extends LayerContainer {
     }
     legend = {
         type: "ordinal",
-        domain: [],
-        range: [],
+        pair: 'simple',
+        domain: color_scheme.map(c => c.label),
+        range: color_scheme.map(c => c.color),
         height: 5,
         width: 320,
         direction: "vertical",
@@ -238,8 +244,11 @@ class HubBoundTravelDataLayer extends LayerContainer {
 
     getBounds() {
         let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
-            filtered = this.geographies.filter(({value}) => geoids.includes(value));
-
+            filtered = this.geographies.filter(({value}) =>
+                // geoids.includes(value)
+                value === '36005'
+            );
+        console.log('??', geoids, filtered)
         return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
     }
 
@@ -276,7 +285,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
             scaleY = (tr.height - (options.padding.top + options.padding.bottom)) / size.y;
 
         options.center = tr.unproject(nw.add(se).div(2));
-        options.zoom = Math.min(tr.scaleZoom(tr.scale * Math.min(scaleX, scaleY)), tr.maxZoom);
+        options.zoom = 10 //Math.min(tr.scaleZoom(tr.scale * Math.min(scaleX, scaleY)), tr.maxZoom);
 
         this.defaultZoom = options;
 
@@ -332,7 +341,8 @@ class HubBoundTravelDataLayer extends LayerContainer {
             return bounds.extend(coord);
         }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
         mapboxMap.fitBounds(bounds, {
-            padding: 10
+            padding: 1,
+            maxZoom: 10
         })
         return Promise.resolve();
     }
@@ -471,6 +481,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                 ["get", ["to-string", ["get", "sector"]], ["literal", colors]]
             )
         }
+
     }
 
 
