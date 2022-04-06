@@ -176,6 +176,18 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                     20, 0.1
                 ]
             }
+        },
+        { id: 'counties-labels',
+            source: 'counties',
+            'source-layer': 'counties',
+            type: 'symbol',
+            layout: {
+                "symbol-placement": "point",
+                "text-size": 15
+            },
+            paint: {
+                "text-color": "#000"
+            }
         }
     ]
 
@@ -501,6 +513,15 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
             "#090",
             ["get", ["get", "geoid"], ["literal", colors]]
         ])
+
+        const nameMapping = this.data_counties.reduce((acc, curr) => {
+            acc[curr.geoid.toString()] = curr.name
+            return acc;
+        }, {})
+
+        map.setLayoutProperty("counties-labels", "text-field",
+            ["get", ["get", "geoid"], ["literal", nameMapping]]
+        )
     }
 
 }
