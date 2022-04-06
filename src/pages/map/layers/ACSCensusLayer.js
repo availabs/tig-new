@@ -341,6 +341,10 @@ class ACSCensusLayer extends LayerContainer {
 
         if (categoryValue) {
             return falcor.get(["tig", "acs_census", "byId", categoryValue, 'data_overlay'])
+                .then(d => {
+                    let falcorCache = falcor.getCache()
+                    this.data = get(falcorCache, ["tig", "acs_census", "byId", categoryValue, 'data_overlay', 'value'], [])
+                })
         }
         return Promise.resolve({})
 
@@ -507,10 +511,10 @@ class ACSCensusLayer extends LayerContainer {
             .range(this.legend.range);
     }
 
-    render(map, falcor) {
-        const categoryValue = this.filters.dataset.value
-        let falcorCache = falcor.getCache()
-        this.data = get(falcorCache, ["tig", "acs_census", "byId", categoryValue, 'data_overlay', 'value'], [])
+    async render(map, falcor) {
+        if(!this.data){
+            await this.fetchData(falcor)
+        }
 
         this.updateLegendDomain();
 

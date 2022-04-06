@@ -9,6 +9,7 @@ import mapboxgl from "mapbox-gl";
 import {Link} from "react-router-dom";
 import _ from 'lodash'
 import centroid from '@turf/centroid'
+import TypeAhead from "../../../components/tig/TypeAhead";
 
 var parse = require('wellknown');
 
@@ -277,21 +278,20 @@ class TestTipLayer extends LayerContainer {
                     <div className="relative pt-1">
                         <div className={'flex mt-5'}>
                             <label className={'self-center pr-1'} htmlFor={'search'}>TIP Project Search: </label>
-                            <input
-                                className={'p-1'}
-                                id={'search'}
-                                type={'text'}
-                                name={'search'}
-                                onChange={e => {
-                                    let v = e.target.value
-                                    if(!e.target.value.length){
-                                        v = 'Select All'
+                            <TypeAhead
+                                className={'p-1 w-full border'}
+                                classNameMenu={'border-b hover:bg-blue-300'}
+                                suggestions={layer.filters.tip_id.domain}
+                                setParentState={e => {
+                                    if (!e.length) {
+                                        e = 'Select All'
                                     }
-                                    layer.filters.tip_id.onChange(v)
-                                    layer.onFilterChange('tip_id', v)
-                                    layer.dispatchUpdate(layer, {tip_id: v})
+                                    layer.filters.tip_id.onChange(e)
+                                    layer.onFilterChange('tip_id', e)
+                                    layer.dispatchUpdate(layer, {tip_id: e})
                                 }}
-                                placeholder={'ex: ST210694'}/>
+                                placeholder={'ex: ST210694'}
+                            />
                         </div>
                     </div>
                 )

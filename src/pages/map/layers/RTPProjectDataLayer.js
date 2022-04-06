@@ -8,6 +8,7 @@ import mapboxgl from "mapbox-gl";
 import {Link} from "react-router-dom";
 import _ from "lodash";
 import centroid from "@turf/centroid";
+import TypeAhead from "../../../components/tig/TypeAhead";
 
 var parse = require('wellknown');
 
@@ -283,26 +284,24 @@ class RTPProjectDataLayer extends LayerContainer {
         },
         {
             Component: ({layer}) => {
-
                 return (
                     <div className="relative pt-1">
                         <div className={'flex mt-5'}>
                             <label className={'self-center pr-1'} htmlFor={'search'}>RTP Project Search: </label>
-                            <input
-                                className={'p-1'}
-                                id={'search'}
-                                type={'text'}
-                                name={'search'}
-                                onChange={e => {
-                                    let v = e.target.value
-                                    if(!e.target.value.length){
-                                        v = 'Select All'
+                            <TypeAhead
+                                className={'p-1 w-full border'}
+                                classNameMenu={'border-b hover:bg-blue-300'}
+                                suggestions={layer.filters.rtp_id.domain}
+                                setParentState={e => {
+                                    if (!e.length) {
+                                        e = 'Select All'
                                     }
-                                    layer.filters.rtp_id.onChange(v)
-                                    layer.onFilterChange('rtp_id', v)
-                                    layer.dispatchUpdate(layer, {rtp_id: v})
+                                    layer.filters.rtp_id.onChange(e)
+                                    layer.onFilterChange('rtp_id', e)
+                                    layer.dispatchUpdate(layer, {rtp_id: e})
                                 }}
-                                placeholder={'search...'}/>
+                                placeholder={'ex: NSSC662V'}
+                            />
                         </div>
                     </div>
                 )
