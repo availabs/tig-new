@@ -348,13 +348,13 @@ class TestTipLayer extends LayerContainer {
                 let geom = feat.geometry;
                 let props = feat.properties;
 
-                if (geom.type === 'MultiPolygon') {
+                if (geom.type === 'MultiPolygon' || geom.type === 'MultiPoint') {
                     for (var i = 0; i < geom.coordinates.length; i++) {
                         var polygon = {
                             type: 'feature',
                             properties: props,
                             geometry: {
-                                'type': 'Polygon',
+                                'type': geom.type.replace('Multi', ''),
                                 'coordinates': geom.coordinates[i],
                             }
                         };
@@ -617,7 +617,7 @@ class TestTipLayer extends LayerContainer {
             {
                 type: 'FeatureCollection',
                 features: geojson.features.filter(d => {
-                    if (d['geometry'] && d['geometry'].type === 'Point') {
+                    if (d['geometry'] && d['geometry'].type.includes('Point')) {
                         return d
                     }
                     return false
