@@ -224,7 +224,7 @@ class RTPProjectDataLayer extends LayerContainer {
                 ['Sponsor:', feature['sponsor']],
                 ['Project Type:', feature['ptype']],
                 ['Cost:', feature['estimated_cost'] ? feature['estimated_cost'].toString() + 'M' : ''],
-                ['Description:', feature['description'].toLowerCase()]
+                ['Description:', feature['description']]
             ]
         },
         HoverComp: ({data, layer}) => {

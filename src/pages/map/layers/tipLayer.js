@@ -192,7 +192,7 @@ class TestTipLayer extends LayerContainer {
                 ['Sponsor:', feature['sponsor']],
                 ['Project Type:', feature['ptype']],
                 ['Cost:', feature['cost'] ? feature['cost'].toString() + 'M' : ''],
-                ['Description:', feature['description'].toLowerCase()]
+                ['Description:', feature['description']]
             ]
         },
         HoverComp: ({data, layer}) => {
