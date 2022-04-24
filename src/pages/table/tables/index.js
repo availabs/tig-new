@@ -11,15 +11,19 @@ import SedCounty2040DataTable from "./SedCounty2040DataTable";
 import TigDataTable from "./TigDataTable";
 
 export const tables = {
-    npmrds: NpmrdsTable,
+    sed_taz_2040: SedTaz2040DataTable,
+    sed_taz_2050: SedTaz2040DataTable,
+    sed_taz_2055: SedTaz2040DataTable,
+
+    sed_county_2040: SedTaz2040DataTable,
+    sed_county_2050: SedCounty2050DataTable,
+    sed_county_2055: SedCounty2055DataTable,
+
+    acs_census: AcsCensusDataTable,
+
     rtp_project_data: RtpProjectDataTable,
     hub_bound_travel_data: HubBoundTravelDataTable, // huge data
     bpm_performance: BpmPerformanceDataTable,
-    acs_census: AcsCensusDataTable,
-    sed_taz_2055: SedTaz2055DataTable,
-    sed_county_2055: SedCounty2055DataTable,
-    sed_taz_2040: SedTaz2040DataTable,
-    sed_county_2050: SedCounty2050DataTable,
-    sed_county_2040: SedCounty2040DataTable,
+    npmrds: NpmrdsTable,
     tip: TigDataTable
 }

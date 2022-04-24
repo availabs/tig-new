@@ -1,65 +1,67 @@
 import {useState, useMemo, useEffect} from 'react'
 import {Select, Input, Table, useFalcor} from '@availabs/avl-components'
-import {filters} from 'pages/map/layers/npmrds/filters.js'
 import get from "lodash.get";
-import flatten from "lodash.flatten";
-import {HOST} from "../../map/layers/layerHost";
-import fetcher from "../../map/wrappers/fetcher";
 import {useParams} from "react-router-dom";
 import _ from "lodash";
+import {filters} from 'pages/map/layers/npmrds/filters.js'
+import counties from "../../map/config/counties.json";
 
-const columns = ['taz', '2010', '2015', '2020', '2025', '2030', '2035', '2040']
-
-const fetchData = (dataset) => {
-    const url = `${HOST}views/${dataset}/table.json`
-    const params = `?draw=8&columns%5B0%5D%5Bdata%5D=0&columns%5B0%5D%5Bname%5D=&columns%5B0%5D%5Bsearchable%5D=true
-    &columns%5B0%5D%5Borderable%5D=true&columns%5B0%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B0%5D%5Bsearch%5D%5Bregex%5D=false
-    &columns%5B1%5D%5Bdata%5D=1&columns%5B1%5D%5Bname%5D=&columns%5B1%5D%5Bsearchable%5D=true&columns%5B1%5D%5Borderable%5D=true
-    &columns%5B1%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B1%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B2%5D%5Bdata%5D=2&columns%5B2%5D%5Bname%5D=
-    &columns%5B2%5D%5Bsearchable%5D=true&columns%5B2%5D%5Borderable%5D=true&columns%5B2%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B2%5D%5Bsearch%5D%5Bregex%5D=false
-    &columns%5B3%5D%5Bdata%5D=3&columns%5B3%5D%5Bname%5D=&columns%5B3%5D%5Bsearchable%5D=true&columns%5B3%5D%5Borderable%5D=true
-    &columns%5B3%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B3%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B4%5D%5Bdata%5D=4&columns%5B4%5D%5Bname%5D=
-    &columns%5B4%5D%5Bsearchable%5D=true&columns%5B4%5D%5Borderable%5D=true&columns%5B4%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B4%5D%5Bsearch%5D%5Bregex%5D=false
-    &columns%5B5%5D%5Bdata%5D=5&columns%5B5%5D%5Bname%5D=&columns%5B5%5D%5Bsearchable%5D=true&columns%5B5%5D%5Borderable%5D=true&columns%5B5%5D%5Bsearch%5D%5Bvalue%5D=
-    &columns%5B5%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B6%5D%5Bdata%5D=6&columns%5B6%5D%5Bname%5D=&columns%5B6%5D%5Bsearchable%5D=true&columns%5B6%5D%5Borderable%5D=true
-    &columns%5B6%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B6%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B7%5D%5Bdata%5D=7&columns%5B7%5D%5Bname%5D=&columns%5B7%5D%5Bsearchable%5D=true
-    &columns%5B7%5D%5Borderable%5D=true&columns%5B7%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B7%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B8%5D%5Bdata%5D=8&columns%5B8%5D%5Bname%5D=
-    &columns%5B8%5D%5Bsearchable%5D=true&columns%5B8%5D%5Borderable%5D=true&columns%5B8%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B8%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B9%5D%5Bdata%5D=9
-    &columns%5B9%5D%5Bname%5D=&columns%5B9%5D%5Bsearchable%5D=true&columns%5B9%5D%5Borderable%5D=true&columns%5B9%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B9%5D%5Bsearch%5D%5Bregex%5D=false
-    &columns%5B10%5D%5Bdata%5D=10&columns%5B10%5D%5Bname%5D=&columns%5B10%5D%5Bsearchable%5D=true&columns%5B10%5D%5Borderable%5D=true&columns%5B10%5D%5Bsearch%5D%5Bvalue%5D=
-    &columns%5B10%5D%5Bsearch%5D%5Bregex%5D=false&order%5B0%5D%5Bcolumn%5D=0&order%5B0%5D%5Bdir%5D=asc
-    &start=0&length=4000
-    &search%5Bvalue%5D=&search%5Bregex%5D=false&lower=&upper=&_=1641912701431`
-    return fetcher(url + params)
+const fetchData = (falcor, type, view) => {
+    return falcor.get(['tig', 'source', `${type.split('_')[2]} SED ${type.split('_')[1]} Level Forecast`, 'view', view])
+        .then(d => get(d, ['json', 'tig', 'source', `${type.split('_')[2]} SED ${type.split('_')[1]} Level Forecast`, 'view', view]))
 }
 
-const processData = (data) => {
-    data = data
-        .map(row => {
-        return row.reduce((acc, r, rI) => {
-            acc[columns[rI]] = columns[rI] === 'taz' ? r : +r
-            return acc
-        }, {})
-    }, [])
-    return data
-}
-
-const RenderTable = (data = [], pageSize, lower, upper) => useMemo(() =>
-    <Table
-        data={data.filter(d => {
-            return !(upper || lower) ||
-                (
-                    (!lower || !!(Object.values(d).find(l => l >= lower))) &&
-                    (!upper || !!(Object.values(d).find(l => l <= upper)))
+const processData = (data= {}, geography = '', lower, upper, type) => {
+    console.log('d?', data)
+    let reformat = {}
+    let years = new Set();
+    let areaColName = type.split('_')[1].toLowerCase() === 'taz' ? 'enclosing_name' : 'area';
+    let keyCol = type.split('_')[1].toLowerCase() === 'taz' ? 'taz' : 'county';
+    let sortFn = (a, b) => type.split('_')[1].toLowerCase() === 'taz' ? +b[keyCol] - +a[keyCol] : b[keyCol].localeCompare(a[keyCol])
+    console.log('t?', type, type.split('_')[1].toLowerCase())
+    Object.keys(data)
+        .forEach(year => {
+            years.add(year)
+            data[year]
+                .filter(entry =>
+                    get(filters.geography.domain.filter(geo => geo.name === geography), [0, 'value'], [])
+                        .includes(counties.filter(c => c.name === entry[areaColName])[0].geoid)
                 )
+                .forEach(entry => {
+                    reformat[entry.area] = Object.assign(reformat[entry.area] || {}, {[year]: +entry.value})
+                })
+        });
 
-        })}
+
+    return {
+        data: Object.keys(reformat)
+            .map(tazId => ({[keyCol]: tazId, ...reformat[tazId]}))
+            .filter(d => {
+                let values = Object.keys(d).filter(d => !['taz', 'county'].includes(d)).map(k => d[k]);
+                return !(upper || lower) ||
+                    (
+                        (!lower || !!(values.find(l => l >= lower))) &&
+                        (!upper || !!(values.find(l => l <= upper)))
+                    )
+
+            })
+            .sort(sortFn),
+        years: [...years]
+    }
+}
+
+const RenderTable = (data = {}, pageSize, type) => useMemo(() =>
+    <Table
+        data={data.data}
         columns={
-           columns
+          [type.split('_')[1].toLowerCase() === 'taz' ? 'taz' : 'county', ...data.years]
+              .sort((a,b) => a === 'taz' ? -1 : a-b)
                 .map(c => ({
                     Header: c,
                     accessor: c,
-                    align: 'center'
+                    align: 'center',
+                    disableFilters: c !== 'taz',
+                    Cell: (d) => (d.cell.value || 0).toLocaleString()
                 }))
         }
         initialPageSize={pageSize}
@@ -67,11 +69,11 @@ const RenderTable = (data = [], pageSize, lower, upper) => useMemo(() =>
         striped={true}
     />, [data, pageSize])
 
-const SedTaz2055DataTable = ({name}) => {
+const SedTaz2055DataTable = ({name, type}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams()
     const [loading, setLoading] = useState(false)
-    const [data, setData] = useState([])
+    const [data, setData] = useState({data: [], years: []})
     const [pageSize, setPageSize] = useState(50)
 
     const [geography, setGeography] = useState('All')
@@ -84,14 +86,14 @@ const SedTaz2055DataTable = ({name}) => {
         upper: {get: upper, set: setUpper},
         pageSize: {get: pageSize, set: setPageSize},
     }
-
+    console.log('name, type', name, type)
     useEffect(async () => {
         setLoading(true)
-        let d = await fetchData(viewId, lower, upper)
-        setData(processData(get(d, 'data', [])))
+        let d = await fetchData(falcor, type, viewId)
+        setData(processData(d, geography, lower, upper, type))
         setLoading(false)
 
-    }, [lower, upper]);
+    }, [geography, lower, upper, viewId, name]);
 
     const config = {
     }
@@ -99,17 +101,23 @@ const SedTaz2055DataTable = ({name}) => {
         <div className='w-full'>
             <div> {name} </div>
 
-            <div className={`w-5 flex pb-1`}>
+            <div className={`flex pb-3 pt-3`}>
                 <label  className={`self-center px-1 font-bold text-sm`}>Area:</label>
                 <Select
                     id={'geography'}
+                    themeOptions={{
+                        // color: 'transparent',
+                        size: 'compact'
+                    }}
+                    color={'transparent'}
+                    className={'text-sm'}
                     {...filters.geography}
                     onChange={e => getterSetters.geography.set(e)}
                     value={getterSetters.geography.get}
-                /> <span  className={`self-center px-1 font-bold text-sm`}>Data</span>
+                /> <span  className={`self-center px-1 font-bold text-sm capitalize`}>{type.split('_')[1]} Data</span>
             </div>
 
-            <div className={`flex pb-1 items-center`}>
+            <div className={`flex pb-5 items-center`}>
                 {
                     Object.keys(config)
                         .map(f =>
@@ -124,25 +132,31 @@ const SedTaz2055DataTable = ({name}) => {
                             />
                         </>)
                 }
-                <label  className={`px-1 font-bold text-sm`}>from:</label>
+                <label  className={`px-1 font-bold text-sm`}>From:</label>
                 <Input type='number' id={'lower'} value={lower} onChange={setLower} large />
-                <label  className={`px-1 font-bold text-sm`}>to:</label>
+                <label  className={`px-1 font-bold text-sm ml-5`}>To:</label>
                 <Input type='number' id={'upper'} value={upper} onChange={setUpper} large />
-            </div>
 
-            <div className={'flex flex-row pb-5 items-center w-1/2'}>
-                <label  className={`px-1 font-bold text-sm`}>Show:</label>
+                <label  className={`ml-10 px-1 font-bold text-sm`}>Show:</label>
                 <Select
                     id={'pageSize'}
+                    themeOptions={{
+                        // color: 'transparent',
+                        size: 'compact'
+                    }}
+                    color={'transparent'}
+                    className={'text-sm'}
                     domain={[10, 25, 50, 100]}
                     onChange={e => getterSetters.pageSize.set(e)}
                     value={pageSize}
                     multi={false}
                 /><span  className={`px-1 font-bold text-sm`}>entries</span>
             </div>
+
+
             {loading ? <div>Processing...</div> : ''}
             <div className='w-full overflow-x-scroll scrollbar font-sm'>
-                {RenderTable(data, pageSize, lower, upper)}
+                {RenderTable(data, pageSize, type)}
             </div>
         </div>
     )

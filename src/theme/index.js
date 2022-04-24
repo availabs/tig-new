@@ -5,11 +5,11 @@ const ppdaf = () => {
   const highlight =  'white'
   const accent =  'blue'
   // const secondary =  'green'
-  
+
   return {
     graphColors: [ '#1e40af','#93c5fd','#1d4ed8','#bfdbfe',],
     graphCategorical:  ['#eff6ff','#dbeafe','#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb','#1d4ed8','#1e40af','#1e3a8a'], //
-
+    aaa: 'hi',
     sidenav: (opts={}) =>  {
       const {color='white',size='compact'} = opts
       let colors = {
@@ -179,21 +179,51 @@ const ppdaf = () => {
 
     },
 
-    select: ({color='white'}) => {
-      
+    select: ({color='white', size = 'full'}) => {
+
       let colors = {
         white: 'white',
         transparent: 'gray-100'
+      }
+
+      let sizes = {
+          compact: 'px-0 py-0',
+          full: 'px-4 py-2'
       }
       return {
           menuWrapper: `bg-${colors[color]} my-1 text-sm `,
           menuItemActive: `px-2 py-2 cursor-not-allowed bg-${accent}-200 border-1 border-${colors[color]} focus:border-${accent}-300`,
           menuItem: `px-2 py-2 cursor-pointer hover:bg-blue-100 border-1 border-${colors[color]} focus:border-blue-300`,
-          select: `z-60 bg-${colors[color]} w-full flex flex-row justify-between truncate px-4 py-2 cursor-pointer border-2 border-${colors[color]} focus:border-blue-300`,
+          select: `z-60 bg-${colors[color]} w-full flex flex-row justify-between truncate ${sizes[size]} cursor-pointer border-2 border-${colors[color]} focus:border-blue-300`,
           selectIcon: `fa fa-angle-down text-gray-400 pt-2 px-2`
         }
     },
+      table: (opts = {color:'white', size: 'compact'}) => {
+          const {color = 'white', size = 'compact'} = opts
+          let colors = {
+              white: 'bg-white hover:bg-gray-100',
+              gray: 'bg-gray-100 hover:bg-gray-200',
+              transparent: 'gray-100'
+          }
 
+          let sizes = {
+              compact: 'px-4 py-1 text-sm',
+              full: 'px-10 py-5'
+          }
+          return {
+              tableHeader:
+                  `${sizes[size]} pb-1 border-2 border-gray-300 bg-gray-50 text-left font-medium text-gray-700 uppercase first:rounded-tl-md last:rounded-tr-md capitalize`,
+              tableInfoBar: "bg-white",
+              tableRow: `${colors[color]} transition ease-in-out duration-150`,
+              tableRowStriped: `bg-gray-50 odd:bg-gray-100 hover:bg-gray-200 transition ease-in-out duration-150`,
+              tableCell: `${sizes[size]} whitespace-no-wrap border-2 border-gray-300`,
+              inputSmall: 'w-24',
+              vars: {
+                  color: colors,
+                  size: sizes
+              }
+          }
+      },
     /* ------------------------- */
     shadow: "shadow",
     ySpace: "py-4",
@@ -394,25 +424,25 @@ export default PPDAF_THEME
 
 
 // const TDS_THEME_BASE = {
-//     /* ----- 
-//      Side Nav Theme Components Minimal 
+//     /* -----
+//      Side Nav Theme Components Minimal
 //   ------*/
 
 //   sidenavWrapper: `${colors[color].contentBg} ${sizes[size].wrapper} border-r border-gray-200 h-full`,
 //   menuIconSide: ` text-${colors[color].accentColor} ${sizes[size].icon} group-hover:${colors[color].highlightColor}`,
-//   navitemSide: ` 
-//     group font-sans 
-//     ${sizes[size].sideItem} ${colors[color].textColor} ${colors[color].borderColor} 
-//     ${colors[color].accentBg} hover:${colors[color].highlightColor} 
-//     focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
+//   navitemSide: `
+//     group font-sans
+//     ${sizes[size].sideItem} ${colors[color].textColor} ${colors[color].borderColor}
+//     ${colors[color].accentBg} hover:${colors[color].highlightColor}
+//     focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
 //     transition-all cursor-pointer
 //   `,
 
 //   navitemSideActive: `
 //     group flex pl-8 pr-4 py-2 bg-${colors[color].highlightColor} text-base font-medium text-darkblue-500 focus:outline-none hover:text-indigo-800 focus:text-indigo-800 focus:bg-blue-200 focus:border-indigo-700 transition duration-150 ease-in-out`,
 
-//   /* ----- 
-//      Top Nav Theme Components Minimal 
+//   /* -----
+//      Top Nav Theme Components Minimal
 //   ------*/
 //   topnavWrapper: `w-full h-12 ${colors[color].contentBg}`,
 //   topnavContent: `flex w-full h-full`,
@@ -421,16 +451,16 @@ export default PPDAF_THEME
 
 //   navitemTop: `
 //     group font-sans w-full
-//     ${sizes[size].topItem} ${colors[color].textColor} ${colors[color].borderColor} 
-//     ${colors[color].accentBg} hover:${colors[color].highlightColor} 
-//     focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
+//     ${sizes[size].topItem} ${colors[color].textColor} ${colors[color].borderColor}
+//     ${colors[color].accentBg} hover:${colors[color].highlightColor}
+//     focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
 //     transition cursor-pointer`,
 //   //`px-4 text-sm font-medium tracking-widest uppercase inline-flex items-center  border-transparent  leading-5 text-white hover:bg-white hover:text-darkblue-500 border-gray-200 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out h-full`,
 //   topmenuRightNavContainer: "hidden md:block h-full",
 //   navitemTopActive: `group font-sans w-full
-//     ${sizes[size].topItem} ${colors[color].textColor} ${colors[color].borderColor} 
-//     ${colors[color].accentBg} hover:${colors[color].highlightColor} 
-//     focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 
+//     ${sizes[size].topItem} ${colors[color].textColor} ${colors[color].borderColor}
+//     ${colors[color].accentBg} hover:${colors[color].highlightColor}
+//     focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300
 //     transition cursor-pointer`,
 
 //   /* ------------------------- */
@@ -476,7 +506,7 @@ export default PPDAF_THEME
 //   menuTextActive: "text-cyan-300",
 //   menuTextActiveHover: "hover:text-cyan-200",
 
-  
+
 //   sidebarBg: 'bg-white',
 //   sidebarBorder: '',
 
