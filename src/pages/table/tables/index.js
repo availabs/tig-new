@@ -16,8 +16,8 @@ export const tables = {
     sed_taz_2055: SedTaz2040DataTable,
 
     sed_county_2040: SedTaz2040DataTable,
-    sed_county_2050: SedCounty2050DataTable,
-    sed_county_2055: SedCounty2055DataTable,
+    sed_county_2050: SedTaz2040DataTable,
+    sed_county_2055: SedTaz2040DataTable,
 
     acs_census: AcsCensusDataTable,
 

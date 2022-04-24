@@ -6,9 +6,9 @@ import _ from "lodash";
 import {filters} from 'pages/map/layers/npmrds/filters.js'
 import counties from "../../map/config/counties.json";
 
-const fetchData = (falcor, type, view) => {
-    return falcor.get(['tig', 'source', `${type.split('_')[2]} SED ${type.split('_')[1]} Level Forecast`, 'view', view])
-        .then(d => get(d, ['json', 'tig', 'source', `${type.split('_')[2]} SED ${type.split('_')[1]} Level Forecast`, 'view', view]))
+const fetchData = (falcor, sourceName, view) => {
+    return falcor.get(['tig', 'source', sourceName, 'view', view])
+        .then(d => get(d, ['json', 'tig', 'source', sourceName, 'view', view]))
 }
 
 const processData = (data= {}, geography = '', lower, upper, type) => {
@@ -69,7 +69,7 @@ const RenderTable = (data = {}, pageSize, type) => useMemo(() =>
         striped={true}
     />, [data, pageSize])
 
-const SedTaz2055DataTable = ({name, type}) => {
+const SedTaz2055DataTable = ({name, type, sourceName}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams()
     const [loading, setLoading] = useState(false)
@@ -89,7 +89,7 @@ const SedTaz2055DataTable = ({name, type}) => {
     console.log('name, type', name, type)
     useEffect(async () => {
         setLoading(true)
-        let d = await fetchData(falcor, type, viewId)
+        let d = await fetchData(falcor, sourceName, viewId)
         setData(processData(d, geography, lower, upper, type))
         setLoading(false)
 
