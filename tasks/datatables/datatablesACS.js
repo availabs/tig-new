@@ -22,18 +22,19 @@ const fetch = async () => {
         const sql = `
             with s as (
                 SELECT view_id,
-                       array_agg(json_build_object('value', value, 'area', areas.name, 'type', areas.type, 'gid',
-                                                   base_geometry_id
+                       array_agg(json_build_object(
+                           'area', areas.name,
+                           'fips', lpad(fips_code::text, 11, '0'),
+                           'value', value, 
+                           'base_value', base_value,
+                           'percentage', ("value" / NULLIF("base_value", 0)) * 100,
+                           'type', type,
+                           'gid', base_geometry_id
 
                            )) AS data
-                FROM public.comparative_facts df
-
-                         JOIN public.areas areas
-                              ON area_id = areas.id
-
-
-
-
+                FROM public.comparative_facts c
+                         JOIN areas
+                              ON areas.id = area_id
                 WHERE view_id IN (
                     SELECT v.id
                     FROM public.views v

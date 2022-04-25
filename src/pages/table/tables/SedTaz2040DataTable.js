@@ -60,7 +60,7 @@ const RenderTable = (data = {}, pageSize, type) => useMemo(() =>
                     Header: c,
                     accessor: c,
                     align: 'center',
-                    disableFilters: c !== 'taz',
+                    disableFilters: !['taz', 'county'].includes(c),
                     Cell: (d) => (d.cell.value || 0).toLocaleString()
                 }))
         }
