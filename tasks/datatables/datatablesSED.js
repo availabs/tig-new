@@ -5,6 +5,7 @@ sql.setDialect('postgres');
 
 
 const fetch = async () => {
+    // change sources below, and server in db.js
     let allSrc = {
         local: [
             '2040 SED County Level Forecast Data',
@@ -23,7 +24,7 @@ const fetch = async () => {
             "2055 SED TAZ LEVEL FORECAST"
         ]
     }
-    let sources = allSrc.tigtet2;
+    let sources = allSrc.local;
 
     for (const s of sources) {
         console.log('source', s);

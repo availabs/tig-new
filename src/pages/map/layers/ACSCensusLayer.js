@@ -340,9 +340,12 @@ class ACSCensusLayer extends LayerContainer {
         const categoryValue = this.filters.dataset.value
 
         if (categoryValue) {
-            return falcor.get(["tig", "acs_census", "byId", categoryValue, 'data_overlay'])
+            return falcor.get(
+                ["tig", "acs_census", "byId", categoryValue, 'data_overlay'],
+                ['tig', 'source', 'acs_census', 'view', this.vid])
                 .then(d => {
                     let falcorCache = falcor.getCache()
+                    console.log('??', d, falcorCache)
                     this.data = get(falcorCache, ["tig", "acs_census", "byId", categoryValue, 'data_overlay', 'value'], [])
                 })
         }
