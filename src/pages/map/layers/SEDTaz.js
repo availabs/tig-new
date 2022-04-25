@@ -524,8 +524,11 @@ class SEDTazLayer extends LayerContainer {
                 this.fullData = newData || {};
                 this.data = newData[this.filters.year.value] || []
 
-                let geoms = await falcor.get(['tig', 'geoms', 'gid', this.data.map(d => d.gid)])
-                this.geoms = get(geoms, ['json', 'tig', 'geoms', 'gid'], [])
+
+                await _.chunk(this.data.map(d => d.gid), 450)
+                    .reduce((acc, curr) => acc.then(() => falcor.get(['tig', 'geoms', 'gid', curr])) , Promise.resolve())
+
+                this.geoms = get(falcor.getCache(), ['tig', 'geoms', 'gid'], [])
 
                 let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
 
