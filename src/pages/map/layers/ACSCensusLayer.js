@@ -205,7 +205,7 @@ class ACSCensusLayer extends LayerContainer {
         this.data
             .filter(c => geoids.includes(
                 get(tracts.filter(tract => tract.name === c.area), [0, 'geoid'], '').slice(0, 5)
-            ))
+            ) && c.geom)
             .map((d, i) => {
                 return {
                     type: "Feature",
@@ -343,10 +343,15 @@ class ACSCensusLayer extends LayerContainer {
             return falcor.get(
                 ["tig", "acs_census", "byId", categoryValue, 'data_overlay'],
                 ['tig', 'source', 'acs_census', 'view', this.vid])
-                .then(d => {
+                .then(async (d) => {
                     let falcorCache = falcor.getCache()
-                    console.log('??', d, falcorCache)
-                    this.data = get(falcorCache, ["tig", "acs_census", "byId", categoryValue, 'data_overlay', 'value'], [])
+                    // this.data = get(falcorCache, ["tig", "acs_census", "byId", categoryValue, 'data_overlay', 'value'], [])
+                    this.data = Object.values(get(falcorCache , ['tig', 'source', 'acs_census', 'view', this.vid, 'value'], {}));
+
+                    let geoms = await falcor.get(['tig', 'geoms', 'gid', this.data.map(d => d.gid)])
+                    this.geoms = get(geoms, ['json', 'tig', 'geoms', 'gid'], [])
+
+                    this.data = this.data.map(d => ({...d, geom: this.geoms[d.gid] }))
                 })
         }
         return Promise.resolve({})
@@ -529,7 +534,7 @@ class ACSCensusLayer extends LayerContainer {
         let features = this.data
             .filter(c => geoids.includes(
                 get(tracts.filter(tract => tract.name === c.area), [0, 'geoid'], '').slice(0, 5)
-            ))
+            ) && c.geom)
             .map((d, i) => {
                 return {
                     type: "Feature",

@@ -7,7 +7,7 @@ import _ from "lodash";
 import counties from "../../map/config/counties.json";
 
 const fetchData = (falcor,viewId) => {
-    return falcor.get(["tig", "acs_census", "byId", viewId, 'data_overlay'], ['tig', 'source', 'acs_census', 'view', viewId])
+    return falcor.get(['tig', 'source', 'acs_census', 'view', viewId])
         .then(d => get(d , ['json', 'tig', 'source', 'acs_census', 'view', viewId], {}))
 }
 
@@ -29,13 +29,14 @@ const processData = (data, viewId, valueColumn, upper, lower, nameMapping, geogr
                     return acc
                 }, {})
     }, [])
-        .filter(entry =>
+        .filter(entry => !get(counties.filter(c => c.name === entry.county), [0]) ||
             get(filters.geography.domain.filter(geo => geo.name === geography), [0, 'value'], [])
                 .includes(counties.filter(c => c.name === entry.county)[0].geoid)
         )
         .filter(d => {
             return !(valueColumn && (upper || lower)) || ((!lower || (d[valueColumn] >= lower)) && (!upper || d[valueColumn] <= upper))
         })
+        .sort((a,b) => b.county.localeCompare(a.county))
     return data
 }
 
