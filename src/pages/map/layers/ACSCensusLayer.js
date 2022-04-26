@@ -338,18 +338,20 @@ class ACSCensusLayer extends LayerContainer {
 
     fetchData(falcor) {
         const categoryValue = this.filters.dataset.value
-
-        if (categoryValue) {
+        let view = this.filters.dataset.value || this.vid
+        if (view) {
             return falcor.get(
-                ["tig", "acs_census", "byId", categoryValue, 'data_overlay'],
-                ['tig', 'source', 'acs_census', 'view', this.vid])
+                // ["tig", "acs_census", "byId", categoryValue, 'data_overlay'],
+                ['tig', 'source', 'acs_census', 'view', view])
                 .then(async (d) => {
                     let falcorCache = falcor.getCache()
                     // this.data = get(falcorCache, ["tig", "acs_census", "byId", categoryValue, 'data_overlay', 'value'], [])
-                    this.data = Object.values(get(falcorCache , ['tig', 'source', 'acs_census', 'view', this.vid, 'value'], {}));
+                    this.data = Object.values(get(falcorCache , ['tig', 'source', 'acs_census', 'view', view, 'value'], {}));
 
-                    let geoms = await falcor.get(['tig', 'geoms', 'gid', this.data.map(d => d.gid)])
-                    this.geoms = get(geoms, ['json', 'tig', 'geoms', 'gid'], [])
+                    await _.chunk(this.data.map(d => d.gid), 450)
+                        .reduce((acc, curr) => acc.then(() => falcor.get(['tig', 'geoms', 'gid', curr])) , Promise.resolve())
+
+                    this.geoms = get(falcor.getCache(), ['tig', 'geoms', 'gid'], [])
 
                     this.data = this.data.map(d => ({...d, geom: this.geoms[d.gid] }))
                 })
