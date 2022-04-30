@@ -157,9 +157,11 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         { id: 'counties-labels',
             source: 'counties',
             'source-layer': 'counties',
+            'symbol-spacing': '5000',
             type: 'symbol',
             layout: {
                 "symbol-placement": "point",
+                'symbol-spacing': 50000,
                 "text-size": 15
             },
             paint: {
@@ -630,10 +632,16 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
 
 
-    getColorScale(data) {
-        return d3scale.scaleThreshold()
-            .domain(this.legend.domain)
-            .range(this.legend.range);
+    getColorScale(value) {
+        if(!this.legend.domain.length) return null;
+        let color = null
+        this.legend.domain
+            .forEach((v, i) => {
+                if(value >= v && value <= this.legend.domain[i+1]){
+                    color = this.legend.range[i];
+                }
+            });
+        return color;
     }
 
     render(map, falcor) {
@@ -661,11 +669,9 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
             return acc
         },[])
 
-
-        const colorScale = this.getColorScale(this.processedData),
-            colors = this.processedData.reduce((a,c) =>{
+        const colors = this.processedData.reduce((a,c) =>{
                 if(c.value !== 0){
-                    a[c.id] = colorScale(c.value)
+                    a[c.id] = this.getColorScale(c.value)
                 }
                 return a
             },{});

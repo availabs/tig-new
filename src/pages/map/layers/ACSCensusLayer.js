@@ -515,10 +515,16 @@ class ACSCensusLayer extends LayerContainer {
         return ',d' ? column === 'value' : ',f'
     }
 
-    getColorScale(data) {
-        return d3scale.scaleThreshold()
-            .domain(this.legend.domain)
-            .range(this.legend.range);
+    getColorScale(value) {
+        if(!this.legend.domain.length) return null;
+        let color = null
+        this.legend.domain
+            .forEach((v, i) => {
+                if(value >= v && value <= this.legend.domain[i+1]){
+                    color = this.legend.range[i];
+                }
+            });
+        return color;
     }
 
     async render(map, falcor) {
@@ -560,10 +566,8 @@ class ACSCensusLayer extends LayerContainer {
                 value: d[this.filters.column.value]
             }
         })
-
-        let colorScale = this.getColorScale(this.processedData),
-            colors = this.processedData.filter(c => c.value).reduce((a, c) => {
-                a[c.id] = colorScale(c.value || 0)
+        let colors = this.processedData.reduce((a, c) => {
+                a[c.id] = this.getColorScale(c.value)
                 return a
             }, {});
 
@@ -571,7 +575,7 @@ class ACSCensusLayer extends LayerContainer {
             "case",
             ["boolean", ["feature-state", "hover"], false],
             "#090",
-            ['coalesce', ["get", ["get", "area"], ["literal", colors]], colorScale(0)]
+            ['coalesce', ["get", ["get", "area"], ["literal", colors]], this.getColorScale(1)]
         ])
     }
 
