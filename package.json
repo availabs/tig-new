@@ -12,6 +12,7 @@
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^11.2.2",
     "@testing-library/user-event": "^12.5.0",
+    "@turf/center": "^6.5.0",
     "@turf/centroid": "^6.5.0",
     "@turf/combine": "^6.5.0",
     "chokidar": "^3.5.3",

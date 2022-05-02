@@ -9,6 +9,7 @@ import {filters} from 'pages/map/layers/npmrds/filters.js'
 import shpwrite from "../../../utils/shp-write";
 import mapboxgl from "mapbox-gl";
 import flatten from "lodash.flatten";
+import center from "@turf/center";
 
 const color_scheme = {
     "start_color": "yellow",
@@ -152,6 +153,16 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                 type: "vector",
                 url: "mapbox://am3081.a8ndgl5n"
             }
+        },
+        {
+            id: "county-labels",
+            source: {
+                type: "geojson",
+                data: {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
+            }
         }
     ]
     layers = [
@@ -178,15 +189,14 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
             }
         },
         { id: 'counties-labels',
-            source: 'counties',
-            'source-layer': 'counties',
+            source: 'county-labels',
             type: 'symbol',
-            layout: {
-                "symbol-placement": "point",
-                "text-size": 15
-            },
-            paint: {
-                "text-color": "#000"
+            'layout': {
+                'text-field': ['get', 'area'],
+                'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+                'text-radial-offset': 0.5,
+                'text-justify': 'auto',
+                'icon-image': ['get', 'icon']
             }
         }
     ]
@@ -514,14 +524,38 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
             ["get", ["get", "geoid"], ["literal", colors]]
         ])
 
-        const nameMapping = this.data_counties.reduce((acc, curr) => {
-            acc[curr.geoid.toString()] = curr.name
-            return acc;
-        }, {})
+        // get polygons, and label them
+        let geoJSON = {
+            type: 'FeatureCollection',
+            features: []
+        };
 
-        map.setLayoutProperty("counties-labels", "text-field",
-            ["get", ["get", "geoid"], ["literal", nameMapping]]
-        )
+        this.data.reduce((acc,curr) =>{
+            this.data_counties.forEach(data_tract =>{
+                if(curr.area === data_tract.name){
+                    acc.push({
+                        geoid: data_tract.geoid,
+                        geom: JSON.parse(this.geoms[curr.gid]),
+                        area: curr.area,
+                        area_type: curr.type
+                    })
+                }
+            })
+            return acc
+        },[]).map(t => {
+            return {
+                type: "Feature",
+                properties: Object.keys(t).filter(t => t !== 'geom').reduce((acc, curr) => ({...acc, [curr]: t[curr]}) , {}),
+                geometry: t.geom
+            }
+        })
+            .forEach((feat) => {
+                let geom = center(feat.geometry);
+                geom.properties = {...feat.properties}
+                geoJSON.features.push(geom)
+            });
+
+        map.getSource('county-labels').setData(geoJSON)
     }
 
 }
