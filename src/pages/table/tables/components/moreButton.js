@@ -1,4 +1,5 @@
 import {useState} from 'react'
+import _ from 'lodash'
 import {AvlModal, Button, useFalcor, Select} from '@availabs/avl-components'
 import { CSVLink, CSVDownload } from "react-csv";
 
@@ -10,29 +11,31 @@ const MoreButton = ({className, data, columns, filteredColumns, setFilteredColum
             m-3
             bg-tigGray-200 
             hover:bg-tigGray-50 hover:cursor-pointer 
-            py-1.5 px-2 font-light text-xs text-gray-600 rounded-sm`;
+            py-2.5 px-2 font-semibold text-xs text-gray-600 rounded-sm`;
 
+    console.log('d?', data)
     return (
         <div>
             <AvlModal show={open} onHide={() => setOpen(!open)}>
                 <CSVLink
                     className={modalButtonTheme}
-                    data={data}
+                    data={data.map(d => _.omit(d, filteredColumns))}
                 >
                     Export Filtered
                 </CSVLink>
 
-                <Button
+                <CSVLink
                     className={modalButtonTheme}
-                    onClick={() => {
-
-                    }}
+                    data={data}
                 >
                     Export All
-                </Button>
+                </CSVLink>
 
                 <Button
-                    className={modalButtonTheme}
+                    className={`m-3
+            bg-tigGray-200 
+            hover:bg-tigGray-50 hover:cursor-pointer 
+            py-1.5 px-2 font-semibold text-xs text-gray-600 rounded-sm`}
                     onClick={() => {
                         setOpenColumnList(!openColumnList)
                     }}
@@ -40,9 +43,10 @@ const MoreButton = ({className, data, columns, filteredColumns, setFilteredColum
                     Show/hide columns
                 </Button>
 
-                <div>
+                <div className={`${openColumnList ? 'block' : 'hidden'} flex ml-3`}>
+                    <label className={'self-center pr-3'} htmlFor={'show_hide_columns'}>Hide:</label>
                     <Select
-                        className={openColumnList ? 'block' : 'hidden'}
+                        id={'show_hide_columns'}
                         domain={columns}
                         value={filteredColumns}
                         onChange={e => setFilteredColumns(e)}

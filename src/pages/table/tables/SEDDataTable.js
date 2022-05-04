@@ -5,6 +5,7 @@ import {useParams} from "react-router-dom";
 import _ from "lodash";
 import {filters} from 'pages/map/layers/npmrds/filters.js'
 import counties from "../../map/config/counties.json";
+import MoreButton from "./components/moreButton";
 
 const fetchData = (falcor, type, view) => {
     return falcor.get(['tig', 'source', `${type.split('_')[2]} SED ${type.split('_')[1]} Level Forecast`, 'view', view])
@@ -50,12 +51,13 @@ const processData = (data= {}, geography = '', lower, upper, type) => {
     }
 }
 
-const RenderTable = (data = {}, pageSize, type) => useMemo(() =>
+const RenderTable = (data = {}, pageSize, type, filteredColumns) => useMemo(() =>
     <Table
         data={data.data}
         columns={
           [type.split('_')[1].toLowerCase() === 'taz' ? 'taz' : 'county', ...data.years]
-              .sort((a,b) => a === 'taz' ? -1 : a-b)
+              .filter(c => !filteredColumns.includes(c))
+              .sort((a,b) => a === 'taz' ||  a === 'county' ? -1 : a-b)
                 .map(c => ({
                     Header: c,
                     accessor: c,
@@ -67,7 +69,7 @@ const RenderTable = (data = {}, pageSize, type) => useMemo(() =>
         initialPageSize={pageSize}
         pageSize={pageSize}
         striped={true}
-    />, [data, pageSize])
+    />, [data, pageSize, filteredColumns])
 
 const SEDDataTable = ({name, type}) => {
     const {falcor, falcorCache} = useFalcor();
@@ -79,6 +81,7 @@ const SEDDataTable = ({name, type}) => {
     const [geography, setGeography] = useState('All')
     const [lower, setLower] = useState()
     const [upper, setUpper] = useState()
+    const [filteredColumns, setFilteredColumns] = useState([])
 
     const getterSetters = {
         geography: {get: geography, set: setGeography},
@@ -150,12 +153,20 @@ const SEDDataTable = ({name, type}) => {
                     value={pageSize}
                     multi={false}
                 /><span  className={`px-1 text-xs`}>entries</span>
+
+                <MoreButton className={'pl-3 float-right'}
+                            data={data.data}
+                            columns={
+                                    [type.split('_')[1].toLowerCase() === 'taz' ? 'taz' : 'county', ...data.years]
+                                        .sort((a,b) => a === 'county' ? -1 : a-b)
+                                    }
+                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}/>
             </div>
 
 
             {loading ? <div>Processing...</div> : ''}
             <div className='w-full overflow-x-scroll scrollbar font-sm'>
-                {RenderTable(data, pageSize, type)}
+                {RenderTable(data, pageSize, type, filteredColumns)}
             </div>
         </div>
     )
