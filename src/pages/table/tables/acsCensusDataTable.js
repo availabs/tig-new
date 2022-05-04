@@ -5,6 +5,7 @@ import get from "lodash.get";
 import {useParams} from "react-router-dom";
 import _ from "lodash";
 import counties from "../../map/config/counties.json";
+import MoreButton from "./components/moreButton";
 
 const fetchData = (falcor,viewId) => {
     return falcor.get(['tig', 'source', 'acs_census', 'view', viewId])
@@ -40,11 +41,12 @@ const processData = (data, viewId, valueColumn, upper, lower, nameMapping, geogr
     return data
 }
 
-const RenderTable = (data = [], pageSize, valueColumn, lower, upper) => useMemo(() =>
+const RenderTable = (data = [], pageSize, filteredColumns = []) => useMemo(() =>
     <Table
         data={data}
         columns={
             Object.keys(data[0] || {})
+                .filter(c => !filteredColumns.includes(c))
                 .map(c => ({
                     Header: c,
                     accessor: c,
@@ -56,7 +58,7 @@ const RenderTable = (data = [], pageSize, valueColumn, lower, upper) => useMemo(
         initialPageSize={pageSize}
         pageSize={pageSize}
         striped={true}
-    />, [data, pageSize])
+    />, [data, pageSize, filteredColumns])
 
 const AcsCensusDataTable = ({name}) => {
     const {falcor, falcorCache} = useFalcor();
@@ -76,9 +78,8 @@ const AcsCensusDataTable = ({name}) => {
     const [column, setColumn] = useState(nameMapping["base_value"])
     const [lower, setLower] = useState()
     const [upper, setUpper] = useState()
-    const [configDomain, setConfigDomain] = useState([
-        nameMapping.base_value, nameMapping.percentage
-    ])
+    const [configDomain, setConfigDomain] = useState([nameMapping.base_value, nameMapping.percentage])
+    const [filteredColumns, setFilteredColumns] = useState([])
 
     const getterSetters = {
         geography: {get: geography, set: setGeography},
@@ -127,7 +128,7 @@ const AcsCensusDataTable = ({name}) => {
                 /> <span  className={`self-center px-1 capitalize font-semibold text-xs`}>Census Tract Data</span>
             </div>
 
-            <div className={`flex pb-5 items-center font-light text-sm`}>
+            <div className={`flex justify-between pb-3 items-center font-light text-sm`}>
                 {
                     Object.keys(config)
                         .map(f =>
@@ -151,6 +152,7 @@ const AcsCensusDataTable = ({name}) => {
                 <Input className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-gray-300 p-1'} type='text' id={'upper'} value={upper} onChange={setUpper} large />
 
                 <label  className={`ml-10 px-1 text-xs`}>Show:</label>
+
                 <Select
                     id={'pageSize'}
                     themeOptions={{
@@ -163,11 +165,16 @@ const AcsCensusDataTable = ({name}) => {
                     value={pageSize}
                     multi={false}
                 /><span  className={`px-1 text-xs`}>entries</span>
+
+                <MoreButton className={'pl-3'}
+                            data={data}
+                            columns={Object.keys(data[0] || {})}
+                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}/>
             </div>
 
             {loading ? <div>Processing...</div> : ''}
             <div className='w-full overflow-x-scroll scrollbar font-sm'>
-                {RenderTable(data, pageSize, column, lower, upper)}
+                {RenderTable(data, pageSize, filteredColumns)}
             </div>
         </div>
     )
