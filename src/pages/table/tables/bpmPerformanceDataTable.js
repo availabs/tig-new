@@ -99,7 +99,7 @@ const BpmPerformanceDataTable = ({name}) => {
     }
     return (
         <div className='w-full'>
-            <div> {name}: </div>
+            <div className={'font-light text-lg'}> {name} </div>
 
             <div className={`w-5 flex pb-1`}>
                 <label  className={`self-center px-1 font-bold text-sm`}>Area:</label>

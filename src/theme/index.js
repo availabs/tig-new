@@ -8,8 +8,7 @@ const ppdaf = () => {
 
   return {
     graphColors: [ '#1e40af','#93c5fd','#1d4ed8','#bfdbfe',],
-    graphCategorical:  ['#eff6ff','#dbeafe','#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb','#1d4ed8','#1e40af','#1e3a8a'], //
-    aaa: 'hi',
+    graphCategorical:  ['#eff6ff','#dbeafe','#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb','#1d4ed8','#1e40af','#1e3a8a'],
     sidenav: (opts={}) =>  {
       const {color='white',size='compact'} = opts
       let colors = {
@@ -117,7 +116,7 @@ const ppdaf = () => {
       const {color='white',size='compact'} = opts
       let colors = {
         white: {
-          contentBg: `bg-gray-50`,
+          contentBg: `bg-white`,
           accentColor: `${accent}-600`,
           accentBg: `hover:bg-${accent}-600`,
           borderColor: `border-${primary}-100`,
@@ -212,11 +211,11 @@ const ppdaf = () => {
           }
           return {
               tableHeader:
-                  `${sizes[size]} pb-1 border-2 border-gray-300 bg-gray-50 text-left font-medium text-gray-700 uppercase first:rounded-tl-md last:rounded-tr-md capitalize`,
+                  `${sizes[size]} pb-1 border-2 border-gray-300 bg-white text-left font-medium text-gray-700 uppercase first:rounded-tl-md last:rounded-tr-md capitalize`,
               tableInfoBar: "bg-white",
               tableRow: `${colors[color]} transition ease-in-out duration-150`,
-              tableRowStriped: `bg-gray-50 odd:bg-gray-100 hover:bg-gray-200 transition ease-in-out duration-150`,
-              tableCell: `${sizes[size]} whitespace-no-wrap border-2 border-gray-300`,
+              tableRowStriped: `bg-white odd:bg-tigGray-25 hover:bg-tigGray-100 bg-opacity-25 transition ease-in-out duration-150`,
+              tableCell: `${sizes[size]} whitespace-no-wrap border-2 border-gray-300 pl-1 font-light text-sm`,
               inputSmall: 'w-24',
               vars: {
                   color: colors,
@@ -261,7 +260,7 @@ const ppdaf = () => {
     navMenuItem:
       "hover:font-medium cursor-pointer px-2 py-1 text-lg font-semibold",
 
-    bg: "bg-gray-50",
+    bg: "bg-white",
 
     menuBg: "bg-white z-39",
     menuBgHover: "",

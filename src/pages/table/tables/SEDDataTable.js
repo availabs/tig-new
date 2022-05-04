@@ -69,7 +69,7 @@ const RenderTable = (data = {}, pageSize, type) => useMemo(() =>
         striped={true}
     />, [data, pageSize])
 
-const SedTaz2055DataTable = ({name, type}) => {
+const SEDDataTable = ({name, type}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams()
     const [loading, setLoading] = useState(false)
@@ -99,30 +99,29 @@ const SedTaz2055DataTable = ({name, type}) => {
     }
     return (
         <div className='w-full'>
-            <div> {name} </div>
+            <div className={'font-light text-lg'}> {name} </div>
 
-            <div className={`flex pb-3 pt-3`}>
-                <label  className={`self-center px-1 font-bold text-sm`}>Area:</label>
+            <div className={`flex pb-4 pt-1.5`}>
+                <label  className={`self-center px-1 font-semibold text-xs`}>Area:</label>
                 <Select
                     id={'geography'}
                     themeOptions={{
-                        // color: 'transparent',
                         size: 'compact'
                     }}
                     color={'transparent'}
-                    className={'text-sm'}
+                    className={'font-light text-sm'}
                     {...filters.geography}
                     onChange={e => getterSetters.geography.set(e)}
                     value={getterSetters.geography.get}
-                /> <span  className={`self-center px-1 font-bold text-sm capitalize`}>{type.split('_')[1]} Data</span>
+                /> <span  className={`self-center px-1 capitalize font-semibold text-xs`}>{type.split('_')[1]} Data</span>
             </div>
 
-            <div className={`flex pb-5 items-center`}>
+            <div className={`flex pb-3 items-center`}>
                 {
                     Object.keys(config)
                         .map(f =>
                         <>
-                            <label  className={`self-center px-1 font-bold text-sm whitespace-nowrap`}>{config[f].name}:</label>
+                            <label  className={`self-center px-1 whitespace-nowrap`}>{config[f].name}:</label>
                             <Select
                                 id={f}
                                 className={'whitespace-nowrap'}
@@ -132,12 +131,12 @@ const SedTaz2055DataTable = ({name, type}) => {
                             />
                         </>)
                 }
-                <label  className={`px-1 font-bold text-sm`}>From:</label>
-                <Input type='number' id={'lower'} value={lower} onChange={setLower} large />
-                <label  className={`px-1 font-bold text-sm ml-5`}>To:</label>
-                <Input type='number' id={'upper'} value={upper} onChange={setUpper} large />
+                <label  className={`px-1 text-xs`}>From:</label>
+                <Input className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-none focus:border-pink-300 p-1'} type='text' id={'lower'} value={lower} onChange={setLower} placeholder={''}/>
+                <label  className={`px-1 ml-5 text-xs`}>To:</label>
+                <Input className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-gray-300 p-1'} type='text' id={'upper'} value={upper} onChange={setUpper} large placeholder={''}/>
 
-                <label  className={`ml-10 px-1 font-bold text-sm`}>Show:</label>
+                <label  className={`ml-10 px-1 text-xs`}>Show:</label>
                 <Select
                     id={'pageSize'}
                     themeOptions={{
@@ -145,12 +144,12 @@ const SedTaz2055DataTable = ({name, type}) => {
                         size: 'compact'
                     }}
                     color={'transparent'}
-                    className={'text-sm'}
+                    className={'font-light text-sm'}
                     domain={[10, 25, 50, 100]}
                     onChange={e => getterSetters.pageSize.set(e)}
                     value={pageSize}
                     multi={false}
-                /><span  className={`px-1 font-bold text-sm`}>entries</span>
+                /><span  className={`px-1 text-xs`}>entries</span>
             </div>
 
 
@@ -162,4 +161,4 @@ const SedTaz2055DataTable = ({name, type}) => {
     )
 }
 
-export default SedTaz2055DataTable
+export default SEDDataTable

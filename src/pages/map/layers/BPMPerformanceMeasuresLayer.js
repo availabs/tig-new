@@ -371,10 +371,16 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
         this.legend.domain = get(domains, [this.filters.dataset.value, this.filters.column.value]) || domains["58"]['vehicle_miles_traveled']
     }
 
-    getColorScale(data) {
-        return d3scale.scaleThreshold()
-            .domain(this.legend.domain)
-            .range(this.legend.range);
+    getColorScale(value) {
+        if(!this.legend.domain.length) return null;
+        let color = null
+        this.legend.domain
+            .forEach((v, i) => {
+                if(value >= v && value <= this.legend.domain[i+1]){
+                    color = this.legend.range[i];
+                }
+            });
+        return color;
     }
 
     init(map, falcor){
@@ -509,10 +515,9 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
             return acc
         },[])
 
-        const colorScale = this.getColorScale(this.processedData),
-            colors = this.processedData.reduce((a,c) =>{
+        const colors = this.processedData.reduce((a,c) =>{
                 if(c.value !== 0){
-                    a[c.id] = colorScale(c.value)
+                    a[c.id] = this.getColorScale(c.value)
                 }
                 return a
             },{});
@@ -530,17 +535,18 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
             features: []
         };
 
+
         this.data.reduce((acc,curr) =>{
-            this.data_counties.forEach(data_tract =>{
-                if(curr.area === data_tract.name){
-                    acc.push({
-                        geoid: data_tract.geoid,
-                        geom: JSON.parse(this.geoms[curr.gid]),
-                        area: curr.area,
-                        area_type: curr.type
-                    })
-                }
-            })
+            let data_tract = this.data_counties.filter(data_tract => curr.name === data_tract.name)[0];
+
+           if(!acc.find(d => d.geoid === data_tract.geoid)){
+               acc.push({
+                   geoid: data_tract.geoid,
+                   geom: JSON.parse(curr.geom),
+                   area: curr.name,
+                   area_type: curr.type
+               })
+           }
             return acc
         },[]).map(t => {
             return {

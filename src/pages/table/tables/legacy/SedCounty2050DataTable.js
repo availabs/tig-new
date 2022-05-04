@@ -3,8 +3,8 @@ import {Select, Input, Table, useFalcor} from '@availabs/avl-components'
 import {filters} from 'pages/map/layers/npmrds/filters.js'
 import get from "lodash.get";
 import flatten from "lodash.flatten";
-import {HOST} from "../../map/layers/layerHost";
-import fetcher from "../../map/wrappers/fetcher";
+import {HOST} from "../../../map/layers/layerHost";
+import fetcher from "../../../map/wrappers/fetcher";
 import {useParams} from "react-router-dom";
 import _ from "lodash";
 

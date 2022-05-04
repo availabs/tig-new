@@ -5,7 +5,7 @@ import TigBreadcrumbs from './TigBreadcrumbs'
 
 const TigLayout = withAuth(({children}) => {
     return (
-        <div className='w-full max-w-6xl mx-auto min-h-screen flex flex-col z-10'>
+        <div className='w-full mx-auto min-h-screen flex flex-col z-10' style={{maxWidth: '71rem'}}>
             <div className='z-10'>
                 <TigNav />
             </div>

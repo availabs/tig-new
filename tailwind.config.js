@@ -6,6 +6,7 @@ module.exports = {
     extend: {
        colors: {
           tigGray: {
+            '25': '#F9F9F9',
             '50': '#EEEEEE',
             '100': '#E6E6E6',
             '200': '#D2D2D2'

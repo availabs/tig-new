@@ -93,24 +93,24 @@ const TigBreadcrumbs = ({children}) => {
     
 
     return (
-        <div className='w-full flex justify-between py-6 items-baseline z-40'>
+        <div className='w-full flex justify-between pb-6 pt-8 items-baseline z-40'>
             <div className='flex items-stretch'>
                 
                 <a href='/' 
-                    className='bg-tigGray-100 hover:bg-tigGray-50 hover:text-orange-300 hover:cursor-pointer py-1 px-3 text-sm text-gray-600'>
+                    className='bg-tigGray-200 hover:bg-tigGray-50 hover:text-orange-300 hover:cursor-pointer py-1.5 px-2 text-xs text-gray-600'>
                     Catalog
                 </a>
                 {viewId ?
                 <>
                 <div 
-                className='ml-2 bg-tigGray-100 hover:bg-tigGray-50 hover:text-orange-300 hover:cursor-pointer text-sm text-gray-600' style={{background: '#bbd4cb'}}>
+                className='ml-2 bg-tigGray-100 hover:bg-tigGray-50 hover:text-orange-300 hover:cursor-pointer text-xs text-gray-600' style={{background: '#bbd4cb'}}>
                     <Listbox value={selected} onChange={(e) => {
                         console.log('on change', )
                         let url = `/views/${e.id}/${activeAction.path}`
                         history.push(url)
                     }}>
                         <div className="relative">
-                            <Listbox.Button className="py-1 px-3 relative w-full text-left cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-opacity-75 focus-visible:ring-white focus-visible:ring-offset-orange-300 focus-visible:ring-offset-2 focus-visible:border-indigo-500 sm:text-sm">
+                            <Listbox.Button className="py-1.5 px-2 relative w-full text-left cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-opacity-75 focus-visible:ring-white focus-visible:ring-offset-orange-300 focus-visible:ring-offset-2 focus-visible:border-indigo-500 sm:text-xs">
                                 <span className=" truncate">{activeSource.name}</span>
                                 <span className='pl-2 fa fa-caret-down'/>
                             </Listbox.Button>
@@ -120,7 +120,7 @@ const TigBreadcrumbs = ({children}) => {
                                 leaveFrom="opacity-100"
                                 leaveTo="opacity-0"
                             >
-                                <Listbox.Options className="z-50 absolute py-1 mt-1 overflow-auto text-xs shadow-lg max-h-96 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" style={{background: '#bbd4cb'}}>
+                                <Listbox.Options className="z-50 absolute py-1.5 mt-1 overflow-auto text-xs shadow-lg max-h-96 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-xs" style={{background: '#bbd4cb'}}>
                                   {views.map((view, personIdx) => (
                                     <Listbox.Option
                                       key={personIdx}
@@ -159,14 +159,14 @@ const TigBreadcrumbs = ({children}) => {
                     </Listbox>
                 </div> 
                 <div 
-                className='ml-2 bg-tigGray-100 hover:bg-tigGray-50 hover:text-orange-300 hover:cursor-pointer text-sm text-gray-600' style={{background: '#bbd4cb'}}>
+                className='ml-2 bg-tigGray-100 hover:bg-tigGray-50 hover:text-orange-300 hover:cursor-pointer text-xs text-gray-600' style={{background: '#bbd4cb'}}>
                    <Listbox value={activeAction} onChange={(e) => {
                         let url = `/views/${viewId}/${e.path}`
                         console.log('url', url)
                         history.push(url)
                     }}>
                         <div className="relative">
-                            <Listbox.Button className="py-1 px-3 relative w-full text-left cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-opacity-75 focus-visible:ring-white focus-visible:ring-offset-orange-300 focus-visible:ring-offset-2 focus-visible:border-indigo-500 sm:text-sm">
+                            <Listbox.Button className="py-1.5 px-2 relative w-full text-left cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-opacity-75 focus-visible:ring-white focus-visible:ring-offset-orange-300 focus-visible:ring-offset-2 focus-visible:border-indigo-500 sm:text-xs">
                                 <span className=" truncate">{activeAction.name}</span>
                                 <span className='pl-2 fa fa-caret-down'/>
                             </Listbox.Button>
@@ -176,7 +176,7 @@ const TigBreadcrumbs = ({children}) => {
                                 leaveFrom="opacity-100"
                                 leaveTo="opacity-0"
                             >
-                                <Listbox.Options className="z-50 absolute py-1 mt-1 overflow-auto text-xs shadow-lg max-h-96 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" style={{background: '#bbd4cb'}}>
+                                <Listbox.Options className="z-50 absolute py-1.5 mt-1 overflow-auto text-xs shadow-lg max-h-96 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-xs" style={{background: '#bbd4cb'}}>
                                   {actions.map((view, personIdx) => (
                                     <Listbox.Option
                                       key={personIdx}
@@ -220,7 +220,7 @@ const TigBreadcrumbs = ({children}) => {
 
             </div>
             <a href='/Gatewayhelp.htm'>
-                <span className='fa fa-question text-sm text-gray-600' />
+                <span className='fa fa-question text-xs text-gray-600' />
             </a>
         </div>
     )

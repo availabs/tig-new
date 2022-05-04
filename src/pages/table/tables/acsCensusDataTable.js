@@ -49,7 +49,8 @@ const RenderTable = (data = [], pageSize, valueColumn, lower, upper) => useMemo(
                     Header: c,
                     accessor: c,
                     align: 'center',
-                    disableFilters: c !== 'county'
+                    disableFilters: c !== 'county',
+                    Cell: (d) => c.includes('percent') ? (d.cell.value || 0).toFixed(0) + '%' : (d.cell.value || 0)
                 }))
         }
         initialPageSize={pageSize}
@@ -75,6 +76,9 @@ const AcsCensusDataTable = ({name}) => {
     const [column, setColumn] = useState(nameMapping["base_value"])
     const [lower, setLower] = useState()
     const [upper, setUpper] = useState()
+    const [configDomain, setConfigDomain] = useState([
+        nameMapping.base_value, nameMapping.percentage
+    ])
 
     const getterSetters = {
         geography: {get: geography, set: setGeography},
@@ -84,82 +88,81 @@ const AcsCensusDataTable = ({name}) => {
         pageSize: {get: pageSize, set: setPageSize},
     }
 
+    let config = {
+        column: {
+            name: 'Column',
+            type: "select",
+            multi: false,
+            domain: configDomain,
+            value: column
+        },
+    }
 
     useEffect(async () => {
         setLoading(true)
         let d = await fetchData(falcor, viewId)
         setData(processData(d, viewId, column, upper, lower, nameMapping, geography))
+        setConfigDomain([nameMapping.base_value, nameMapping.percentage])
+        ![nameMapping.base_value, nameMapping.percentage].includes(column) && setColumn(nameMapping.base_value);
         setLoading(false)
 
     }, [viewId, column, lower, upper, geography]);
-    const config = {
-        column: {
-            name: 'Column',
-            type: "select",
-            multi: false,
-            domain: [
-                nameMapping["percentage"],
-                nameMapping["base_value"]
-            ],
-            value: column
-        },
-    }
+
     return (
         <div className='w-full'>
-            <div> {name} </div>
+            <div className={'font-light text-lg'}> {name} </div>
 
-            <div className={`pt-3 flex pb-3`}>
-                <label  className={`self-center px-1 font-bold text-sm`}>Area:</label>
+            <div className={`flex pb-4 pt-1.5`}>
+                <label  className={`self-center px-1 font-semibold text-xs`}>Area:</label>
                 <Select
                     id={'geography'}
                     themeOptions={{
                         size: 'compact'
                     }}
                     color={'transparent'}
-                    className={'text-sm'}
+                    className={'font-light text-sm'}
                     {...filters.geography}
                     onChange={e => getterSetters.geography.set(e)}
                     value={getterSetters.geography.get}
-                /> <span  className={`self-center px-1 font-bold text-sm`}>Data</span>
+                /> <span  className={`self-center px-1 capitalize font-semibold text-xs`}>Census Tract Data</span>
             </div>
 
-            <div className={`flex pb-5 items-center`}>
+            <div className={`flex pb-5 items-center font-light text-sm`}>
                 {
                     Object.keys(config)
                         .map(f =>
                         <>
-                            <label  className={`self-center px-1 font-bold text-sm whitespace-nowrap`}>{config[f].name}:</label>
+                            <label  className={`self-center px-1 whitespace-nowrap`}>{config[f].name}:</label>
                             <Select
                                 id={f}
+                                className={'whitespace-nowrap capitalize'}
                                 themeOptions={{
                                     size: 'compact'
                                 }}
-                                color={'transparent'}
-                                className={'text-sm whitespace-nowrap'}
                                 {...config[f]}
                                 onChange={e => getterSetters[f].set(e)}
                                 value={getterSetters[f].get}
                             />
                         </>)
                 }
-                <label  className={`px-1 pl-5 font-bold text-sm`}>From:</label>
-                <Input type='number' id={'lower'} value={lower} onChange={setLower} large />
-                <label  className={`px-1 font-bold text-sm`}>To:</label>
-                <Input type='number' id={'upper'} value={upper} onChange={setUpper} large />
+                <label  className={`px-1 text-xs`}>From:</label>
+                <Input className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-none focus:border-pink-300 p-1'} type='text' id={'lower'} value={lower} onChange={setLower} large />
+                <label  className={`px-1 ml-5 text-xs`}>To:</label>
+                <Input className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-gray-300 p-1'} type='text' id={'upper'} value={upper} onChange={setUpper} large />
 
-                <label  className={`px-1 font-bold text-sm`}>Show:</label>
+                <label  className={`ml-10 px-1 text-xs`}>Show:</label>
                 <Select
                     id={'pageSize'}
                     themeOptions={{
                         size: 'compact'
                     }}
                     color={'transparent'}
-                    className={'text-sm'}
+                    className={'font-light text-sm'}
                     domain={[10, 25, 50, 100]}
                     onChange={e => getterSetters.pageSize.set(e)}
                     value={pageSize}
                     multi={false}
-                /><span  className={`px-1 font-bold text-sm`}>entries</span>
+                /><span  className={`px-1 text-xs`}>entries</span>
             </div>
 
             {loading ? <div>Processing...</div> : ''}
