@@ -217,9 +217,63 @@ const ppdaf = () => {
               tableRowStriped: `bg-white odd:bg-tigGray-25 hover:bg-tigGray-100 bg-opacity-25 transition ease-in-out duration-150`,
               tableCell: `${sizes[size]} whitespace-no-wrap border border-gray-200 pl-1 font-light text-sm`,
               inputSmall: 'w-24',
+              sortIconDown: 'fas fa-sort-amount-down',
+              sortIconUp: 'fas fa-sort-amount-up',
+              sortIconIdeal: 'fas fa-sort',
               vars: {
                   color: colors,
                   size: sizes
+              }
+          }
+      },
+      button: (opts = {}) => {
+          const {color = 'white', size = 'base', width = 'block'} = opts
+          let colors = {
+              white: `
+                    border border-gray-300  text-gray-700 bg-white hover:text-gray-500
+                    focus:outline-none focus:shadow-outline-blue focus:border-blue-300
+                    active:text-gray-800 active:bg-gray-50 transition duration-150 ease-in-out
+                    disabled:cursor-not-allowed
+                `,
+              transparent: `
+                    border border-gray-300  text-gray-700 bg-white hover:text-gray-500
+                    focus:outline-none focus:shadow-outline-blue focus:border-blue-300
+                    active:text-gray-800 active:bg-gray-50 transition duration-150 ease-in-out
+                    disabled:cursor-not-allowed
+                `,
+              primary: '',
+              danger: ''
+          }
+
+          let sizes  = {
+              base: 'px-4 py-4 leading-5 font-medium',
+              sm: 'text-sm px-2 py-2 leading-5 font-medium',
+              lg: 'text-lg px-6 py-6 leading-5 font-medium',
+              xl: 'text-2xl px-12 py-8 leading-5 font-medium'
+          }
+
+          let widths = {
+              'block': '',
+              'full' : 'w-full'
+          }
+
+          return {
+              button: `
+              inline-flex items-center
+                px-4 py-2 border border-gray-300
+                text-sm leading-5 font-medium
+                rounded-md text-gray-700 bg-white
+                hover:text-ray-500
+                focus:outline-none focus:shadow-outline-blue focus:border-blue-300
+                active:text-gray-800 active:bg-gray-50 transition duration-150 ease-in-out
+                disabled:cursor-not-allowed
+                `,
+              //inline-flex items-center justify-items-center text-center
+              //                     ${colors[color]} ${sizes[size]} ${widths[width]}
+              vars: {
+                  color: colors,
+                  size: sizes,
+                  width: widths
               }
           }
       },
@@ -305,15 +359,6 @@ const ppdaf = () => {
     width: "",
 
     transition: "transition ease-in-out duration-150",
-    button: `
-        inline-flex items-center
-        px-4 py-2 border border-gray-300
-        text-sm leading-5 font-medium
-        rounded-md text-gray-700 bg-white
-        hover:text-gray-500
-        focus:outline-none focus:shadow-outline-blue focus:border-blue-300
-        active:text-gray-800 active:bg-gray-50 transition duration-150 ease-in-out
-        disabled:cursor-not-allowed`,
     buttonPrimary:
       "inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:shadow-outline-indigo focus:border-indigo-700 active:bg-indigo-700 transition duration-150 ease-in-out disabled:cursor-not-allowed",
 
