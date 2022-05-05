@@ -197,7 +197,7 @@ const ppdaf = () => {
           selectIcon: `fa fa-angle-down text-gray-400 pt-2 px-2`
         }
     },
-      table: (opts = {color:'white', size: 'compact'}) => {
+    table: (opts = {color:'white', size: 'compact'}) => {
           const {color = 'white', size = 'compact'} = opts
           let colors = {
               white: 'bg-white hover:bg-gray-100',
@@ -211,11 +211,11 @@ const ppdaf = () => {
           }
           return {
               tableHeader:
-                  `${sizes[size]} pb-1 border-2 border-gray-300 bg-white text-left font-medium text-gray-700 uppercase first:rounded-tl-md last:rounded-tr-md capitalize`,
+                  `${sizes[size]} pb-1 h-8 border border-b-4 border-gray-200 bg-white text-left font-medium text-gray-700 uppercase first:rounded-tl-md last:rounded-tr-md capitalize`,
               tableInfoBar: "bg-white",
-              tableRow: `${colors[color]} transition ease-in-out duration-150`,
+              tableRow: `${colors[color]} transition ease-in-out duration-150 hover:bg-gray-300`,
               tableRowStriped: `bg-white odd:bg-tigGray-25 hover:bg-tigGray-100 bg-opacity-25 transition ease-in-out duration-150`,
-              tableCell: `${sizes[size]} whitespace-no-wrap border-2 border-gray-300 pl-1 font-light text-sm`,
+              tableCell: `${sizes[size]} whitespace-no-wrap border border-gray-200 pl-1 font-light text-sm`,
               inputSmall: 'w-24',
               vars: {
                   color: colors,
