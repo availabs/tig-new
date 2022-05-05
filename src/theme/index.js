@@ -219,7 +219,7 @@ const ppdaf = () => {
               inputSmall: 'w-24',
               sortIconDown: 'fas fa-sort-amount-down',
               sortIconUp: 'fas fa-sort-amount-up',
-              sortIconIdeal: 'fas fa-sort',
+              sortIconIdeal: 'fas fa-sort-alt',
               vars: {
                   color: colors,
                   size: sizes
