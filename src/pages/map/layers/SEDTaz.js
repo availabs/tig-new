@@ -358,29 +358,9 @@ class SEDTazLayer extends LayerContainer {
     }
 
     updateLegendDomain() {
-        const domains = {
-            // 2040
-            37:[0, 35696, 40620, 45755, 53519, 202112],
-            34:[0, 1351, 2054, 2782, 3910, 78160],
-            30:[0, 1, 3, 11, 50, 1201],
-            29:[0, 1, 22, 118, 253, 12050],
-            31:[0, 1, 7, 16, 56, 10503],
-            28:[0, 11, 40, 200, 12050],
-            26:[0, 44787, 61304, 80355, 113880, 1109731],
-            27:[0, 2995, 4270, 5680, 7883, 117220],
-            32:[0, 1112, 1588, 2112, 2958, 56390],
-            33:[0, 2.3, 2.62, 2.83, 3.08, 7],
-            36:[0, 66, 142, 276, 670, 48061],
-            35:[0, 30, 78, 167, 385, 13225],
-            13:[0, 489, 791, 1119, 1632, 42294],
-            25:[0, 560, 1005, 1699, 3555, 80093],
-            24:[0, 3090, 4361, 5816, 8083, 181241],
-            38:[0, 1, 670, 2586, 8143, 51583]
-        }
+     let values = _.uniq((this.data || []).map(d => get(d, ['value'], 0)))
 
-        let values = _.uniq((this.data || []).map(d => get(d, ['value'], 0)))
-
-        if(!domains[this.filters.dataset.value] && values.length){
+        if(values.length){
             this.legend.domain =
                 ckmeans(values, Math.min(values.length, 5)
                 ).reduce((acc, d, dI) => {
@@ -391,8 +371,6 @@ class SEDTazLayer extends LayerContainer {
                     }
                     return acc
                 } , [])
-        }else if(domains[this.filters.dataset.value]){
-            this.legend.domain = domains[this.filters.dataset.value]
         }else{
             this.legend.domain = [0,10,25,50,100]
         }

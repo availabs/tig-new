@@ -3,6 +3,7 @@ import {Select, Input, Table, useFalcor} from '@availabs/avl-components'
 import {filters} from 'pages/map/layers/npmrds/filters.js'
 import get from "lodash.get";
 import flatten from "lodash.flatten";
+import MoreButton from "./components/moreButton";
 
 const fetchGeo = (falcor, states) => {
     return falcor.get(["geo", states, "geoLevels"])
@@ -23,11 +24,13 @@ const fetchData = (falcor, filtered, month, year, setLoading) => {
     })
 }
 
-const RenderTable = (data, pageSize) => useMemo(() =>
+const RenderTable = (data, pageSize, filteredColumns) => useMemo(() =>
     <Table
         data={data}
         columns={
-            Object.keys(data[0] || {}).map(c => ({
+            Object.keys(data[0] || {})
+                .filter(c => !filteredColumns.includes(c))
+                .map(c => ({
                 Header: c,
                 accessor: c,
                 align: 'center'
@@ -36,7 +39,7 @@ const RenderTable = (data, pageSize) => useMemo(() =>
         initialPageSize={pageSize}
         pageSize={pageSize}
         striped={true}
-    />, [data, pageSize])
+    />, [data, pageSize, filteredColumns])
 
 const NpmrdsTable = ({name}) => {
     const {falcor, falcorCache} = useFalcor();
@@ -51,6 +54,7 @@ const NpmrdsTable = ({name}) => {
     const [speedFrom, setSpeedFrom] = useState(0)
     const [speedTo, setSpeedTo] = useState(100)
     const [direction, setDirection] = useState('all')
+    const [filteredColumns, setFilteredColumns] = useState([])
 
     const getterSetters = {
         geography: {get: geography, set: setGeography},
@@ -125,25 +129,31 @@ const NpmrdsTable = ({name}) => {
         <div className='w-full'>
             <div className={'font-light text-lg'}> {name} </div>
 
-            <div className={`w-5 flex pb-1`}>
-                <label  className={`self-center px-1 font-bold text-sm`}>Area:</label>
+            <div className={`w-5 flex pb-1 text-xs`}>
+                <label  className={`self-center px-1 font-bold`}>Area:</label>
                 <Select
                     id={'geography'}
+                    themeOptions={{
+                        size: 'compact'
+                    }}
                     {...filters.geography}
                     onChange={e => getterSetters.geography.set(e)}
                     value={getterSetters.geography.get}
-                /> <span  className={`self-center px-1 font-bold text-sm`}>Data</span>
+                /> <span  className={`self-center px-1 font-bold`}>Data</span>
             </div>
 
-            <div className={'flex flex-row pb-5'}>
+            <div className={'flex flex-row pb-5 text-xs'}>
                 {
                     Object.keys(filters)
                         .filter(f => !['hour', 'geography'].includes(f))
                         .map((f, fI) =>
                             <>
-                                <label className={`self-center px-1 font-bold text-sm`}>{filters[f].name}:</label>
+                                <label className={`self-center px-1 font-bold`}>{filters[f].name}:</label>
                                 <Select
                                     id={f}
+                                    themeOptions={{
+                                        size: 'compact'
+                                    }}
                                     {...filters[f]}
                                     onChange={e => getterSetters[f].set(e)}
                                     value={getterSetters[f].get}
@@ -152,15 +162,15 @@ const NpmrdsTable = ({name}) => {
                 }
             </div>
 
-            <div className={'flex flex-row pb-5 items-center w-1/2'}>
-                <label  className={`px-1 font-bold text-sm whitespace-nowrap`}>Speed (mph) from</label>
+            <div className={'flex flex-row pb-5 items-center w-1/2 text-xs'}>
+                <label  className={`px-1 font-bold text-xs whitespace-nowrap`}>Speed (mph) from</label>
                 <Input
                     id={'speedFrom'}
                     value={speedFrom}
                     onChange={e => getterSetters.speedFrom.set(e)}
                     
                 />
-                <label  className={`px-1 font-bold text-sm`}>to</label>
+                <label  className={`px-1 font-bold text-xs`}>to</label>
                 <Input
                     id={'speedTo'}
                     value={speedTo}
@@ -168,18 +178,26 @@ const NpmrdsTable = ({name}) => {
                     
                 />
 
-                <label  className={`px-1 font-bold text-sm`}>Show:</label>
+                <label  className={`px-1 font-bold text-xs`}>Show:</label>
                 <Select
                     id={'pageSize'}
+                    themeOptions={{
+                        size: 'compact'
+                    }}
                     domain={[10, 25, 50, 100]}
                     onChange={e => getterSetters.pageSize.set(e)}
                     value={pageSize}
                     multi={false}
-                /><span  className={`px-1 font-bold text-sm`}>entries</span>
+                /><span  className={`px-1 font-bold text-xs`}>entries</span>
+
+                <MoreButton className={'pl-3'}
+                            data={data || []}
+                            columns={Object.keys(data[0] || {})}
+                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}/>
             </div>
             {loading ? <div>Processing...</div> : ''}
             <div className='w-full overflow-x-scroll scrollbar font-sm'>
-                {RenderTable(data, pageSize)}
+                {RenderTable(data, pageSize, filteredColumns)}
             </div>
         </div>
     )

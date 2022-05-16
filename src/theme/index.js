@@ -186,14 +186,17 @@ const ppdaf = () => {
       }
 
       let sizes = {
-          compact: 'px-0 py-0',
+          compact: 'px-0 py-1',
           full: 'px-4 py-2'
       }
       return {
           menuWrapper: `bg-${colors[color]} my-1 text-sm `,
           menuItemActive: `px-2 py-2 cursor-not-allowed bg-${accent}-200 border-1 border-${colors[color]} focus:border-${accent}-300`,
           menuItem: `px-2 py-2 cursor-pointer hover:bg-blue-100 border-1 border-${colors[color]} focus:border-blue-300`,
-          select: `z-60 bg-${colors[color]} w-full flex flex-row justify-between truncate ${sizes[size]} cursor-pointer border-2 border-${colors[color]} focus:border-blue-300`,
+          select: `z-60 bg-${colors[color]} w-full flex flex-row justify-between truncate ${sizes[size]} cursor-pointer 
+          rounded border-2 border-${colors[color]} focus:border-blue-300
+          shadow-inner focus:outline-none focus:ring-1 focus:border-blue-300 focus:shadow-tigShadow focus:shadow-blue-200
+          `,
           selectIcon: `fa fa-angle-down text-gray-400 pt-2 px-2`
         }
     },
@@ -217,9 +220,9 @@ const ppdaf = () => {
               tableRowStriped: `bg-white odd:bg-tigGray-25 hover:bg-tigGray-100 bg-opacity-25 transition ease-in-out duration-150`,
               tableCell: `${sizes[size]} whitespace-no-wrap border-2 border-gray-300 pl-1 font-light text-sm`,
               inputSmall: 'w-24',
-              sortIconDown: 'fas fa-sort-amount-down',
-              sortIconUp: 'fas fa-sort-amount-up',
-              sortIconIdeal: 'fas fa-sort-alt',
+              sortIconDown: 'fas fa-sort-amount-down text-tigGray-300 opacity-75',
+              sortIconUp: 'fas fa-sort-amount-up text-tigGray-300 opacity-75',
+              sortIconIdeal: 'fas fa-sort-alt text-tigGray-300 opacity-25',
               vars: {
                   color: colors,
                   size: sizes
@@ -259,17 +262,46 @@ const ppdaf = () => {
 
           return {
               button: `
-              inline-flex items-center
-                px-4 py-2 border border-gray-300
-                text-sm leading-5 font-medium
-                rounded-md text-gray-700 bg-white
-                hover:text-ray-500
-                focus:outline-none focus:shadow-outline-blue focus:border-blue-300
-                active:text-gray-800 active:bg-gray-50 transition duration-150 ease-in-out
+              bg-tigGray-200 hover:bg-tigGray-50 hover:text-orange-400 hover:cursor-pointer 
+                py-1.5 px-2 font-light text-sm rounded-sm
+                font-bold
+                transition duration-150 ease-in-out
                 disabled:cursor-not-allowed
                 `,
               //inline-flex items-center justify-items-center text-center
               //                     ${colors[color]} ${sizes[size]} ${widths[width]}
+              vars: {
+                  color: colors,
+                  size: sizes,
+                  width: widths
+              }
+          }
+      },
+
+      input: (opts = {}) => {
+          const {color = 'gray', size = 'small', width = 'block'} = opts
+          let colors = {
+              white: 'bg-white',
+              gray: 'bg-gray-100'
+          }
+
+          let sizes  = {
+              base: 'px-4 py-4 font-medium',
+              small: 'text-sm px-2 py-2 font-medium text-xs',
+              large: 'text-lg px-6 py-6 font-medium text-xl'
+          }
+
+          let widths = {
+              'block': '',
+              'full' : 'w-full'
+          }
+
+          return {
+              input: `
+              border border-1 border-gray-300 rounded
+              shadow-inner focus:outline-none focus:ring-1 focus:border-blue-300 focus:shadow-tigShadow focus:shadow-blue-400
+              ${colors[color]} ${sizes[size]} ${widths[width]}
+                `,
               vars: {
                   color: colors,
                   size: sizes,

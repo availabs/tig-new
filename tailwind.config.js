@@ -17,6 +17,9 @@ module.exports = {
       },
         backgroundImage: {
            bus: "url('images/mapIcons/bus.png')"
+        },
+        boxShadow: {
+           tigShadow: '0 0px 5px 1px rgba(38, 146, 248, 0.1)'
         }
       /*fontFamily: {
         sans: ['Proxima Nova W01', 'Inter var', ...defaultTheme.fontFamily.sans],

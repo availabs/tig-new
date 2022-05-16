@@ -11,6 +11,7 @@ import centroid from "@turf/centroid";
 import center from "@turf/center";
 import {download as shpDownload} from "utils/shp-write";
 import TypeAhead from "components/tig/TypeAhead";
+import {ckmeans} from "simple-statistics";
 class SED2040CountyLevelForecastLayer extends LayerContainer {
     constructor(props) {
         super(props);
@@ -364,39 +365,22 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
     }
 
     updateLegendDomain() {
-        const domains = {
-            // 2040
-            '46':[1, 5, 9, 20, 29, 79],
-            '45':[69, 207, 473, 729, 1099, 2761],
-            '47':[28, 86, 166, 274, 398, 1044],
-            '48':[1.98, 2.54, 2.69, 2.77, 2.92, 3.26],
-            '50':[33, 116, 237, 366, 557, 1383],
-            '43':[22, 74, 192, 300, 483, 2997],
-            '44':[7, 33, 51, 82, 161, 399],
-            '42':[31, 111, 243, 402, 624, 3397],
-            '41':[74, 213, 481, 750, 1134, 2801],
-            // 2050
-            '113':[33, 99, 219, 351, 538, 1299],
-            '110':[2, 5, 11, 23, 34, 67],
-            '109':[74, 187, 486, 760, 1111, 2862],
-            '111':[30 ,83, 174, 285, 438, 1063],
-            '112':[1.99, 2.44, 2.58, 2.68, 2.81, 3.07],
-            '114':[36, 106, 233, 400, 605, 1399],
-            '107':[24, 65, 200, 337, 472, 2660],
-            '108':[3, 11, 17, 29, 67, 241],
-            '106':[28, 76, 218, 361, 532, 2901],
-            '105':[78, 195, 496, 74, 1148, 2898],
-            // 2055
-            '208':[38, 91, 227, 400, 581, 1429],
-            '207':[32, 85, 218, 363, 543, 1337],
-            '205':[30, 77, 173, 286, 408, 1133],
-            '206':[2, 2, 3, 3, 3],
-            '202':[3, 11, 16, 30, 66],
-            '204':[2, 4, 10, 20, 29, 67],
-            '203':[72, 172, 483, 749, 1070, 2944]
-        }
+    let values = _.uniq((this.data || []).map(d => get(d, ['value'], 0)))
 
-        this.legend.domain = domains[this.filters.dataset.value] || domains["45"]
+        if(values.length){
+            this.legend.domain =
+                ckmeans(values, Math.min(values.length, 5)
+                ).reduce((acc, d, dI) => {
+                    if(dI === 0){
+                        acc.push(d[0], d[d.length - 1])
+                    }else{
+                        acc.push(d[d.length - 1])
+                    }
+                    return acc
+                } , [])
+        }else{
+            this.legend.domain = [0,10,25,50,100]
+        }
 
         this.updateLegendTitle()
     }
