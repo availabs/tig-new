@@ -187,6 +187,7 @@ const ppdaf = () => {
 
       let sizes = {
           compact: 'px-0 py-1',
+          tableMini: 'px-2 py-0',
           full: 'px-4 py-2'
       }
       return {

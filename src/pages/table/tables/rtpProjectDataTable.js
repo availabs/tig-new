@@ -41,7 +41,10 @@ const RenderTable = (data, pageSize, filteredColumns) => useMemo(() =>
                 .map(c => ({
                     Header: c,
                     accessor: c,
-                    align: 'center'
+                    align: 'center',
+                    filter: ['project type', 'plan portion', 'county', 'year'].includes(c) ? 'dropdown' : null,
+                    filterThemeOptions: {size: 'tableMini'},
+                    filterClassName: 'w-full text-sm z-50',
                 }))
         }
         initialPageSize={pageSize}

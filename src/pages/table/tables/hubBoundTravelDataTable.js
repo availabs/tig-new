@@ -40,9 +40,12 @@ const RenderTable = (data = [], pageSize, filteredColumns) => useMemo(() =>
             Object.keys(columns)
                 .filter(c => !filteredColumns.includes(columns[c]))
                 .map(c => ({
-                Header: columns[c] || c,
-                accessor: c,
-                align: 'center'
+                    Header: columns[c] || c,
+                    accessor: c,
+                    align: 'center',
+                    filter: ['year', 'var_name', 'route_name', 'mode_name', 'in_station_name', 'direction', 'loc_name', 'sector_name', 'transit_agency'].includes(c) ? 'dropdown' : null,
+                    filterThemeOptions: {size: 'tableMini'},
+                    filterClassName: 'w-full text-sm z-50',
             }))
         }
         initialPageSize={pageSize}
