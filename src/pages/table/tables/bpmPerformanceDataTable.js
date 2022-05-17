@@ -6,25 +6,45 @@ import flatten from "lodash.flatten";
 import {HOST} from "../../map/layers/layerHost";
 import fetcher from "../../map/wrappers/fetcher";
 import {useParams} from "react-router-dom";
+import counties from "../../map/config/counties.json";
+import MoreButton from "./components/moreButton";
 
 const mapping = {
-    area: 'county',
+    name: 'county',
     vehicle_miles_traveled: 'vmt (in thousands)',
     vehicle_hours_traveled: 'vht (in thousands)',
     avg_speed: 'avg. speed (milers/hr)',
 }
 
-const fetchData = (dataset, period = 0, functional_class = 0, value_column = '', lower = '', upper = '') => {
-    const url = `${HOST}/views/${dataset}/data_overlay`
-    const params = `?utf8=%E2%9C%93&period=${period}&functional_class=${functional_class}&value_column=${value_column}&lower=${lower}&upper=${upper}`
-    return fetcher(url + params)
+const fetchData = (falcor, viewId, type) => {
+    return falcor.get(["tig", type, "byId", viewId, 'data_overlay'])
+        .then(response => {
+            console.log('??', response)
+            return get(response, ['json', "tig", type, "byId", viewId, 'data_overlay'], [])
+        })
 }
 
-const RenderTable = (data, pageSize) => useMemo(() =>
+const processData = (data, viewId, column, upper, lower, geography, timePeriod, functionalClass) => {
+
+    return data
+        .filter(d => {
+                return d.period === timePeriod && d.functional_class === functionalClass &&
+                    ((!lower || d[column] >= lower) && (!upper || d[column] <= upper))
+            }
+        )
+        .filter(entry => !get(counties.filter(c => c.name === entry.name), [0]) ||
+            get(filters.geography.domain.filter(geo => geo.name === geography), [0, 'value'], [])
+                .includes(counties.filter(c => c.name === entry.name)[0].geoid)
+        )
+        .sort((a,b) => b.name.localeCompare(a.name))
+}
+
+const RenderTable = (data, pageSize, filteredColumns) => useMemo(() =>
     <Table
         data={data}
         columns={
             Object.keys(mapping)
+                .filter(c => !filteredColumns.includes(mapping[c]))
                 .map(c => ({
                     Header: mapping[c],
                     accessor: c,
@@ -34,9 +54,9 @@ const RenderTable = (data, pageSize) => useMemo(() =>
         initialPageSize={pageSize}
         pageSize={pageSize}
         striped={true}
-    />, [data, pageSize])
+    />, [data, pageSize, filteredColumns])
 
-const BpmPerformanceDataTable = ({name}) => {
+const BpmPerformanceDataTable = ({name, type}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams()
     const [loading, setLoading] = useState(false)
@@ -46,9 +66,11 @@ const BpmPerformanceDataTable = ({name}) => {
     const [geography, setGeography] = useState('All')
     const [timePeriod, setTimePeriod] = useState(0)
     const [functionalClass, setFunctionalClass] = useState(0)
-    const [column, setColumn] = useState()
+    const [column, setColumn] = useState('vehicle_miles_traveled')
     const [lower, setLower] = useState()
     const [upper, setUpper] = useState()
+    const [filteredColumns, setFilteredColumns] = useState([])
+
 
 
     const getterSetters = {
@@ -63,10 +85,11 @@ const BpmPerformanceDataTable = ({name}) => {
 
     useEffect(async () => {
         setLoading(true)
-        let d = await fetchData(viewId, timePeriod, functionalClass, column, lower, upper)
+        let d = await fetchData(falcor, viewId, type)
         setLoading(false)
-        setData(get(d, 'data', []))
-    }, [timePeriod, functionalClass, column, lower, upper]);
+        console.log('d?', d.data)
+        setData(processData(d, viewId, column, upper, lower, geography, timePeriod, functionalClass))
+    }, [viewId, timePeriod, functionalClass, column, lower, upper, geography]);
 
     const config = {
         timePeriod: {
@@ -91,7 +114,7 @@ const BpmPerformanceDataTable = ({name}) => {
             name: 'Column',
             type: "select",
             multi: false,
-            domain: [{name: 'vmt (in thousands)', value: 'vehicle_miles_traveled'}, {name: 'vht (in thousands)', value: 'vehicle_hours_traveled'}, {name: 'avg. speed (milers/hr)', value: 'avg_speed'}],
+            domain: [{name: 'VMT (in thousands)', value: 'vehicle_miles_traveled'}, {name: 'VHT (in thousands)', value: 'vehicle_hours_traveled'}, {name: 'Avg. Speed (milers/hr)', value: 'avg_speed'}],
             value: column,
             accessor: d => d.name,
             valueAccessor: d => d.value,
@@ -101,50 +124,75 @@ const BpmPerformanceDataTable = ({name}) => {
         <div className='w-full'>
             <div className={'font-light text-lg'}> {name} </div>
 
-            <div className={`w-5 flex pb-1`}>
-                <label  className={`self-center px-1 font-bold text-sm`}>Area:</label>
+            <div className={`flex pb-4 pt-1.5`}>
+                <label  className={`self-center px-1 font-bold text-xs`}>Area:</label>
                 <Select
                     id={'geography'}
+                    themeOptions={{
+                        size: 'compact'
+                    }}
+                    className={'font-light text-sm'}
                     {...filters.geography}
                     onChange={e => getterSetters.geography.set(e)}
                     value={getterSetters.geography.get}
-                /> <span  className={`self-center px-1 font-bold text-sm`}>Data</span>
+                /> <span  className={`self-center px-1 capitalize font-semibold text-xs`}>Data</span>
             </div>
 
-            <div className={`flex pb-1 items-center`}>
+            <div className={`flex pb-3 items-center`}>
                 {
                     Object.keys(config)
                         .map(f =>
                         <>
-                            <label  className={`self-center px-1 font-bold text-sm whitespace-nowrap`}>{config[f].name}:</label>
+                            <label  className={`self-center px-1 whitespace-nowrap text-xs font-bold`}>{config[f].name}:</label>
                             <Select
                                 id={f}
-                                className={'whitespace-nowrap'}
+                                themeOptions={{
+                                    size: 'compact'
+                                }}
+                                className={'whitespace-nowrap text-sm'}
                                 {...config[f]}
                                 onChange={e => getterSetters[f].set(e)}
                                 value={getterSetters[f].get}
                             />
                         </>)
                 }
-                <label  className={`px-1 font-bold text-sm`}>from:</label>
-                <Input type='number' id={'lower'} value={lower} onChange={setLower} large />
-                <label  className={`px-1 font-bold text-sm`}>to:</label>
-                <Input type='number' id={'upper'} value={upper} onChange={setUpper} large />
+                <label  className={`px-1 text-xs`}>From:</label>
+                <Input
+                       type='text'
+                       id={'lower'}
+                       value={lower}
+                       onChange={setLower}
+                       placeholder={''}
+                       themeOptions={{
+                           size: 'small',
+                           color: 'white'
+                       }}
+                />
+                <label  className={`px-1 ml-3 text-xs`}>To:</label>
+                <Input type='text' id={'upper'} value={upper} onChange={setUpper} placeholder={''}/>
             </div>
 
             <div className={'flex flex-row pb-5 items-center w-1/2'}>
-                <label  className={`px-1 font-bold text-sm`}>Show:</label>
+                <label  className={`px-1 text-sm`}>Show:</label>
                 <Select
                     id={'pageSize'}
+                    themeOptions={{
+                        size: 'compact'
+                    }}
                     domain={[10, 25, 50, 100]}
                     onChange={e => getterSetters.pageSize.set(e)}
                     value={pageSize}
                     multi={false}
-                /><span  className={`px-1 font-bold text-sm`}>entries</span>
+                /><span  className={`px-1 text-sm`}>entries</span>
+
+                <MoreButton className={'pl-3'}
+                            data={data}
+                            columns={Object.values(mapping)}
+                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}/>
             </div>
             {loading ? <div>Processing...</div> : ''}
             <div className='w-full overflow-x-scroll scrollbar font-sm'>
-                {RenderTable(data, pageSize)}
+                {RenderTable(data, pageSize, filteredColumns)}
             </div>
         </div>
     )

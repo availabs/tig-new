@@ -3,7 +3,7 @@ import _ from 'lodash'
 import {AvlModal, Button, useFalcor, Select} from '@availabs/avl-components'
 import { CSVLink, CSVDownload } from "react-csv";
 
-const MoreButton = ({className, data, columns, filteredColumns, setFilteredColumns}) => {
+const MoreButton = ({className, data = [], columns, filteredColumns, setFilteredColumns}) => {
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false);
     const [openColumnList, setOpenColumnList] = useState(false);
@@ -43,7 +43,7 @@ const MoreButton = ({className, data, columns, filteredColumns, setFilteredColum
                     Show/hide columns
                 </Button>
 
-                <div className={`${openColumnList ? 'block' : 'hidden'} flex ml-3`}>
+                <div className={`${openColumnList ? 'block' : 'hidden'} flex ml-3 capitalize`}>
                     <label className={'self-center pr-3'} htmlFor={'show_hide_columns'}>Hide:</label>
                     <Select
                         id={'show_hide_columns'}
@@ -58,10 +58,7 @@ const MoreButton = ({className, data, columns, filteredColumns, setFilteredColum
 
             <Button
                 className={
-                    `${className} 
-            bg-tigGray-200 
-            hover:bg-tigGray-50 hover:text-orange-300 hover:cursor-pointer 
-            py-1.5 px-2 font-light text-xs text-gray-600 rounded-sm`}
+                    `${className}`}
                 onClick={() => setOpen(!open)}
             >
                 <i className={'fa fa-wrench pr-1'}/> More...
