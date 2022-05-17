@@ -219,12 +219,13 @@ const ppdaf = () => {
               inputSmall: 'w-24',
               sortIconDown: 'fas fa-sort-amount-down',
               sortIconUp: 'fas fa-sort-amount-up',
-              sortIconIdeal: 'fas fa-sort',
+              sortIconIdeal: 'far fa-sort-alt text-gray-300 ',
               vars: {
                   color: colors,
                   size: sizes
               }
           }
+         
       },
       button: (opts = {}) => {
           const {color = 'white', size = 'base', width = 'block'} = opts
