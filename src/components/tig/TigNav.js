@@ -5,7 +5,7 @@ import { withAuth, TopNav, /*useTheme*/ } from '@availabs/avl-components'
 
 const TigNav = withAuth(() => {
     return (
-        <div className='w-full'>
+        <div className='z-50'>
             <TopNav
                 leftMenu={(
                     <a href='/' className={' hover:bg-tigGray-50 h-12'}>
@@ -15,9 +15,9 @@ const TigNav = withAuth(() => {
                 rightMenu={
                     
                     <div className='flex h-12 flex-col md:flex-row'>
-                        <div className='p-4 h-full bg-tigGray-200 my-2 md:my-0 md:mr-2 text-xs font-bold self-center'>Welcome!</div>
-                        <div className='p-4 h-full hover:bg-tigGray-50 hover:text-yellow-500 hover:cursor-pointer bg-tigGray-200 my-2 md:my-0 md:mr-2 text-xs font-light'>Sign up</div>
-                        <div className='p-4 h-full hover:bg-tigGray-50 hover:text-yellow-500 hover:cursor-pointer bg-tigGray-200 text-xs font-light'>Login</div>
+                        <a className='p-4 h-full bg-tigGray-200 my-2 md:my-0 md:mr-2 text-xs font-bold '>Welcome!</a>
+                        <a href={'/users/sign_up'} className='p-4 h-full hover:bg-tigGray-50 hover:text-yellow-500 hover:cursor-pointer bg-tigGray-200 mt-2 md:my-0 md:mr-2 text-xs font-light'>Sign up</a>
+                        <a href={'/users/sign_in'} className='p-4 h-full hover:bg-tigGray-50 hover:text-yellow-500 hover:cursor-pointer bg-tigGray-200 text-xs font-light'>Login</a>
                     </div>
                     
                 }

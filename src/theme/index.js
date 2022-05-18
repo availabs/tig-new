@@ -154,7 +154,7 @@ const ppdaf = () => {
         topnavMenu: `hidden md:flex flex-1 justify-end h-full overflow-x-auto overflow-y-hidden scrollbar-sm`,
         menuIconTop: `text-${colors[color].accentColor} ${sizes[size].icon} group-hover:${colors[color].highlightColor}`,
         menuOpenIcon: `fa fa-bars`,
-        menuCloseIcon: `os-icon os-icon-x`,
+        menuCloseIcon: `fa fa-x`,
         navitemTop: `group font-sans 
             ${sizes[size].topItem} ${colors[color].textColor} ${colors[color].borderColor} 
             ${colors[color].accentBg} hover:${colors[color].highlightColor} 
@@ -178,7 +178,7 @@ const ppdaf = () => {
 
     },
 
-    select: ({color='white', size = 'full'}) => {
+    select: ({color='white', size = 'compact'}) => {
 
       let colors = {
         white: 'white',
@@ -194,7 +194,7 @@ const ppdaf = () => {
           menuWrapper: `bg-${colors[color]} my-1 text-sm `,
           menuItemActive: `px-2 py-2 cursor-not-allowed bg-${accent}-200 border-1 border-${colors[color]} focus:border-${accent}-300`,
           menuItem: `px-2 py-2 cursor-pointer hover:bg-blue-100 border-1 border-${colors[color]} focus:border-blue-300`,
-          select: `z-60 bg-${colors[color]} w-full flex flex-row justify-between truncate ${sizes[size]} cursor-pointer 
+          select: `z-60 bg-${colors[color]} flex-wrap flex flex-row justify-between truncate ${sizes[size]} cursor-pointer 
           rounded border-2 border-${colors[color]} focus:border-blue-300
           shadow-inner focus:outline-none focus:ring-1 focus:border-blue-300 focus:shadow-tigShadow focus:shadow-blue-200
           `,
