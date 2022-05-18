@@ -52,6 +52,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         range: getColorRange(5, "YlOrRd", true),
         domain: [],
         show: false,
+        units: ' (in 000s)',
         Title: "",
 
     }
@@ -74,7 +75,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                     a.push(
                         [this.filters.dataset.domain.reduce((a,c) => {
                             if(c.value === this.filters.dataset.value){
-                                a = c.name
+                                a = c.name + ' (in 000s)'
                             }
                             return a
                         },'')],
@@ -564,10 +565,20 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 let geom = JSON.parse(
                     this.geoms[get(this.data.filter(d => d.area.toLowerCase() === value.toLowerCase()), [0, 'gid'])] || '{}'
                 )
+
                 if (geom && Object.keys(geom).length) {
-                    let featId =
-                        get(this.mapboxMap.queryRenderedFeatures()
-                            .filter(feats => feats.properties.geoid === get(this.data_counties.filter(dc => dc.name.toLowerCase() === value.toLowerCase()), [0, 'geoid'])), [0, 'id'])
+                    let featId;
+                    if(this.featMapping){
+                        featId = this.featMapping.get(value)
+                    }else{
+                        this.featMapping = new Map();
+                        this.mapboxMap.queryRenderedFeatures({layers: ['Counties']})
+                            .filter(feats => feats.properties.geoid)
+                            .map(feats => this.featMapping.set(this.geoidToNameMapping[feats.properties.geoid], feats.id))
+
+                        featId = this.featMapping.get(value)
+                    }
+
                    if(featId){
                        this.featId &&  this.mapboxMap.setFeatureState(
                            { source: 'counties', id: this.featId, sourceLayer: 'counties'},
@@ -659,10 +670,11 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
             type: 'FeatureCollection',
             features: []
         };
-
+        this.geoidToNameMapping = {}
         this.data.reduce((acc,curr) =>{
             this.data_counties.forEach(data_tract =>{
                 if(curr.area === data_tract.name){
+                    this.geoidToNameMapping[data_tract.geoid] = curr.area;
                     acc.push({
                         geoid: data_tract.geoid,
                         geom: JSON.parse(this.geoms[curr.gid]),
