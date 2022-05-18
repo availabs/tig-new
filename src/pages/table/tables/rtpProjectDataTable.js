@@ -41,10 +41,11 @@ const RenderTable = (data, pageSize, filteredColumns) => useMemo(() =>
                 .map(c => ({
                     Header: c,
                     accessor: c,
-                    align: 'center',
+                    align: ['estimated cost'].includes(c) ? 'right' : 'left',
                     filter: ['project type', 'plan portion', 'county', 'year'].includes(c) ? 'dropdown' : null,
                     filterThemeOptions: {size: 'tableMini'},
                     filterClassName: 'w-full text-sm z-50',
+                    Cell: d => c === 'estimated cost' ? d.value && `$${d.value} M` : d.value
                 }))
         }
         initialPageSize={pageSize}
@@ -52,7 +53,7 @@ const RenderTable = (data, pageSize, filteredColumns) => useMemo(() =>
         striped={true}
     />, [data, pageSize, filteredColumns])
 
-const RtpProjectDataTable = ({name, searchId}) => {
+const RtpProjectDataTable = ({name, type, searchId}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams()
     const [loading, setLoading] = useState(false)
@@ -73,7 +74,7 @@ const RtpProjectDataTable = ({name, searchId}) => {
         setLoading(false)
 
     }, [viewId, searchId, geography]);
-
+console.log('name?', `${type.split('_').join(' ')}: ${name.replace('_', '')}`, name)
     return (
         <div className='w-full'>
             <div className={'font-light text-lg'}> {name} </div>
@@ -107,7 +108,9 @@ const RtpProjectDataTable = ({name, searchId}) => {
                 <MoreButton className={'pl-3'}
                             data={data || []}
                             columns={Object.values(columns)}
-                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}/>
+                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}
+                            filename={`${type.split('_').join(' ')}: ${name.trim()}`}
+                />
             </div>
             {loading ? <div>Processing...</div> : ''}
             <div className='w-full overflow-x-scroll scrollbar font-sm'>

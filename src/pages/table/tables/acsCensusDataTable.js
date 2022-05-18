@@ -50,9 +50,10 @@ const RenderTable = (data = [], pageSize, filteredColumns = []) => useMemo(() =>
                 .map(c => ({
                     Header: c,
                     accessor: c,
-                    align: 'center',
+                    align: ['county', 'census tract', 'fips'].includes(c) ? 'left' : 'right',
+                    filterLocation: 'inline',
                     disableFilters: c !== 'county',
-                    Cell: (d) => c.includes('percent') ? (d.cell.value || 0).toFixed(0) + '%' : (d.cell.value || 0)
+                    Cell: (d) => c.includes('percent') ? (d.cell.value || 0).toFixed(0) + '%' : (d.cell.value || 0).toLocaleString()
                 }))
         }
         initialPageSize={pageSize}
@@ -60,7 +61,7 @@ const RenderTable = (data = [], pageSize, filteredColumns = []) => useMemo(() =>
         striped={true}
     />, [data, pageSize, filteredColumns])
 
-const AcsCensusDataTable = ({name}) => {
+const AcsCensusDataTable = ({name, type}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams();
 
@@ -169,7 +170,9 @@ const AcsCensusDataTable = ({name}) => {
                 <MoreButton className={'pl-3'}
                             data={data}
                             columns={Object.keys(data[0] || {})}
-                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}/>
+                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}
+                            filename={`${type.split('_').join(' ')}: ${name}`}
+                />
             </div>
 
             {loading ? <div>Processing...</div> : ''}

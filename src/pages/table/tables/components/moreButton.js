@@ -3,7 +3,7 @@ import _ from 'lodash'
 import {AvlModal, Button, useFalcor, Select} from '@availabs/avl-components'
 import { CSVLink, CSVDownload } from "react-csv";
 
-const MoreButton = ({className, data = [], columns, filteredColumns, setFilteredColumns}) => {
+const MoreButton = ({className, data = [], columns, filteredColumns, setFilteredColumns, filename = 'data'}) => {
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false);
     const [openColumnList, setOpenColumnList] = useState(false);
@@ -13,13 +13,13 @@ const MoreButton = ({className, data = [], columns, filteredColumns, setFiltered
             hover:bg-tigGray-50 hover:cursor-pointer 
             py-2.5 px-2 font-semibold text-xs text-gray-600 rounded-sm`;
 
-    console.log('d?', data)
     return (
         <div>
             <AvlModal show={open} onHide={() => setOpen(!open)}>
                 <CSVLink
                     className={modalButtonTheme}
-                    data={data.map(d => _.omit(d, filteredColumns))}
+                    data={data.map(d => _.omit(d, [...filteredColumns, 'geom', undefined]))}
+                    filename={filename}
                 >
                     Export Filtered
                 </CSVLink>
@@ -27,6 +27,7 @@ const MoreButton = ({className, data = [], columns, filteredColumns, setFiltered
                 <CSVLink
                     className={modalButtonTheme}
                     data={data}
+                    filename={filename}
                 >
                     Export All
                 </CSVLink>

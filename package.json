@@ -5,7 +5,7 @@
   "homepage": ".",
   "dependencies": {
     "@availabs/ams": "^1.0.5",
-    "@availabs/avl-components": "^1.1.13",
+    "@availabs/avl-components": "^1.1.15",
     "@availabs/avl-map": "^1.0.8",
     "@headlessui/react": "^1.6.1",
     "@heroicons/react": "^1.0.6",

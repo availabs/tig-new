@@ -46,10 +46,11 @@ const RenderTable = (data = [], pageSize, filteredColumns) => useMemo(() =>
                 .map(c => ({
                     Header: c,
                     accessor: c,
-                    align: 'center',
+                    align: c === 'cost' ? 'right' : 'left',
                     filter: ['project type', 'mpo name', 'county', 'agency'].includes(c) ? 'dropdown' : null,
                     filterThemeOptions: {size: 'tableMini'},
                     filterClassName: 'w-full text-sm z-50',
+                    Cell: (d) => c === 'cost' ? `$${d.value} M` : d.value
                 }))
         }
         initialPageSize={pageSize}
@@ -57,7 +58,7 @@ const RenderTable = (data = [], pageSize, filteredColumns) => useMemo(() =>
         striped={true}
     />, [data, pageSize, filteredColumns])
 
-const SedTaz2055DataTable = ({name, searchId}) => {
+const SedTaz2055DataTable = ({name, type, searchId}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams()
     const [loading, setLoading] = useState(false)
@@ -136,7 +137,9 @@ const SedTaz2055DataTable = ({name, searchId}) => {
                 <MoreButton className={'pl-3'}
                             data={data || []}
                             columns={Object.values(columns)}
-                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}/>
+                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}
+                            filename={`${type.split('_').join(' ')}: ${name}`}
+                />
             </div>
             {loading ? <div>Processing...</div> : ''}
             <div className='w-full overflow-x-scroll scrollbar font-sm'>

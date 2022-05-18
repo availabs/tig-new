@@ -219,7 +219,7 @@ const ppdaf = () => {
               tableInfoBar: "bg-white",
               tableRow: `${colors[color]} transition ease-in-out duration-150 hover:bg-gray-300`,
               tableRowStriped: `bg-white odd:bg-tigGray-25 hover:bg-tigGray-100 bg-opacity-25 transition ease-in-out duration-150`,
-              tableCell: `${sizes[size]} whitespace-no-wrap border border-gray-200 pl-1 font-light text-sm`,
+              tableCell: `${sizes[size]} whitespace-no-wrap border border-gray-200 pl-1 align-top font-light text-sm`,
               inputSmall: 'w-24',
               sortIconDown: 'fas fa-sort-amount-down',
               sortIconUp: 'fas fa-sort-amount-up',
