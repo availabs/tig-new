@@ -61,7 +61,7 @@ class SEDTazLayer extends LayerContainer {
             },'')
 
             return this.data.reduce((a,c) =>{
-                if(c.area === area_id){
+                if(c.area === area_id && !a.length){
 
                     a.push(
                         [this.filters.dataset.domain.reduce((a,c) => {
@@ -494,10 +494,10 @@ class SEDTazLayer extends LayerContainer {
 
                 let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
 
-                this.taz_ids = this.data.filter(item => geoids.includes(counties.filter(c => c.name === item.enclosing_name)[0].geoid))
+                this.taz_ids = _.uniq(this.data.filter(item => geoids.includes(counties.filter(c => c.name === item.enclosing_name)[0].geoid))
                     .map(d => d.area)
                     .filter(d => d)
-                    .sort((a, b) => a - b)
+                    .sort((a, b) => a - b))
 
                 this.updateLegendDomain()
             })
