@@ -50,7 +50,7 @@ const RenderTable = (data = [], pageSize, filteredColumns) => useMemo(() =>
                     filter: ['project type', 'mpo name', 'county', 'agency'].includes(c) ? 'dropdown' : null,
                     filterThemeOptions: {size: 'tableMini'},
                     filterClassName: 'w-full text-sm z-50',
-                    Cell: (d) => c === 'cost' ? `$${d.value} M` : d.value
+                    Cell: d => c === 'cost' ?  `$${d.value} M` : c === 'actions' ? <a href={d.value}>Map</a> : d.value
                 }))
         }
         initialPageSize={pageSize}

@@ -2,11 +2,11 @@ import React, {useState} from "react"
 import {  TopNav } from '@availabs/avl-components'
 
 
-const TypeAhead = ({suggestions, setParentState, className, classNameMenu, placeholder, dynamicPlaceHolder = false}) => {
+const TypeAhead = ({suggestions, value, setParentState, className, classNameMenu, placeholder, dynamicPlaceHolder = false}) => {
     const [filteredSuggestions, setFilteredSuggestions] = useState([]);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
     const [showSuggestions, setShowSuggestions] = useState(false);
-    const [input, setInput] = useState("");
+    const [input, setInput] = useState(value || "");
     const [focus, setFocus] = useState(false);
 
     const onChange = (e) => {
