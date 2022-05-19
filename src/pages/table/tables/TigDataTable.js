@@ -28,7 +28,7 @@ const processData = (data, searchId, viewId, geography) => {
 
             acc[columns[r]] = row[r]
             return acc
-        }, {actions: `/views/${viewId}/map?search=${row.tip_id}`})
+        }, {actions: `/v2/views/${viewId}/map?search=${row.tip_id}`})
     }, [])
         .filter(entry => !get(counties.filter(c => c.name === entry.name), [0]) ||
             get(filters.geography.domain.filter(geo => geo.name === geography), [0, 'value'], [])
