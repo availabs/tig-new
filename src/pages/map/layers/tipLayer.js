@@ -520,6 +520,7 @@ class TestTipLayer extends LayerContainer {
 
                 if(window.location.search.split('=')[1]){
                     this.filters.tip_id.value = window.location.search.split('=')[1];
+                    this.onFilterChange('tip_id', window.location.search.split('=')[1])
                 }
 
             })
