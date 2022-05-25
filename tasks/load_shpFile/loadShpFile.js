@@ -3,8 +3,6 @@ var sql = require('sql');
 sql.setDialect('postgres');
 const get = require('lodash.get');
 const fs = require('fs');
-const proj4 = require('proj4')
-const shapefileToGeojson = require("shapefile-to-geojson");
 
 const shpPath = 'data/shp/'
 const geojsonPath = 'data/geojson/'
@@ -126,54 +124,54 @@ const main = async () => {
         const geoJSON = geoJson.split('\n').filter(i => i.length > 0) // delimiter
         const properties = JSON.parse(geoJSON[0]).properties;
 
-        let viewRes = [
-            { id: 211, name: '2010 - 2055 Total Population (test)' },
-            { id: 212, name: '2010 - 2055 Household Population (test)' },
-            { id: 213, name: '2010 - 2055 Group Quarters Population (test)' },
-            {
-                id: 214,
-                name: '2010 - 2055 Group Quarters Institutional Population (test)'
-            },
-            { id: 215, name: '2010 - 2055 GQPOPSTR (test)' },
-            {
-                id: 216,
-                name: '2010 - 2055 Group Quarters Other Population (test)'
-            },
-            { id: 217, name: '2010 - 2055 Households (test)' },
-            { id: 218, name: '2010 - 2055 Household Size (test)' },
-            { id: 219, name: '2010 - 2055 Employed Labor Force (test)' },
-            { id: 220, name: '2010 - 2055 Household Income (test)' },
-            { id: 221, name: '2010 - 2055 Total Employment (test)' },
-            { id: 222, name: '2010 - 2055 Retail Employment (test)' },
-            { id: 223, name: '2010 - 2055 Office Employment (test)' },
-            { id: 224, name: '2010 - 2055 Earnings (test)' },
-            { id: 225, name: '2010 - 2055 University Enrollment (test)' },
-            { id: 226, name: '2010 - 2055 K12ETOT (test)' }
-        ]
+        // let viewRes = [
+        //     { id: 211, name: '2010 - 2055 Total Population (test)' },
+        //     { id: 212, name: '2010 - 2055 Household Population (test)' },
+        //     { id: 213, name: '2010 - 2055 Group Quarters Population (test)' },
+        //     {
+        //         id: 214,
+        //         name: '2010 - 2055 Group Quarters Institutional Population (test)'
+        //     },
+        //     { id: 215, name: '2010 - 2055 GQPOPSTR (test)' },
+        //     {
+        //         id: 216,
+        //         name: '2010 - 2055 Group Quarters Other Population (test)'
+        //     },
+        //     { id: 217, name: '2010 - 2055 Households (test)' },
+        //     { id: 218, name: '2010 - 2055 Household Size (test)' },
+        //     { id: 219, name: '2010 - 2055 Employed Labor Force (test)' },
+        //     { id: 220, name: '2010 - 2055 Household Income (test)' },
+        //     { id: 221, name: '2010 - 2055 Total Employment (test)' },
+        //     { id: 222, name: '2010 - 2055 Retail Employment (test)' },
+        //     { id: 223, name: '2010 - 2055 Office Employment (test)' },
+        //     { id: 224, name: '2010 - 2055 Earnings (test)' },
+        //     { id: 225, name: '2010 - 2055 University Enrollment (test)' },
+        //     { id: 226, name: '2010 - 2055 K12ETOT (test)' }
+        // ]
 
-        // console.log('STEP 1: ')
-        // let srcId = await db.query(insertSrcSql('test srcName'));
-        // srcId = get(srcId, ['rows', 0, 'id']);
-        //
-        // if(srcId){
-        //     console.log('STEP 2: ')
-        //
-        //     const insertValues = [...new Set(Object.keys(properties).map(p => p.substring(0, p.length - 2)))]
-        //         .filter(p => nameMapping[p])
-        //         .map(p => insertValuesFn(srcId,prefix + nameMapping[p] + ' (test)'))
-        //         .join(', ');
-        //
-        //     let viewRes = await db.query(insertViewsSql + insertValues + ' RETURNING id, name');
-        //     viewRes = get(viewRes, ['rows'])
-        //     console.log(JSON.stringify(viewRes))
-        //
-        //     console.log('STEP 3: ')
-        //     await db.query(insertAccessControls(srcId))
-        //     console.log('STEP 4: ')
-        //     await db.query(insertViewsActions(srcId))
-        //     console.log('STEP 5: ')
-        //     await db.query(createTableSql(schema, tableName, viewRes.map(v => v.id)))
-        //
+        console.log('STEP 1: ')
+        let srcId = await db.query(insertSrcSql('test srcName'));
+        srcId = get(srcId, ['rows', 0, 'id']);
+
+        if(srcId){
+            console.log('STEP 2: ')
+
+            const insertValues = [...new Set(Object.keys(properties).map(p => p.substring(0, p.length - 2)))]
+                .filter(p => nameMapping[p])
+                .map(p => insertValuesFn(srcId,prefix + nameMapping[p] + ' (test)'))
+                .join(', ');
+
+            let viewRes = await db.query(insertViewsSql + insertValues + ' RETURNING id, name');
+            viewRes = get(viewRes, ['rows'])
+            console.log(JSON.stringify(viewRes))
+
+            console.log('STEP 3: ')
+            await db.query(insertAccessControls(srcId))
+            console.log('STEP 4: ')
+            await db.query(insertViewsActions(srcId))
+            console.log('STEP 5: ')
+            await db.query(createTableSql(schema, tableName, viewRes.map(v => v.id)))
+
             geoJSON
                 .map(async (feature) => {
                     feature = JSON.parse(feature)
@@ -215,9 +213,9 @@ const main = async () => {
                     })
                 }, Promise.resolve())
 
-        // }else{
-        //     console.warn('Error Creating Source.')
-        // }
+        }else{
+            console.warn('Error Creating Source.')
+        }
     })
 }
 // {"value":192132,"area":"1","type":"taz","gid":1484,"enclosing_name":"New York","enclosing_type":"county"}
