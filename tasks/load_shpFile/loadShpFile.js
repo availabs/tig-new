@@ -10,7 +10,7 @@ const shpFile = shpPath + '3.15.2021_TAZOutputs_Final_ESRIMap.shp'
 const dbf = shpPath + '3.15.2021_TAZOutputs_Final_ESRIMap.dbf'
 
 const prefix = '2010 - 2055 '
-const srcName = '2055 SED TAZ Level Forecast Data test'
+const srcName = 'test'
 const tableName = 'datatable_' + srcName.toLowerCase().split(' ').join('_');
 const schema = 'sed_taz';
 
@@ -124,31 +124,6 @@ const main = async () => {
         const geoJSON = geoJson.split('\n').filter(i => i.length > 0) // delimiter
         const properties = JSON.parse(geoJSON[0]).properties;
 
-        // let viewRes = [
-        //     { id: 211, name: '2010 - 2055 Total Population (test)' },
-        //     { id: 212, name: '2010 - 2055 Household Population (test)' },
-        //     { id: 213, name: '2010 - 2055 Group Quarters Population (test)' },
-        //     {
-        //         id: 214,
-        //         name: '2010 - 2055 Group Quarters Institutional Population (test)'
-        //     },
-        //     { id: 215, name: '2010 - 2055 GQPOPSTR (test)' },
-        //     {
-        //         id: 216,
-        //         name: '2010 - 2055 Group Quarters Other Population (test)'
-        //     },
-        //     { id: 217, name: '2010 - 2055 Households (test)' },
-        //     { id: 218, name: '2010 - 2055 Household Size (test)' },
-        //     { id: 219, name: '2010 - 2055 Employed Labor Force (test)' },
-        //     { id: 220, name: '2010 - 2055 Household Income (test)' },
-        //     { id: 221, name: '2010 - 2055 Total Employment (test)' },
-        //     { id: 222, name: '2010 - 2055 Retail Employment (test)' },
-        //     { id: 223, name: '2010 - 2055 Office Employment (test)' },
-        //     { id: 224, name: '2010 - 2055 Earnings (test)' },
-        //     { id: 225, name: '2010 - 2055 University Enrollment (test)' },
-        //     { id: 226, name: '2010 - 2055 K12ETOT (test)' }
-        // ]
-
         console.log('STEP 1: ')
         let srcId = await db.query(insertSrcSql(srcName));
         srcId = get(srcId, ['rows', 0, 'id']);
@@ -165,10 +140,10 @@ const main = async () => {
             viewRes = get(viewRes, ['rows'])
             console.log(viewRes)
 
-            console.log('STEP 3: ')
-            await db.query(insertAccessControls(srcId))
-            console.log('STEP 4: ')
-            await db.query(insertViewsActions(srcId))
+            // console.log('STEP 3: ')
+            // await db.query(insertAccessControls(srcId))
+            // console.log('STEP 4: ')
+            // await db.query(insertViewsActions(srcId))
             console.log('STEP 5: ')
             console.log(createTableSql(schema, tableName, viewRes.map(v => v.id)))
             await db.query(createTableSql(schema, tableName, viewRes.map(v => v.id)))
@@ -198,21 +173,19 @@ const main = async () => {
                         })
                 })
 
-        // let viewIds = []
+        let viewIds = []
 
-        return Object.keys(data)
-                .reduce(async (acc, viewKeys) => {
-                    acc.then(() => {
-                        const viewId = get(viewRes.find(view => view.name === prefix + nameMapping[viewKeys]), 'id')
-                        if(viewId){
-                            // viewIds.push(viewId)
-                            return db.query(insertDataSql(schema, tableName, [viewId], `'${JSON.stringify(data[viewKeys])}'::json`))
-                            // return `'${JSON.stringify(data[viewKeys])}'::json`
-                        }
+        let d = Object.keys(data)
+                .map(async (viewKeys) => {
+                    const viewId = get(viewRes.find(view => view.name === prefix + nameMapping[viewKeys]), 'id')
+                    if(viewId){
+                        viewIds.push(viewId)
 
-                        return Promise.resolve();
-                    })
-                }, Promise.resolve())
+                        return `'${JSON.stringify(data[viewKeys])}'::json`
+                    }
+                }).join(' ,')
+
+            return db.query(insertDataSql(schema, tableName, viewIds, d))
 
         }else{
             console.warn('Error Creating Source.')
