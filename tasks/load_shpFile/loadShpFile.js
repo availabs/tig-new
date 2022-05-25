@@ -95,6 +95,11 @@ const insertDataSql = (schema, tableName, viewIds, data) => `
                    )
 `
 
+const updateDataSql = (schema, tableName, viewId, data) => `
+            UPDATE ${schema}.${tableName}
+            SET '${viewId}' = ${data}
+`
+
 
 const nameMapping = {
     TOTPOP: 'Total Population',
@@ -173,19 +178,25 @@ const main = async () => {
                         })
                 })
 
-        let viewIds = []
+        // let viewIds = []
 
-        let d = Object.keys(data)
-                .map(async (viewKeys) => {
-                    const viewId = get(viewRes.find(view => view.name === prefix + nameMapping[viewKeys]), 'id')
-                    if(viewId){
-                        viewIds.push(viewId)
+        return Object.keys(data)
+                .reduce(async (acc, viewKeys, i) => {
+                    acc.then(() => {
+                        const viewId = get(viewRes.find(view => view.name === prefix + nameMapping[viewKeys]), 'id')
+                        if(viewId){
+                            // viewIds.push(viewId)
+                            if(i === 0){
+                                return db.query(insertDataSql(schema, tableName, [viewId], `'${JSON.stringify(data[viewKeys])}'::json`))
+                            }else{
+                                return db.query(updateDataSql(schema, tableName, viewId, `'${JSON.stringify(data[viewKeys])}'::json`))
+                            }
+                            // return `'${JSON.stringify(data[viewKeys])}'::json`
+                        }
 
-                        return `'${JSON.stringify(data[viewKeys])}'::json`
-                    }
-                }).join(' ,')
-
-            return db.query(insertDataSql(schema, tableName, viewIds, d))
+                        return Promise.resolve();
+                    })
+                }, Promise.resolve())
 
         }else{
             console.warn('Error Creating Source.')
