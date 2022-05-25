@@ -10,7 +10,7 @@ const shpFile = shpPath + '3.15.2021_TAZOutputs_Final_ESRIMap.shp'
 const dbf = shpPath + '3.15.2021_TAZOutputs_Final_ESRIMap.dbf'
 
 const prefix = '2010 - 2055 '
-const srcName = '2055 SED TAZ Level Forecast Data'
+const srcName = '2055 SED TAZ Level Forecast Data (test)'
 const tableName = 'datatable_' + srcName.toLowerCase().split(' ').join('_');
 const schema = 'sed_taz';
 
@@ -150,7 +150,7 @@ const main = async () => {
         // ]
 
         console.log('STEP 1: ')
-        let srcId = await db.query(insertSrcSql('test srcName'));
+        let srcId = await db.query(insertSrcSql(srcName));
         srcId = get(srcId, ['rows', 0, 'id']);
 
         if(srcId){
@@ -158,7 +158,7 @@ const main = async () => {
 
             const insertValues = [...new Set(Object.keys(properties).map(p => p.substring(0, p.length - 2)))]
                 .filter(p => nameMapping[p])
-                .map(p => insertValuesFn(srcId,prefix + nameMapping[p] + ' (test)'))
+                .map(p => insertValuesFn(srcId,prefix + nameMapping[p]))
                 .join(', ');
 
             let viewRes = await db.query(insertViewsSql + insertValues + ' RETURNING id, name');
@@ -202,7 +202,7 @@ const main = async () => {
         return Object.keys(data)
                 .reduce(async (acc, viewKeys) => {
                     acc.then(() => {
-                        const viewId = get(viewRes.find(view => view.name === prefix + nameMapping[viewKeys] + ' (test)'), 'id')
+                        const viewId = get(viewRes.find(view => view.name === prefix + nameMapping[viewKeys]), 'id')
                         if(viewId){
                             // viewIds.push(viewId)
                             return db.query(insertDataSql(schema, tableName, [viewId], `'${JSON.stringify(data[viewKeys])}'::json`))
