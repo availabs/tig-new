@@ -201,15 +201,19 @@ const main = async () => {
 
         // let viewIds = []
 
-        let d = Object.keys(data)
-                .map(async (viewKeys) => {
-                    const viewId = get(viewRes.find(view => view.name === prefix + nameMapping[viewKeys] + ' (test)'), 'id')
-                    if(viewId){
-                        // viewIds.push(viewId)
-                        await db.query(insertDataSql(schema, tableName, [viewId], `'${JSON.stringify(data[viewKeys])}'::json`))
-                        // return `'${JSON.stringify(data[viewKeys])}'::json`
-                    }
-                })
+        return Object.keys(data)
+                .reduce(async (acc, viewKeys) => {
+                    acc.then(() => {
+                        const viewId = get(viewRes.find(view => view.name === prefix + nameMapping[viewKeys] + ' (test)'), 'id')
+                        if(viewId){
+                            // viewIds.push(viewId)
+                            return db.query(insertDataSql(schema, tableName, [viewId], `'${JSON.stringify(data[viewKeys])}'::json`))
+                            // return `'${JSON.stringify(data[viewKeys])}'::json`
+                        }
+
+                        return Promise.resolve();
+                    })
+                }, Promise.resolve())
 
         // }else{
         //     console.warn('Error Creating Source.')
