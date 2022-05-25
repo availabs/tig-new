@@ -1,7 +1,7 @@
 const { join } = require("path"),
   { Pool, Client } = require("pg");
 
-const HAZMIT_CONFIG = require(join(__dirname, "tigtest2.config.json"));
+const HAZMIT_CONFIG = require(join(__dirname, "lor.config.json"));
 
 
 class DataBase {
