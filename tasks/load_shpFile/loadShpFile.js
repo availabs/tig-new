@@ -10,7 +10,7 @@ const shpFile = shpPath + '3.15.2021_TAZOutputs_Final_ESRIMap.shp'
 const dbf = shpPath + '3.15.2021_TAZOutputs_Final_ESRIMap.dbf'
 
 const prefix = '2010 - 2055 '
-const srcName = 'test2'
+const srcName = 'test3'
 const tableName = 'datatable_' + srcName.toLowerCase().split(' ').join('_');
 const schema = 'sed_taz';
 
@@ -95,10 +95,14 @@ const insertDataSql = (schema, tableName, viewIds, data) => `
                    )
 `
 
-const updateDataSql = (schema, tableName, viewId, data) => `
+const updateDataSql = (schema, tableName, viewId, data) => {
+    console.log(`UPDATE ${schema}.${tableName}
+            SET "${viewId}" = ${data.substring(0, 100)}`)
+    return `
             UPDATE ${schema}.${tableName}
             SET "${viewId}" = ${data}
 `
+}
 
 
 const nameMapping = {
