@@ -10,7 +10,7 @@ const shpFile = shpPath + '3.15.2021_TAZOutputs_Final_ESRIMap.shp'
 const dbf = shpPath + '3.15.2021_TAZOutputs_Final_ESRIMap.dbf'
 
 const prefix = '2010 - 2055 '
-const srcName = '2055 SED TAZ Level Forecast Data (test)'
+const srcName = '2055 SED TAZ Level Forecast Data test'
 const tableName = 'datatable_' + srcName.toLowerCase().split(' ').join('_');
 const schema = 'sed_taz';
 
@@ -163,13 +163,14 @@ const main = async () => {
 
             let viewRes = await db.query(insertViewsSql + insertValues + ' RETURNING id, name');
             viewRes = get(viewRes, ['rows'])
-            console.log(JSON.stringify(viewRes))
+            console.log(viewRes)
 
             console.log('STEP 3: ')
             await db.query(insertAccessControls(srcId))
             console.log('STEP 4: ')
             await db.query(insertViewsActions(srcId))
             console.log('STEP 5: ')
+            console.log(createTableSql(schema, tableName, viewRes.map(v => v.id)))
             await db.query(createTableSql(schema, tableName, viewRes.map(v => v.id)))
 
             geoJSON
