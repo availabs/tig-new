@@ -10,7 +10,7 @@ const shpFile = shpPath + '3.15.2021_TAZOutputs_Final_ESRIMap.shp'
 const dbf = shpPath + '3.15.2021_TAZOutputs_Final_ESRIMap.dbf'
 
 const prefix = '2010 - 2055 '
-const srcName = 'test3'
+const srcName = 'test4'
 const tableName = 'datatable_' + srcName.toLowerCase().split(' ').join('_');
 const schema = 'sed_taz';
 
@@ -186,7 +186,7 @@ const main = async () => {
 
         return Object.keys(data)
                 .reduce(async (acc, viewKeys, i) => {
-                    acc.then(() => {
+                    return acc.then(() => {
                         const viewId = get(viewRes.find(view => view.name === prefix + nameMapping[viewKeys]), 'id')
                         if(viewId){
                             // viewIds.push(viewId)
