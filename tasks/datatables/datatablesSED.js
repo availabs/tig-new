@@ -8,8 +8,8 @@ const fetch = async () => {
     // change sources below, and server in db.js
     let allSrc = {
         local: [
-            '2040 SED County Level Forecast Data',
-            '2050 SED County Level Forecast Data',
+            // '2040 SED County Level Forecast Data',
+            // '2050 SED County Level Forecast Data',
 
             '2040 SED TAZ Level Forecast Data',
             // '2050 SED TAZ Level Forecast Data', -- no data
@@ -24,24 +24,25 @@ const fetch = async () => {
             "2055 SED TAZ LEVEL FORECAST"
         ]
     }
-    let sources = allSrc.local;
+    let sources = allSrc.tigtet2;
 
     for (const s of sources) {
         console.log('source', s);
+        const schema = s.includes('TAZ') ? 'sed_taz' : 'sed_county';
 
         const sql = `
         with s as (
             SELECT view_id,
                    df.year,
-                   array_agg(json_build_object('value', value, 'area', areas.name, 'type', areas.type, 'gid',
-                                               base_geometry_id
+                   array_agg(json_build_object('value', value, 'area', areas.name, 'type', areas.type, 'geom', st_asgeojson(geoms.geom)
                        ${s.includes('TAZ') ? `, 'enclosing_name', enclosing_name, 'enclosing_type', enclosing_type` : ``}
                        )) AS data
             FROM public.demographic_facts df
                 
                      JOIN public.areas areas
                           ON area_id = areas.id
-
+                     JOIN base_geometries geoms
+                          ON geoms.id = base_geometry_id
                       ${
                         s.includes('TAZ') ? 
                                 `    JOIN (
@@ -77,23 +78,35 @@ const fetch = async () => {
         let tableName = 'datatable_' + s.toLowerCase().split(' ').join('_');
         console.log('creating table', tableName)
         let createSql = `
-            CREATE TABLE IF NOT EXISTS public.${tableName}
+            CREATE TABLE IF NOT EXISTS ${schema}.${tableName}
             (
                 ${res.map(r => `"${r.view_id}" json`).join(', ')}
             )
     `;
-        console.log('create table', createSql)
-        let insertSql = `
-            INSERT INTO public.${tableName}( ${res.map(r => `"${r.view_id}"`).join(', ')} )
+        console.log('create table', createSql);
+        await db.query(createSql);
+
+        let insertSql = (viewId, data) => `
+            INSERT INTO ${schema}.${tableName}( "${viewId}" )
             VALUES (
-                    ${
-                    res.map(r => `'${JSON.stringify(r.data)}'::json`).join(' ,')
-                }
+                    ${`'${JSON.stringify(data)}'::json`}
                     )
     `;
 
-        // await db.query(createSql);
-        // await db.query(insertSql);
+        let updateSql = (viewId, data) => `
+            UPDATE ${schema}.${tableName}
+            SET "${viewId}" = ${`'${JSON.stringify(data)}'::json`}
+    `;
+
+        return res.reduce((acc, r, i) => {
+            return acc.then(() => {
+                if(i === 0){
+                    return db.query(insertSql(r.view_id, r.data))
+                }else{
+                    return db.query(updateSql(r.view_id, r.data))
+                }
+            })
+        }, Promise.resolve())
 
     }
 }

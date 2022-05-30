@@ -8,8 +8,13 @@ import counties from "../../map/config/counties.json";
 import MoreButton from "./components/moreButton";
 
 const fetchData = (falcor, type, view) => {
-    return falcor.get(['tig', 'source', `${type.split('_')[2]} SED ${type.split('_')[1]} Level Forecast`, 'view', view])
-        .then(d => get(d, ['json', 'tig', 'source', `${type.split('_')[2]} SED ${type.split('_')[1]} Level Forecast`, 'view', view]))
+    let srcType = type.split('_')[1],
+        year = type.split('_')[2],
+        path =
+            ['tig', 'source', `${year} SED ${srcType} Level Forecast Data`, 'view', view, 'schema', `sed_${srcType}`]
+
+    return falcor.get(path)
+        .then(d => get(d, ['json', ...path]))
 }
 
 const processData = (data= {}, geography = '', lower, upper, type) => {
@@ -24,7 +29,7 @@ const processData = (data= {}, geography = '', lower, upper, type) => {
             data[year]
                 .filter(entry =>
                     get(filters.geography.domain.filter(geo => geo.name === geography), [0, 'value'], [])
-                        .includes(counties.filter(c => c.name === entry[areaColName])[0].geoid)
+                        .includes(get(counties.filter(c => c.name === entry[areaColName]), [0, 'geoid']))
                 )
                 .forEach(entry => {
                     reformat[entry.area] = Object.assign(reformat[entry.area] || {}, {[year]: +entry.value})
@@ -92,6 +97,7 @@ const SEDDataTable = ({name, type}) => {
     useEffect(async () => {
         setLoading(true)
         let d = await fetchData(falcor, type, viewId)
+        console.log(d)
         setData(processData(d, geography, lower, upper, type))
         setLoading(false)
 

@@ -272,6 +272,7 @@ class SEDTazLayer extends LayerContainer {
     ]
 
     download(setLoading){
+        let year = this.type.split('_')[2];
         const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
             (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
 
@@ -284,7 +285,7 @@ class SEDTazLayer extends LayerContainer {
                 if(curr.area === data_tract){
                     acc.push({
                         ...values,
-                        geom: JSON.parse(this.geoms[curr.gid]),
+                        geom: curr.geom,
                         area: curr.area,
                         area_type: curr.type
                     })
@@ -470,13 +471,18 @@ class SEDTazLayer extends LayerContainer {
     }
 
     fetchData(falcor) {
-        let view = this.filters.dataset.value || this.vid
+        let view = this.filters.dataset.value || this.vid,
+            year = this.type.split('_')[2],
+            srcType = 'taz',
+            path = ['2055', '2040'].includes(year) && ['taz'].includes(srcType) ?
+                ['tig', 'source', `${year} SED ${srcType} Level Forecast Data`, 'view', view, 'schema', 'sed_taz'] :
+                ['tig', 'source', `${year} SED ${srcType} Level Forecast`, 'view', view];
+
         return falcor.get(
-            // ["tig", "sed_taz", "byId", view, 'data_overlay'],
-            ['tig', 'source', `${this.type.split('_')[2]} SED Taz Level Forecast`, 'view', view]
+            path
         )
             .then(async (response) =>{
-                let newData =  get(response, ['json', 'tig', 'source', `${this.type.split('_')[2]} SED Taz Level Forecast`, 'view', view], {});
+                let newData =  get(response, ['json', ...path], {});
 
                 if(!this.filters.year.domain.length){
                     this.filters.year.domain = Object.keys(newData);
@@ -486,15 +492,9 @@ class SEDTazLayer extends LayerContainer {
                 this.fullData = newData || {};
                 this.data = newData[this.filters.year.value] || []
 
-
-                await _.chunk(this.data.map(d => d.gid), 450)
-                    .reduce((acc, curr) => acc.then(() => falcor.get(['tig', 'geoms', 'gid', curr])) , Promise.resolve())
-
-                this.geoms = get(falcor.getCache(), ['tig', 'geoms', 'gid'], [])
-
                 let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
 
-                this.taz_ids = _.uniq(this.data.filter(item => geoids.includes(counties.filter(c => c.name === item.enclosing_name)[0].geoid))
+                this.taz_ids = _.uniq(this.data.filter(item => geoids.includes(get(counties.filter(c => c.name === item.enclosing_name), [0, 'geoid'])))
                     .map(d => d.area)
                     .filter(d => d)
                     .sort((a, b) => a - b))
@@ -528,9 +528,7 @@ class SEDTazLayer extends LayerContainer {
             }
 
             case "taz": {
-                let geom = JSON.parse(
-                    this.geoms[get(this.data.filter(d => d.area === value), [0, 'gid'])] || '{}'
-                )
+                let geom = this.parseIfSTR(get(this.data.find(d => d.area === value), ['geom']) || '{}')
                 if (geom && Object.keys(geom).length) {
                     let featId;
                     if(this.featMapping){
@@ -587,7 +585,13 @@ class SEDTazLayer extends LayerContainer {
         return color;
     }
 
+    parseIfSTR(blob) {
+        return typeof blob === 'string' ? JSON.parse(blob) : blob
+    }
+
     async render(map, falcor) {
+        let year = this.type.split('_')[2];
+
         if (!this.data){
             return this.fetchData(falcor).then(() => this.data && this.render(map, falcor))
         }
@@ -606,13 +610,13 @@ class SEDTazLayer extends LayerContainer {
         };
 
         this.data
-            .filter(item => this.geoms[item.gid])
+            .filter(item => item.geom)
             .forEach((item, i) => {
                 geoJSON.features.push({
                     type: "Feature",
                     id: i,
                     properties: {...item},
-                    geometry: JSON.parse(this.geoms[item.gid])
+                    geometry: this.parseIfSTR(item.geom)
                 })
             })
         map.getSource('nymtc_taz_2005-93y4h2').setData(geoJSON)

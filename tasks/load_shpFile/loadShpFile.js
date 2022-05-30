@@ -4,13 +4,8 @@ sql.setDialect('postgres');
 const get = require('lodash.get');
 const fs = require('fs');
 
-const shpPath = 'data/shp/'
-const geojsonPath = 'data/geojson/'
-const shpFile = shpPath + '3.15.2021_TAZOutputs_Final_ESRIMap.shp'
-const dbf = shpPath + '3.15.2021_TAZOutputs_Final_ESRIMap.dbf'
-
 const prefix = '2010 - 2055 '
-const srcName = 'test4'
+const srcName = '2055 SED TAZ Level Forecast data'
 const tableName = 'datatable_' + srcName.toLowerCase().split(' ').join('_');
 const schema = 'sed_taz';
 
@@ -149,10 +144,10 @@ const main = async () => {
             viewRes = get(viewRes, ['rows'])
             console.log(viewRes)
 
-            // console.log('STEP 3: ')
-            // await db.query(insertAccessControls(srcId))
-            // console.log('STEP 4: ')
-            // await db.query(insertViewsActions(srcId))
+            console.log('STEP 3: ')
+            await db.query(insertAccessControls(srcId))
+            console.log('STEP 4: ')
+            await db.query(insertViewsActions(srcId))
             console.log('STEP 5: ')
             console.log(createTableSql(schema, tableName, viewRes.map(v => v.id)))
             await db.query(createTableSql(schema, tableName, viewRes.map(v => v.id)))
