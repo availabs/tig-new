@@ -474,9 +474,8 @@ class SEDTazLayer extends LayerContainer {
         let view = this.filters.dataset.value || this.vid,
             year = this.type.split('_')[2],
             srcType = 'taz',
-            path = ['2055', '2040'].includes(year) && ['taz'].includes(srcType) ?
-                ['tig', 'source', `${year} SED ${srcType} Level Forecast Data`, 'view', view, 'schema', 'sed_taz'] :
-                ['tig', 'source', `${year} SED ${srcType} Level Forecast`, 'view', view];
+            path = ['tig', 'source', `${year} SED ${srcType} Level Forecast Data`, 'view', view, 'schema', 'sed_taz']
+
 
         return falcor.get(
             path
