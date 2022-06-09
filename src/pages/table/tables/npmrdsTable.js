@@ -33,7 +33,9 @@ const RenderTable = (data, pageSize, filteredColumns) => useMemo(() =>
                 .map(c => ({
                 Header: c,
                 accessor: c,
-                align: 'center'
+                align: ['tmc', 'roadname', 'direction'].includes(c) ? 'left' : 'right',
+                    filterLocation: 'inline',
+                    disableFilters: !['tmc', 'roadname'].includes(c)
             }))
         }
         initialPageSize={pageSize}
@@ -41,7 +43,7 @@ const RenderTable = (data, pageSize, filteredColumns) => useMemo(() =>
         striped={true}
     />, [data, pageSize, filteredColumns])
 
-const NpmrdsTable = ({name}) => {
+const NpmrdsTable = ({name, type}) => {
     const {falcor, falcorCache} = useFalcor();
     const [loading, setLoading] = useState(false)
     const [geography, setGeography] = useState('All')
@@ -162,7 +164,7 @@ const NpmrdsTable = ({name}) => {
                 }
             </div>
 
-            <div className={'flex flex-row pb-5 items-center w-1/2 text-xs'}>
+            <div className={'flex flex-row pb-5 items-center text-xs'}>
                 <label  className={`px-1 font-bold text-xs whitespace-nowrap`}>Speed (mph) from</label>
                 <Input
                     id={'speedFrom'}
@@ -193,7 +195,9 @@ const NpmrdsTable = ({name}) => {
                 <MoreButton className={'pl-3'}
                             data={data || []}
                             columns={Object.keys(data[0] || {})}
-                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}/>
+                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}
+                            filename={`${name.split('_').join(' ')}`}
+                />
             </div>
             {loading ? <div>Processing...</div> : ''}
             <div className='w-full overflow-x-scroll scrollbar font-sm'>

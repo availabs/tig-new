@@ -19,7 +19,6 @@ const mapping = {
 const fetchData = (falcor, viewId, type) => {
     return falcor.get(["tig", type, "byId", viewId, 'data_overlay'])
         .then(response => {
-            console.log('??', response)
             return get(response, ['json', "tig", type, "byId", viewId, 'data_overlay'], [])
         })
 }
@@ -48,7 +47,10 @@ const RenderTable = (data, pageSize, filteredColumns) => useMemo(() =>
                 .map(c => ({
                     Header: mapping[c],
                     accessor: c,
-                    align: 'center'
+                    align: c === 'name' ? 'left' : 'right',
+                    filterLocation: 'inline',
+                    Cell: (d) => c === 'avg_speed' ? d.value.toFixed(2) : (d.value || 0).toLocaleString(),
+                    disableFilters: c !== 'name'
                 }))
         }
         initialPageSize={pageSize}
@@ -188,7 +190,9 @@ const BpmPerformanceDataTable = ({name, type}) => {
                 <MoreButton className={'pl-3'}
                             data={data}
                             columns={Object.values(mapping)}
-                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}/>
+                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}
+                            filename={`${type.split('_').join(' ')}: ${name}`}
+                />
             </div>
             {loading ? <div>Processing...</div> : ''}
             <div className='w-full overflow-x-scroll scrollbar font-sm'>

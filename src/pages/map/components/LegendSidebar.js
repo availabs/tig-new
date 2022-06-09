@@ -22,14 +22,13 @@ const LegendCompRange = ({layer}) => {
     const {legend} = layer
     return (
         <div className='bg-white  p-2 rounded w-full my-1'>
-            <h4 className='text-lg font-medium'>{layer.name}</h4>
-            <h4 className='text-md font-medium'>{legend.units}</h4>
+            <h4 className='text-lg font-medium'>{layer.name} <span className='text-md font-medium'>{legend.units}</span> </h4>
             {
-                legend.domain.filter((d,i) => i !== legend.domain.length - 1).map((d,i) =>
+                legend.domain.filter((d,i) => !isNaN(+d) && i !== legend.domain.length - 1).map((d,i) =>
                     <div key={i} className=' flex align-baseline'>
                         <div style={{backgroundColor: legend.range[i], opacity: 0.55, width:20, height:20, display:'inline-block' }} className='m-1'/>
                         {/*<div className='flex-1 pl-2'>{format(',')(d)} - {format(',')(legend.domain[i+1])}</div>*/}
-                        <div className='flex-1 pl-2'>{(d || '').toLocaleString()} - {(legend.domain[i+1] || '').toLocaleString()}</div>
+                        <div className='flex-1 pl-2'>{(d).toLocaleString()} - {(legend.domain[i+1]).toLocaleString()}</div>
                     </div>
                 )
             }
@@ -41,8 +40,7 @@ const LegendCompIcons = ({layer}) => {
     const {legend} = layer
     return (
         <div className='bg-white p-2 rounded w-full my-1'>
-            <h4 className='text-lg font-medium'>{layer.name}</h4>
-            <h4 className='text-md font-medium'>{legend.units}</h4>
+            <h4 className='text-lg font-medium'>{layer.name} <span className='text-md font-medium'>{legend.units}</span></h4>
             {
                 legend.domain.map((d,i) =>
                     <div key={i} className=' flex align-baseline'>
@@ -60,8 +58,7 @@ const LegendCompSimple = ({layer}) => {
     const {legend} = layer
     return (
         <div className='bg-white p-2 rounded w-full my-1'>
-            <h4 className='text-lg font-medium'>{layer.name}</h4>
-            <h4 className='text-md font-medium'>{legend.units}</h4>
+            <h4 className='text-lg font-medium'>{layer.name} <span className='text-md font-medium'>{legend.units}</span></h4>
             {
                 legend.domain.map((d,i) =>
                     <div key={i} className=' flex align-baseline'>

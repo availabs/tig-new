@@ -154,7 +154,7 @@ const ppdaf = () => {
         topnavMenu: `hidden md:flex flex-1 justify-end h-full overflow-x-auto overflow-y-hidden scrollbar-sm`,
         menuIconTop: `text-${colors[color].accentColor} ${sizes[size].icon} group-hover:${colors[color].highlightColor}`,
         menuOpenIcon: `fa fa-bars`,
-        menuCloseIcon: `os-icon os-icon-x`,
+        menuCloseIcon: `fa fa-x`,
         navitemTop: `group font-sans 
             ${sizes[size].topItem} ${colors[color].textColor} ${colors[color].borderColor} 
             ${colors[color].accentBg} hover:${colors[color].highlightColor} 
@@ -178,7 +178,7 @@ const ppdaf = () => {
 
     },
 
-    select: ({color='white', size = 'full'}) => {
+    select: ({color='white', size = 'compact'}) => {
 
       let colors = {
         white: 'white',
@@ -187,13 +187,14 @@ const ppdaf = () => {
 
       let sizes = {
           compact: 'px-0 py-1',
+          tableMini: 'px-2 py-0',
           full: 'px-4 py-2'
       }
       return {
           menuWrapper: `bg-${colors[color]} my-1 text-sm `,
           menuItemActive: `px-2 py-2 cursor-not-allowed bg-${accent}-200 border-1 border-${colors[color]} focus:border-${accent}-300`,
           menuItem: `px-2 py-2 cursor-pointer hover:bg-blue-100 border-1 border-${colors[color]} focus:border-blue-300`,
-          select: `z-60 bg-${colors[color]} w-full flex flex-row justify-between truncate ${sizes[size]} cursor-pointer 
+          select: `z-60 bg-${colors[color]} flex-wrap flex flex-row justify-between truncate ${sizes[size]} cursor-pointer 
           rounded border-2 border-${colors[color]} focus:border-blue-300
           shadow-inner focus:outline-none focus:ring-1 focus:border-blue-300 focus:shadow-tigShadow focus:shadow-blue-200
           `,
@@ -218,9 +219,8 @@ const ppdaf = () => {
               tableInfoBar: "bg-white",
               tableRow: `${colors[color]} transition ease-in-out duration-150 hover:bg-gray-300`,
               tableRowStriped: `bg-white odd:bg-tigGray-25 hover:bg-tigGray-100 bg-opacity-25 transition ease-in-out duration-150`,
-              tableCell: `${sizes[size]} whitespace-no-wrap border border-gray-200 pl-1 font-light text-sm`,
+              tableCell: `${sizes[size]} whitespace-no-wrap border border-gray-200 pl-1 align-top font-light text-sm`,
               inputSmall: 'w-24',
-
               sortIconDown: 'fas fa-sort-amount-down text-tigGray-300 opacity-75',
               sortIconUp: 'fas fa-sort-amount-up text-tigGray-300 opacity-75',
               sortIconIdeal: 'fas fa-sort-alt text-tigGray-300 opacity-25',

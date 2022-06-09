@@ -56,17 +56,17 @@ class SEDTazLayer extends LayerContainer {
         callback: (layerId, features, lngLat) => {
 
             const area_id = features.reduce((a,c) => {
-                a = get(c,['properties','name'],'')
+                a = get(c,['properties','area'],'')
                 return a
             },'')
 
             return this.data.reduce((a,c) =>{
-                if(c.area === area_id){
+                if(c.area === area_id && !a.length){
 
                     a.push(
                         [this.filters.dataset.domain.reduce((a,c) => {
                             if(c.value === this.filters.dataset.value){
-                                a = c.name
+                                a = c.name + ' (in 000s)'
                             }
                             return a
                         },'')],
@@ -83,8 +83,11 @@ class SEDTazLayer extends LayerContainer {
         {
             id: "nymtc_taz_2005-93y4h2",
             source: {
-                type: "vector",
-                url: "mapbox://am3081.dgujwhsd"
+                type: "geojson",
+                data: {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
             }
         }
     ]
@@ -92,7 +95,6 @@ class SEDTazLayer extends LayerContainer {
         {
             id: "nymtc_taz_2005",
             filter: false,
-            "source-layer": "nymtc_taz_2005",
             source: "nymtc_taz_2005-93y4h2",
             type: "fill",
             paint: {
@@ -114,7 +116,6 @@ class SEDTazLayer extends LayerContainer {
         {
             id: "nymtc_taz_2005-line",
             filter: false,
-            "source-layer": "nymtc_taz_2005",
             source: "nymtc_taz_2005-93y4h2",
             type: "line",
             paint: {
@@ -129,28 +130,12 @@ class SEDTazLayer extends LayerContainer {
         }
     ]
     legend = {
-        // types: ["quantile", "linear", "quantize", "ordinal"],
-        // type: "linear",
-        // domain: [0, 50, 100],
-        // range: getColorRange(3, "BrBG", true),
-
-        // type: "ordinal",
-        // domain: ["One", "Two", "Three", "Four", "Five"],
-        // range: getColorRange(5, "Set3", true),
-        // height: 2,
-        // width: 320,
-        // direction: "horizontal",
-
-        // type: "quantize",
-        // domain: [0, 15000],
-        // range: getColorRange(5, "BrBG", true),
-        // format: ",d",
-
         type: "quantile",
         domain: [],
         range: getColorRange(5, "YlOrRd", true),
         show: false,
         Title: "",
+        units: ' (in 000s)',
         format: ",d",
 
     }
@@ -287,6 +272,7 @@ class SEDTazLayer extends LayerContainer {
     ]
 
     download(setLoading){
+        let year = this.type.split('_')[2];
         const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
             (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
 
@@ -297,10 +283,9 @@ class SEDTazLayer extends LayerContainer {
                     return acc;
                 } , {})
                 if(curr.area === data_tract){
-                    console.log('?', this.geoms[curr.gid], curr, this.geoms)
                     acc.push({
                         ...values,
-                        geom: JSON.parse(this.geoms[curr.gid]),
+                        geom: curr.geom,
                         area: curr.area,
                         area_type: curr.type
                     })
@@ -486,13 +471,17 @@ class SEDTazLayer extends LayerContainer {
     }
 
     fetchData(falcor) {
-        let view = this.filters.dataset.value || this.vid
+        let view = this.filters.dataset.value || this.vid,
+            year = this.type.split('_')[2],
+            srcType = 'taz',
+            path = ['tig', 'source', `${year} SED ${srcType} Level Forecast Data`, 'view', view, 'schema', 'sed_taz']
+
+
         return falcor.get(
-            // ["tig", "sed_taz", "byId", view, 'data_overlay'],
-            ['tig', 'source', `${this.type.split('_')[2]} SED Taz Level Forecast`, 'view', view]
+            path
         )
             .then(async (response) =>{
-                let newData =  get(response, ['json', 'tig', 'source', `${this.type.split('_')[2]} SED Taz Level Forecast`, 'view', view], {});
+                let newData =  get(response, ['json', ...path], {});
 
                 if(!this.filters.year.domain.length){
                     this.filters.year.domain = Object.keys(newData);
@@ -502,15 +491,12 @@ class SEDTazLayer extends LayerContainer {
                 this.fullData = newData || {};
                 this.data = newData[this.filters.year.value] || []
 
-
-                await _.chunk(this.data.map(d => d.gid), 450)
-                    .reduce((acc, curr) => acc.then(() => falcor.get(['tig', 'geoms', 'gid', curr])) , Promise.resolve())
-
-                this.geoms = get(falcor.getCache(), ['tig', 'geoms', 'gid'], [])
-
                 let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
 
-                this.taz_ids = this.data.filter(item => geoids.includes(counties.filter(c => c.name === item.enclosing_name)[0].geoid)).map(d => d.area).filter(d => d)
+                this.taz_ids = _.uniq(this.data.filter(item => geoids.includes(get(counties.filter(c => c.name === item.enclosing_name), [0, 'geoid'])))
+                    .map(d => d.area)
+                    .filter(d => d)
+                    .sort((a, b) => a - b))
 
                 this.updateLegendDomain()
             })
@@ -541,9 +527,7 @@ class SEDTazLayer extends LayerContainer {
             }
 
             case "taz": {
-                let geom = JSON.parse(
-                    this.geoms[get(this.data.filter(d => d.area === value), [0, 'gid'])] || '{}'
-                )
+                let geom = this.parseIfSTR(get(this.data.find(d => d.area === value), ['geom']) || '{}')
                 if (geom && Object.keys(geom).length) {
                     let featId;
                     if(this.featMapping){
@@ -551,19 +535,19 @@ class SEDTazLayer extends LayerContainer {
                     }else{
                         this.featMapping = new Map();
                         this.mapboxMap.queryRenderedFeatures()
-                            .filter(feats => feats.properties.name)
-                            .map(feats => this.featMapping.set(feats.properties.name, feats.id))
+                            .filter(feats => feats.properties.area)
+                            .map(feats => this.featMapping.set(feats.properties.area, feats.id))
 
                         featId = this.featMapping.get(value)
                     }
 
                     if(featId){
                         this.featId && this.mapboxMap.setFeatureState(
-                            { source: 'nymtc_taz_2005-93y4h2', id: this.featId, sourceLayer: 'nymtc_taz_2005'},
+                            { source: 'nymtc_taz_2005-93y4h2', id: this.featId},
                             { hover: false }
                         );
                         this.mapboxMap.setFeatureState(
-                            { source: 'nymtc_taz_2005-93y4h2', id: featId, sourceLayer: 'nymtc_taz_2005'},
+                            { source: 'nymtc_taz_2005-93y4h2', id: featId},
                             { hover: true }
                         );
                         this.featId = featId;
@@ -571,7 +555,7 @@ class SEDTazLayer extends LayerContainer {
                     this.zoomToGeography(get(centroid(geom), ['geometry', 'coordinates']))
                 }else{
                     this.featId && this.mapboxMap.setFeatureState(
-                        { source: 'nymtc_taz_2005-93y4h2', id: this.featId, sourceLayer: 'nymtc_taz_2005'},
+                        { source: 'nymtc_taz_2005-93y4h2', id: this.featId},
                         { hover: false }
                     );
 
@@ -600,18 +584,42 @@ class SEDTazLayer extends LayerContainer {
         return color;
     }
 
+    parseIfSTR(blob) {
+        return typeof blob === 'string' ? JSON.parse(blob) : blob
+    }
+
     async render(map, falcor) {
+        let year = this.type.split('_')[2];
+
         if (!this.data){
             return this.fetchData(falcor).then(() => this.data && this.render(map, falcor))
         }
         if (this.taz_ids.length) {
-            map.setFilter("nymtc_taz_2005", ["in", ["get", "name"], ["literal", this.taz_ids]]);
-            map.setFilter("nymtc_taz_2005-line", ["in", ["get", "name"], ["literal", this.taz_ids]]);
+            map.setFilter("nymtc_taz_2005", ["in", ["get", "area"], ["literal", this.taz_ids]]);
+            map.setFilter("nymtc_taz_2005-line", ["in", ["get", "area"], ["literal", this.taz_ids]]);
         }
         else {
             map.setFilter("nymtc_taz_2005", false);
             map.setFilter("nymtc_taz_2005-line", false);
         }
+
+        let geoJSON = {
+            type: 'FeatureCollection',
+            features: []
+        };
+
+        this.data
+            .filter(item => item.geom)
+            .forEach((item, i) => {
+                geoJSON.features.push({
+                    type: "Feature",
+                    id: i,
+                    properties: {...item},
+                    geometry: this.parseIfSTR(item.geom)
+                })
+            })
+        map.getSource('nymtc_taz_2005-93y4h2').setData(geoJSON)
+
         this.processedData = this.data.reduce((acc,curr) =>{
             acc.push({
                 'id': curr['area'] || '',
@@ -630,7 +638,7 @@ class SEDTazLayer extends LayerContainer {
             "case",
             ["boolean", ["feature-state", "hover"], false],
             "#090",
-            ["get", ["get", "name"], ["literal", colors]]
+            ["get", ["get", "area"], ["literal", colors]]
         ])
 
     }

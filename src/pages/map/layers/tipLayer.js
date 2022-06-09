@@ -282,6 +282,7 @@ class TestTipLayer extends LayerContainer {
                                 className={'p-1 w-full border'}
                                 classNameMenu={'border-b hover:bg-blue-300'}
                                 suggestions={layer.filters.tip_id.domain}
+                                value={layer.filters.tip_id.value}
                                 setParentState={e => {
                                     if (!e.length) {
                                         e = 'Select All'
@@ -516,6 +517,11 @@ class TestTipLayer extends LayerContainer {
                 this.filters.tip_id.domain = ['Select All', ..._.uniq(this.data.map(d => d.tip_id))]
 
                 this.updateLegendTitle()
+
+                if(window.location.search.split('=')[1]){
+                    this.filters.tip_id.value = window.location.search.split('=')[1];
+                    this.onFilterChange('tip_id', window.location.search.split('=')[1])
+                }
 
             })
     }

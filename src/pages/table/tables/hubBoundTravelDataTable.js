@@ -40,9 +40,12 @@ const RenderTable = (data = [], pageSize, filteredColumns) => useMemo(() =>
             Object.keys(columns)
                 .filter(c => !filteredColumns.includes(columns[c]))
                 .map(c => ({
-                Header: columns[c] || c,
-                accessor: c,
-                align: 'center'
+                    Header: columns[c] || c,
+                    accessor: c,
+                    align: ['year', 'count'].includes(c) ? 'right' : c === 'hour' ? 'center' : 'left',
+                    filter: ['year', 'var_name', 'route_name', 'mode_name', 'in_station_name', 'direction', 'loc_name', 'sector_name', 'transit_agency'].includes(c) ? 'dropdown' : null,
+                    filterThemeOptions: {size: 'tableMini'},
+                    filterClassName: 'w-full text-sm z-50',
             }))
         }
         initialPageSize={pageSize}
@@ -89,7 +92,9 @@ const HubBoundTravelDataTable = ({name, type}) => {
                 <MoreButton className={'pl-3'}
                             data={data || []}
                             columns={Object.values(columns)}
-                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}/>
+                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}
+                            filename={`${type.split('_').join(' ')}: ${name}`}
+                />
             </div>
             {loading ? <div>Processing...</div> : ''}
             <div className='w-full overflow-x-scroll scrollbar'>

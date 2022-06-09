@@ -8,25 +8,28 @@ import counties from "../../map/config/counties.json";
 import MoreButton from "./components/moreButton";
 
 const fetchData = (falcor, type, view) => {
-    return falcor.get(['tig', 'source', `${type.split('_')[2]} SED ${type.split('_')[1]} Level Forecast`, 'view', view])
-        .then(d => get(d, ['json', 'tig', 'source', `${type.split('_')[2]} SED ${type.split('_')[1]} Level Forecast`, 'view', view]))
+    let srcType = type.split('_')[1],
+        year = type.split('_')[2],
+        path =
+            ['tig', 'source', `${year} SED ${srcType} Level Forecast Data`, 'view', view, 'schema', `sed_${srcType}`]
+
+    return falcor.get(path)
+        .then(d => get(d, ['json', ...path]))
 }
 
 const processData = (data= {}, geography = '', lower, upper, type) => {
-    console.log('d?', data)
     let reformat = {}
     let years = new Set();
     let areaColName = type.split('_')[1].toLowerCase() === 'taz' ? 'enclosing_name' : 'area';
     let keyCol = type.split('_')[1].toLowerCase() === 'taz' ? 'taz' : 'county';
     let sortFn = (a, b) => type.split('_')[1].toLowerCase() === 'taz' ? +b[keyCol] - +a[keyCol] : b[keyCol].localeCompare(a[keyCol])
-    console.log('t?', type, type.split('_')[1].toLowerCase())
     Object.keys(data)
         .forEach(year => {
             years.add(year)
             data[year]
                 .filter(entry =>
                     get(filters.geography.domain.filter(geo => geo.name === geography), [0, 'value'], [])
-                        .includes(counties.filter(c => c.name === entry[areaColName])[0].geoid)
+                        .includes(get(counties.filter(c => c.name === entry[areaColName]), [0, 'geoid']))
                 )
                 .forEach(entry => {
                     reformat[entry.area] = Object.assign(reformat[entry.area] || {}, {[year]: +entry.value})
@@ -61,7 +64,8 @@ const RenderTable = (data = {}, pageSize, type, filteredColumns) => useMemo(() =
                 .map(c => ({
                     Header: c,
                     accessor: c,
-                    align: 'center',
+                    align: ['taz', 'county'].includes(c) ? 'left' : 'right',
+                    filterLocation: 'inline',
                     disableFilters: !['taz', 'county'].includes(c),
                     Cell: (d) => (d.cell.value || 0).toLocaleString()
                 }))
@@ -89,10 +93,11 @@ const SEDDataTable = ({name, type}) => {
         upper: {get: upper, set: setUpper},
         pageSize: {get: pageSize, set: setPageSize},
     }
-    console.log('name, type', name, type)
+
     useEffect(async () => {
         setLoading(true)
         let d = await fetchData(falcor, type, viewId)
+        console.log(d)
         setData(processData(d, geography, lower, upper, type))
         setLoading(false)
 
@@ -160,7 +165,9 @@ const SEDDataTable = ({name, type}) => {
                                     [type.split('_')[1].toLowerCase() === 'taz' ? 'taz' : 'county', ...data.years]
                                         .sort((a,b) => a === 'county' ? -1 : a-b)
                                     }
-                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}/>
+                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}
+                            filename={`${type.split('_').join(' ')}: ${name}`}
+                />
             </div>
 
 
