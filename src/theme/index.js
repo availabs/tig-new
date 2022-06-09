@@ -220,15 +220,10 @@ const ppdaf = () => {
               tableRowStriped: `bg-white odd:bg-tigGray-25 hover:bg-tigGray-100 bg-opacity-25 transition ease-in-out duration-150`,
               tableCell: `${sizes[size]} whitespace-no-wrap border border-gray-200 pl-1 font-light text-sm`,
               inputSmall: 'w-24',
-<<<<<<< HEAD
-              sortIconDown: 'fas fa-sort-amount-down',
-              sortIconUp: 'fas fa-sort-amount-up',
-              sortIconIdeal: 'far fa-sort-alt text-gray-300 ',
-=======
+
               sortIconDown: 'fas fa-sort-amount-down text-tigGray-300 opacity-75',
               sortIconUp: 'fas fa-sort-amount-up text-tigGray-300 opacity-75',
               sortIconIdeal: 'fas fa-sort-alt text-tigGray-300 opacity-25',
->>>>>>> 353098de16b8304bc0c8f936bd7a524e07154747
               vars: {
                   color: colors,
                   size: sizes
