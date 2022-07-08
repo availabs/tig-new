@@ -53,26 +53,25 @@ class SEDTazLayer extends LayerContainer {
         }
     }
     onHover = {
-        layers: ["nymtc_taz_2005"],
+        layers: ["maine"],
         callback: (layerId, features, lngLat) => {
 
             const area_id = features.reduce((a,c) => {
-                a = get(c,['properties','area'],'')
+                a = get(c,['properties','name'],'')
                 return a
             },'')
-
             return this.data.reduce((a,c) =>{
-                if(c.area === area_id && !a.length){
+                if(c.id === area_id && !a.length){
 
                     a.push(
                         [this.filters.dataset.domain.reduce((a,c) => {
-                            if(c.value === this.filters.dataset.value){
+                            if(+c.value === +this.filters.dataset.value){
                                 a = c.name + ' (in 000s)'
                             }
                             return a
                         },'')],
                         ["Year:", this.filters.year.value],
-                        ["Taz id:",c.area],["Value:",c.value.toLocaleString()]
+                        ["Taz id:",c.id],["Value:",c.value.toLocaleString()]
                     )
                 }
 
@@ -95,7 +94,6 @@ class SEDTazLayer extends LayerContainer {
     layers = [
         {
             id: "nymtc_taz_2005",
-            filter: false,
             source: "nymtc_taz_2005-93y4h2",
             type: "fill",
             paint: {
@@ -116,7 +114,6 @@ class SEDTazLayer extends LayerContainer {
         },
         {
             id: "nymtc_taz_2005-line",
-            filter: false,
             source: "nymtc_taz_2005-93y4h2",
             type: "line",
             paint: {
@@ -127,6 +124,16 @@ class SEDTazLayer extends LayerContainer {
                     2,
                     0
                 ]
+            }
+        },
+        {
+            'id': 'maine',
+            'type': 'fill',
+            'source': 'nymtc_taz_2005-93y4h2', // reference the data source
+            'layout': {},
+            'paint': {
+            'fill-color': '#0080ff', // blue color fill
+            'fill-opacity': 0.5
             }
         }
     ]
@@ -267,8 +274,8 @@ class SEDTazLayer extends LayerContainer {
         )).then(setLoading(false));
     }
 
-    updateLegendDomain() {
-     let values = _.uniq((this.data || []).map(d => get(d, ['value'], 0)))
+    updateLegendDomain(data) {
+     let values = _.uniq((data || []).map(d => get(d, ['value'], 0)))
 
         if(values.length){
             this.legend.domain =
@@ -305,7 +312,6 @@ class SEDTazLayer extends LayerContainer {
     getBounds() {
         let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
             filtered = this.geographies.filter(({ value }) => geoids.includes(value));
-
         return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
     }
 
@@ -407,12 +413,17 @@ class SEDTazLayer extends LayerContainer {
         )
             .then((response) => {
                 let source_id = get(response, ['json','tig','byViewId', view, 'source_id'], null)
-                console.log('source_id', source_id, response)
+                //console.log('source_id', source_id, response)
                 if (source_id) {
                     console.time('get sed taz data')
                     return falcor.get(['tig','sed_taz','bySource',source_id,'data'])
                         .then(data => {
-
+                            let sourceData = get(data, ['json','tig','sed_taz','bySource',source_id,'data'], {geo: {type:'FeatureCollection', features:[]}, data: {}})
+                            let years = Object.keys(Object.values(Object.values(sourceData.data)[0])[0])
+                            if(this.filters.year.domain.length === 0) {
+                                this.filters.year.domain = years.map(d => +d)
+                                this.filters.year.value = years[0]
+                            }
                             console.timeEnd('get sed taz data')
                         })
                 } else {
@@ -422,10 +433,7 @@ class SEDTazLayer extends LayerContainer {
                 // let newData =  get(response, ['json', ...path], {});
                 // console.log('new data', newData)
 
-                // if(!this.filters.year.domain.length){
-                //     this.filters.year.domain = Object.keys(newData);
-                //     this.filters.year.value = this.filters.year.domain[0];
-                // }
+               
 
                 // console.timeEnd('get sed taz data')
 
@@ -447,11 +455,11 @@ class SEDTazLayer extends LayerContainer {
         switch (filterName){
             case "year" : {
                 this.filters.year.value = value;
-                this.data = this.fullData[this.filters.year.value] || [];
+                //this.data = this.fullData[this.filters.year.value] || [];
 
-                if(value && document.getElementById(`yearRange-${this.id}`) && document.getElementById(`yearRange-${this.id}`).value.toString() !== this.filters.year.domain.indexOf(value).toString()){
-                    document.getElementById(`yearRange-${this.id}`).value = this.filters.year.domain.indexOf(value).toString()
-                }
+                // if(value && document.getElementById(`yearRange-${this.id}`) && document.getElementById(`yearRange-${this.id}`).value.toString() !== this.filters.year.domain.indexOf(value).toString()){
+                //     document.getElementById(`yearRange-${this.id}`).value = this.filters.year.domain.indexOf(value).toString()
+                // }
                 this.dispatchUpdate(this, {year: value})
                 this.updateLegendDomain()
                 break;
@@ -530,7 +538,8 @@ class SEDTazLayer extends LayerContainer {
     }
 
     render(map, falcor) {
-        let year = 2020,
+        console.time('render time')
+        let year = this.filters.year.value || 2020,
             view = this.filters.dataset.value || this.vid,
             falcorCache = falcor.getCache(),
             source_id = get(falcorCache, ['tig','byViewId', view, 'source_id','value'], null);
@@ -538,41 +547,46 @@ class SEDTazLayer extends LayerContainer {
         if(!source_id) return
 
         let sourceData = get(falcorCache, ['tig','sed_taz','bySource',source_id,'data','value'], {geo: {type:'FeatureCollection', features:[]}, data: {}})
-        sourceData.geo.features.forEach(f => f.geometry = JSON.parse(f.geometry))
+        get(sourceData,'geo.features', []).forEach(f => f.geometry = this.parseIfSTR(f.geometry))
 
         console.log('testing', sourceData)
-        if (this.taz_ids.length) {
-            map.setFilter("nymtc_taz_2005", ["in", ["get", "area"], ["literal", this.taz_ids]]);
-            map.setFilter("nymtc_taz_2005-line", ["in", ["get", "area"], ["literal", this.taz_ids]]);
-        }
-        else {
+        // if (this.taz_ids.length) {
+        //     map.setFilter("nymtc_taz_2005", ["in", ["get", "area"], ["literal", this.taz_ids]]);
+        //     map.setFilter("nymtc_taz_2005-line", ["in", ["get", "area"], ["literal", this.taz_ids]]);
+        // }
+        // else {
             map.setFilter("nymtc_taz_2005", false);
             map.setFilter("nymtc_taz_2005-line", false);
-        }
+        // }
 
         map.getSource('nymtc_taz_2005-93y4h2').setData(sourceData.geo)
 
-        this.processedData = Object.keys(sourceData.data).reduce((acc,area_id) =>{
+        let processedData = Object.keys(sourceData.data).reduce((acc,area_id) =>{
             acc.push({
                 'id': area_id || '',
                 'value': get(sourceData.data, `[${area_id}][${view}][${year}]`,0)
             })
             return acc
         },[])
+        this.data = processedData
 
-        const colors = this.processedData.reduce((a,c) =>{
-                a[c.id] = this.getColorScale(c.value)
+        console.log('maine', processedData)
+        this.updateLegendDomain(processedData)
+
+        const colors = processedData.reduce((a,c) =>{
+                a[c.id] = this.getColorScale(c.value) || '#f00'
                 return a
             },{})
 
+        //console.log('colors', colors)
 
-        map.setPaintProperty("nymtc_taz_2005", "fill-color", [
+        map.setPaintProperty("maine", "fill-color", [
             "case",
             ["boolean", ["feature-state", "hover"], false],
             "#090",
-            ["get", ["get", "area"], ["literal", colors]]
+            ["get", ["get", "name"], ["literal", colors]]
         ])
-
+        console.timeEnd('render time')
     }
 }
 
