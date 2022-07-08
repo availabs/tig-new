@@ -14,10 +14,11 @@ const fetch = async () => {
         .reduce(async (acc, s) => acc.then(async () => {
         let tablename = `sed_taz_source_${s.id}`
         const sql = `
+            drop table if exists ${schema}.${tablename};
             with s as (
                 SELECT
                     areas.name,
-                    areas.id,
+                    df.area_id,
                     view_id,
                     jsonb_agg(
                         json_build_object( df.year, value)
@@ -33,33 +34,34 @@ const fetch = async () => {
                     where s.id = ${s.id}
                   and deleted_at is null
                 )
-                group by areas.name, areas.id,df.view_id
+                group by areas.name, df.area_id,df.view_id
             ),
             t as (
              select name, 
-                s.id, 
+                s.area_id, 
                 jsonb_agg(
                     json_build_object(view_id, values)
                 ) as value 
             from s
-                group by name, s.id
+                group by name, s.area_id
             )
 
             
 
-            SELECT name, t.id,  value, enclosing_name, enclosing_type, geom 
+            SELECT areas.name, t.area_id,  value, enclosing_name, enclosing_type, geom 
             into ${schema}.${tablename}
             from t
+            JOIN public.areas areas
+                ON t.area_id = areas.id
             JOIN base_geometries geoms
-                ON geoms.id = t.id
+                ON geoms.id = base_geometry_id
             JOIN (
                 SELECT name enclosing_name, type enclosing_type, enclosed_area_id
-                
                 FROM public.area_enclosures
                 JOIN areas
                     ON areas.id = enclosing_area_id
             ) enclosing_geoms
-            ON enclosed_area_id = t.id
+            ON enclosed_area_id = t.area_id
             
             
         `

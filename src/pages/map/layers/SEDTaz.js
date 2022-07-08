@@ -412,6 +412,7 @@ class SEDTazLayer extends LayerContainer {
                     console.time('get sed taz data')
                     return falcor.get(['tig','sed_taz','bySource',source_id,'data'])
                         .then(data => {
+
                             console.timeEnd('get sed taz data')
                         })
                 } else {
@@ -539,7 +540,7 @@ class SEDTazLayer extends LayerContainer {
         let sourceData = get(falcorCache, ['tig','sed_taz','bySource',source_id,'data','value'], {geo: {type:'FeatureCollection', features:[]}, data: {}})
         sourceData.geo.features.forEach(f => f.geometry = JSON.parse(f.geometry))
 
-        
+        console.log('testing', sourceData)
         if (this.taz_ids.length) {
             map.setFilter("nymtc_taz_2005", ["in", ["get", "area"], ["literal", this.taz_ids]]);
             map.setFilter("nymtc_taz_2005-line", ["in", ["get", "area"], ["literal", this.taz_ids]]);
