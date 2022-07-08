@@ -131,7 +131,7 @@ const TigBreadcrumbs = ({children}) => {
                                       value={view}
                                     >
                                       {({ selected, active }) => (
-                                        <>
+                                        <Link to={`/views/${view.id}/${activeAction.path}`}>
                                           <span
                                             className={`${
                                               selected ? 'font-medium' : 'font-thin'
@@ -149,7 +149,7 @@ const TigBreadcrumbs = ({children}) => {
                                               {/*<CheckIcon className="w-5 h-5" aria-hidden="true" />*/}
                                             </span>
                                           ) : null}
-                                        </>
+                                        </Link>
                                       )}
                                     </Listbox.Option>
                                   ))}

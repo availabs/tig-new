@@ -17,7 +17,6 @@ const Routes = [
   Table,
   Chart,
   Metadata,
- 
   NoMatch
 ]
 

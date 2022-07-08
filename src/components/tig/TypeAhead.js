@@ -35,11 +35,11 @@ const TypeAhead = ({suggestions, value, setParentState, className, classNameMenu
 
     const SuggestionsListComponent = () => {
         return filteredSuggestions.length ? (
-            <div className="suggestions scrollbar-sm overflow-auto h-36">
+            <div className="suggestions scrollbar-sm overflow-auto max-h-36 bg-white">
                 {filteredSuggestions.map((suggestion, index) => {
 
                     return (
-                        <div className={`cursor-pointer ${index === activeSuggestionIndex ? `bg-blue-100` : ``} ${classNameMenu}`} key={suggestion} onClick={onClick}>
+                        <div className={`cursor-pointer p-2 ${index === activeSuggestionIndex ? `bg-blue-100` : ``} ${classNameMenu}`} key={suggestion} onClick={onClick}>
                             {suggestion}
                         </div>
                     );
@@ -53,18 +53,26 @@ const TypeAhead = ({suggestions, value, setParentState, className, classNameMenu
     };
 
     return (
-        <div className={className}>
-            <label className={`text-sm text-blue-500 ${focus ? `block` : `hidden`}`}>{placeholder}</label>
-            <input
-                className={'w-full'}
-                type="text"
-                onChange={onChange}
-                onFocus={() => dynamicPlaceHolder && setFocus(!focus)}
-                onBlur={() => dynamicPlaceHolder && setFocus(!focus)}
-                value={input}
-                placeholder={placeholder}
-            />
+        <div>
+            <div className={'mt-1 flex rounded-md shadow-sm'}>
+            
+                <input
+                    className={'focus:ring-indigo-500 focus:border-indigo-500 block w-full pr-10 p-2 sm:text-sm border-gray-300 rounded-l-md border border-r-0'}
+                    type="text"
+                    onChange={onChange}
+                    onFocus={() => dynamicPlaceHolder && setFocus(!focus)}
+                    onBlur={() => dynamicPlaceHolder && setFocus(!focus)}
+                    value={input}
+                    placeholder={placeholder}
+                />
+                <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                    <i className="fa fa-question text-white bg-gray-700 rounded-full h-5 w-5 text-center pt-[4px]" aria-hidden="true" />
+                </span>
+                
+            </div>
+            <div className='absolute  w-full pr-10 z-50'>
             {showSuggestions && input && <SuggestionsListComponent />}
+            </div>
         </div>
     )
 }

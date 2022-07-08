@@ -19,10 +19,6 @@ import {
 
 import reportWebVitals from './reportWebVitals';
 
-//
-// import DmsComponents from "components/dms"
-// import DmsWrappers from "components/dms/wrappers"
-
 import {
   Components as AmsComponents,
   Wrappers as AmsWrappers,
@@ -31,13 +27,11 @@ import {
 
 import 'index.css';
 
-// console.log('index theme', TDS_THEME)
-
-// addComponents(DmsComponents);
-// addWrappers(DmsWrappers);
-
 addComponents(AmsComponents);
 addWrappers(AmsWrappers);
+
+
+
 
 const AuthEnabledApp = enableAuth(App, { AUTH_HOST, PROJECT_NAME, CLIENT_HOST });
 

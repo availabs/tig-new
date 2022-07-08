@@ -12,6 +12,7 @@ import counties from "../config/counties.json";
 import centroid from "@turf/centroid";
 import {ckmeans} from 'simple-statistics'
 import TypeAhead from "components/tig/TypeAhead";
+import Slider from 'rc-slider';
 
 class SEDTazLayer extends LayerContainer {
     constructor(props) {
@@ -141,134 +142,58 @@ class SEDTazLayer extends LayerContainer {
     }
 
     infoBoxes = [
+       
         {
             Component: ({layer}) => {
-
+                let yearMarks = layer.filters.year.domain.reduce((out,yr) => {
+                   out[yr] = ''+yr
+                   return out 
+                },{})
                 return (
                     <div className="relative border-top">
-                        <div className={'p-1 w-full'}>
-                            {layer.Title}
+                        <div className="relative border-top">
+                            <div className={'p-1 w-full'}>
+                                {layer.Title}
+                            </div>
                         </div>
+                        
+                        <TypeAhead
+                            classNameMenu={'border-b hover:bg-blue-300'}
+                            suggestions={layer.taz_ids}
+                            setParentState={e => {
+                                if (!e.length) {
+                                    e = 'Select All'
+                                }
+                                layer.onFilterChange('taz', e)
+                                layer.dispatchUpdate(layer, {taz: e})
+                            }}
+                            placeholder={'Search TAZ...'}
+                        />
+
+                        <div className={'p-2 text-sm text-gray-500'}>Year: {layer.filters.year.value}</div>
+                            
+                        <div className=" pb-6 px-3 ">
+                            <Slider 
+                                min={Math.min(...layer.filters.year.domain)} 
+                                max={Math.max(...layer.filters.year.domain)} 
+                                marks={yearMarks} 
+                                step={null}
+
+                                onChange={value => {
+                                        layer.filters.year.onChange()
+                                        layer.onFilterChange('year', value)
+                                        layer.dispatchUpdate(layer, {year: value})
+                                    }}
+                                defaultValue={Math.min(...layer.filters.year.domain)} 
+                            />
+                        </div>
+                        
                     </div>
                 )
             },
             width: 250
         },
-        {
-            Component: ({layer}) => {
 
-                return (
-                    <div className="relative border-top">
-                        <div className={''}>
-                            <label className={'self-center mr-1 text-sm font-light'} htmlFor={'search'}>TAZ Search:</label>
-                            <TypeAhead
-                                className={'p-1 w-full border'}
-                                classNameMenu={'border-b hover:bg-blue-300'}
-                                suggestions={layer.taz_ids}
-                                setParentState={e => {
-                                    if (!e.length) {
-                                        e = 'Select All'
-                                    }
-                                    layer.onFilterChange('taz', e)
-                                    layer.dispatchUpdate(layer, {taz: e})
-                                }}
-                                placeholder={'ex: 2464'}
-                            />
-                        </div>
-                    </div>
-                )
-            },
-            width: 250
-        },
-
-        {
-            Component: ({layer}) => {
-                const tickers = React.useMemo(() => _.range(Math.ceil(layer.filters.year.domain.length / 3)).map(i => <span id={i} className={'fa fa-caret-up'} />))
-                const setBubble = (range, bubble) => {
-                    const val = range.value;
-                    const min = range.min ? range.min : 0;
-                    const max = range.max ? range.max : 100;
-                    const newVal = Number(((val - min) * 100) / (max - min));
-                    bubble.innerHTML = layer.filters.year.domain[val];
-
-                    // Sorta magic numbers based on size of the native UI thumb
-                    bubble.style.left = `calc(${newVal}% + (${50 - newVal}px))`;
-                }
-
-                let range = document.getElementById(`yearRange-${layer.id}`),
-                    bubble = document.getElementById(`yearRangeBubble-${layer.id}`);
-
-                if(range){
-                    range.addEventListener("input", () => {
-                        setBubble(range, bubble);
-                    });
-                    setBubble(range, bubble);
-                }
-                return (
-                    <div className="relative  p-1">
-                        <label htmlFor={`yearRange-${layer.id}`} className="form-label text-sm font-light">Year</label>
-                        <output id={`yearRangeBubble-${layer.id}`} className="bubble text-sm" style={{
-                            padding: '1px 14px',
-                            marginTop: '1.95rem',
-                            position: 'absolute',
-                            borderRadius: '2px',
-                            left: '50%',
-                            transform: 'translateX(-50%)'}}></output>
-
-                        <div className={'flex mt-10'}>
-                            <div>{layer.filters.year.domain[0]}</div>
-                            <input
-                                type="range"
-                                className="
-                                      z-50
-                                      form-range
-                                      appearance-none
-                                      w-full
-                                      h-6
-                                      p-0
-                                      bg-transparent
-                                      focus:outline-none focus:ring-0 focus:shadow-none
-                                    "
-                                min={0}
-                                max={layer.filters.year.domain.length - 1}
-                                step={1}
-                                defaultValue={0}
-                                id={`yearRange-${layer.id}`}
-                                name={`yearRange-${layer.id}`}
-                                onChange={e => {
-                                    // layer.filters.year.value = layer.filters.year.domain[e.target.value]
-                                    // document.getElementById('yearRange').value = e.target.value
-                                    layer.filters.year.onChange()
-                                    layer.onFilterChange('year', layer.filters.year.domain[e.target.value])
-                                    layer.dispatchUpdate(layer, {year: layer.filters.year.domain[e.target.value]})
-                                }}
-                            />
-                            <div>{layer.filters.year.domain[layer.filters.year.domain.length - 1]}</div>
-                        </div>
-
-
-                        <div className={'flex justify-between rounded-lg z-10'}
-                             style={{
-                                 padding: '1px 2px',
-                                 marginTop: '-1.3499rem',
-                                 position: 'absolute',
-                                 borderRadius: '2px',
-                                 left: '50%',
-                                 width: '70%',
-                                 transform: 'translateX(-50%)',
-                                 backgroundColor: 'rgba(82,78,78,0.4)'
-                             }}
-                        >
-                            {
-                                tickers
-                            }
-                        </div>
-
-                    </div>
-                )
-            },
-            width: 250
-        }
     ]
 
     download(setLoading){
@@ -476,29 +401,44 @@ class SEDTazLayer extends LayerContainer {
             srcType = 'taz',
             path = ['tig', 'source', `${year} SED ${srcType} Level Forecast Data`, 'view', view, 'schema', 'sed_taz']
 
-
+        
         return falcor.get(
-            path
+            ['tig','byViewId', view, 'source_id']
         )
-            .then(async (response) =>{
-                let newData =  get(response, ['json', ...path], {});
+            .then((response) => {
+                let source_id = get(response, ['json','tig','byViewId', view, 'source_id'], null)
+                console.log('source_id', source_id, response)
+                if (source_id) {
+                    console.time('get sed taz data')
+                    return falcor.get(['tig','sed_taz','bySource',source_id,'data'])
+                        .then(data => {
+                            console.timeEnd('get sed taz data')
+                        })
+                } else {
+                    return []
+                }  
 
-                if(!this.filters.year.domain.length){
-                    this.filters.year.domain = Object.keys(newData);
-                    this.filters.year.value = this.filters.year.domain[0];
-                }
+                // let newData =  get(response, ['json', ...path], {});
+                // console.log('new data', newData)
 
-                this.fullData = newData || {};
-                this.data = newData[this.filters.year.value] || []
+                // if(!this.filters.year.domain.length){
+                //     this.filters.year.domain = Object.keys(newData);
+                //     this.filters.year.value = this.filters.year.domain[0];
+                // }
 
-                let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
+                // console.timeEnd('get sed taz data')
 
-                this.taz_ids = _.uniq(this.data.filter(item => geoids.includes(get(counties.filter(c => c.name === item.enclosing_name), [0, 'geoid'])))
-                    .map(d => d.area)
-                    .filter(d => d)
-                    .sort((a, b) => a - b))
+                // this.fullData = newData || {};
+                // this.data = newData[this.filters.year.value] || []
 
-                this.updateLegendDomain()
+                // let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
+
+                // this.taz_ids = _.uniq(this.data.filter(item => geoids.includes(get(counties.filter(c => c.name === item.enclosing_name), [0, 'geoid'])))
+                //     .map(d => d.area)
+                //     .filter(d => d)
+                //     .sort((a, b) => a - b))
+
+                // this.updateLegendDomain()
             })
     }
 
@@ -588,12 +528,18 @@ class SEDTazLayer extends LayerContainer {
         return typeof blob === 'string' ? JSON.parse(blob) : blob
     }
 
-    async render(map, falcor) {
-        let year = this.type.split('_')[2];
+    render(map, falcor) {
+        let year = 2020,
+            view = this.filters.dataset.value || this.vid,
+            falcorCache = falcor.getCache(),
+            source_id = get(falcorCache, ['tig','byViewId', view, 'source_id','value'], null);
 
-        if (!this.data){
-            return this.fetchData(falcor).then(() => this.data && this.render(map, falcor))
-        }
+        if(!source_id) return
+
+        let sourceData = get(falcorCache, ['tig','sed_taz','bySource',source_id,'data','value'], {geo: {type:'FeatureCollection', features:[]}, data: {}})
+        sourceData.geo.features.forEach(f => f.geometry = JSON.parse(f.geometry))
+
+        
         if (this.taz_ids.length) {
             map.setFilter("nymtc_taz_2005", ["in", ["get", "area"], ["literal", this.taz_ids]]);
             map.setFilter("nymtc_taz_2005-line", ["in", ["get", "area"], ["literal", this.taz_ids]]);
@@ -603,27 +549,12 @@ class SEDTazLayer extends LayerContainer {
             map.setFilter("nymtc_taz_2005-line", false);
         }
 
-        let geoJSON = {
-            type: 'FeatureCollection',
-            features: []
-        };
+        map.getSource('nymtc_taz_2005-93y4h2').setData(sourceData.geo)
 
-        this.data
-            .filter(item => item.geom)
-            .forEach((item, i) => {
-                geoJSON.features.push({
-                    type: "Feature",
-                    id: i,
-                    properties: {...item},
-                    geometry: this.parseIfSTR(item.geom)
-                })
-            })
-        map.getSource('nymtc_taz_2005-93y4h2').setData(geoJSON)
-
-        this.processedData = this.data.reduce((acc,curr) =>{
+        this.processedData = Object.keys(sourceData.data).reduce((acc,area_id) =>{
             acc.push({
-                'id': curr['area'] || '',
-                'value': curr.value
+                'id': area_id || '',
+                'value': get(sourceData.data, `[${area_id}][${view}][${year}]`,0)
             })
             return acc
         },[])

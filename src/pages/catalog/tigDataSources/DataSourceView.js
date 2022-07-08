@@ -105,7 +105,7 @@ const Views = () => {
 
     return (
         
-        <TigLayout>
+        <>
             <div className='border-t-2 border-teal-600'>
                 <div className='bg-tigGreen-100 text-xl w-28 py-3 pl-4 text-white mb-2'> Catalog </div>
                 <div className="flex">
@@ -188,7 +188,7 @@ const Views = () => {
                 </div>
             </div>
             </div>
-        </TigLayout>
+        </>
     )
 }
 
@@ -200,7 +200,6 @@ const config = {
     mainNav: true,
     name: 'Views Data Source',
     component: Views,
-    layout: 'Simple',
     layoutSettings: {
         fixed: true,
         headerBar: true,

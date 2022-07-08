@@ -15,9 +15,9 @@ const TigNav = withAuth(() => {
                 rightMenu={
                     
                     <div className='flex h-12 flex-col md:flex-row'>
-                        <a className='p-4 h-full bg-tigGray-200 my-2 md:my-0 md:mr-2 text-xs font-bold '>Welcome!</a>
-                        <a href={'/users/sign_up'} className='p-4 h-full hover:bg-tigGray-50 hover:text-yellow-500 hover:cursor-pointer bg-tigGray-200 mt-2 md:my-0 md:mr-2 text-xs font-light'>Sign up</a>
-                        <a href={'/users/sign_in'} className='p-4 h-full hover:bg-tigGray-50 hover:text-yellow-500 hover:cursor-pointer bg-tigGray-200 text-xs font-light'>Login</a>
+                        <a className='p-4 h-full bg-tigGray-200 my-2 md:my-0 md:mr-2 text-[13px] font-bold '>Welcome!</a>
+                        <a href={'/auth/sign_up'} className='p-4 h-full hover:bg-tigGray-50 hover:text-yellow-500 hover:cursor-pointer bg-tigGray-200 mt-2 md:my-0 md:mr-2 text-[13px] font-light'>Sign up</a>
+                        <a href={'/auth/login'} className='p-4 h-full hover:bg-tigGray-50 hover:text-yellow-500 hover:cursor-pointer bg-tigGray-200 text-[13px] font-light md:mr-2'>Login</a>
                     </div>
                     
                 }

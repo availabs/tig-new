@@ -43,44 +43,43 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
     }, [viewId, falcorCache, layer])
 
     return (
-        <TigLayout>
-             <div className='w-full h-full' style={{height: '800px'}}>   
-                <AvlMap
-                    accessToken={ config.MAPBOX_TOKEN }
-                    mapOptions={ mapOptions }
-                    layers={layer}
-                    sidebarTabPosition='side'
-                    navigationControl="bottom-right"
-                    sidebar={{
-                        title: "",
-                        tabs: [
-                            {
-                                icon: "fa fa-bars",
-                                Component: LegendComp
-                            },
-                            "layers", 
-                            "styles",
-                            {
-                                icon: "fa fa-plus",
-                                Component: AddLayersComp
-                            },
-                            {
-                                icon: "fa fa-download",
-                                Component: Download
-                            },
-                            {
-                                icon: "fa fa-info-circle",
-                                Component: Attribution
-                            },
-                        ],
-                        open: false
+        
+         <div className='w-full h-full' style={{height: '800px'}}>   
+            <AvlMap
+                accessToken={ config.MAPBOX_TOKEN }
+                mapOptions={ mapOptions }
+                layers={layer}
+                sidebarTabPosition='side'
+                navigationControl="bottom-right"
+                sidebar={{
+                    title: "",
+                    tabs: [
+                        {
+                            icon: "fa fa-bars",
+                            Component: LegendComp
+                        },
+                        "layers", 
+                        "styles",
+                        {
+                            icon: "fa fa-plus",
+                            Component: AddLayersComp
+                        },
+                        {
+                            icon: "fa fa-download",
+                            Component: Download
+                        },
+                        {
+                            icon: "fa fa-info-circle",
+                            Component: Attribution
+                        },
+                    ],
+                    open: false
 
-                    }}
+                }}
 
-                />
-               
-            </div>
-        </TigLayout>
+            />
+           
+        </div>
     )
 })
 
@@ -91,26 +90,21 @@ const MapPage = {
     name: "TIG Map",
     exact: true,
     // authLevel: 0,
-    layout: 'Simple',
-    layoutSettings: {
-        fixed: true,
-        navBar: 'top',
-        headerBar: false
-    },
-    component: {
+     component: {
         type: Map,
         props: {
             mapOptions: {
-                zoom: 9.5,
-                center: [-73.911895, 40.88],
+                zoom: 7.27,
+                center: [-73.496258, 40.892292],
                 styles: [
-                    {name: "Streets",
-                    style: 'mapbox://styles/am3081/ckt3271or0nnu17oikkvl0eme' },
-                    {
+                {
                         name: "Topographic",
                         style: 'mapbox://styles/am3081/ckidwyrw22uak19pboub25qix'
                     },
-                     {name: "Satellite",
+                    {name: "Streets",
+                    style: 'mapbox://styles/am3081/ckt3271or0nnu17oikkvl0eme' },
+                    
+                    {name: "Satellite",
                     style: 'mapbox://styles/am3081/cjya6wla3011q1ct52qjcatxg' },
                      {name: "Satellite Streets",
                     style: 'mapbox://styles/am3081/cjya70364016g1cpmbetipc8u' },

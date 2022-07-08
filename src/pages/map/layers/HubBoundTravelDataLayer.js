@@ -248,7 +248,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
                 // geoids.includes(value)
                 value === '36005'
             );
-        console.log('??', geoids, filtered)
+        //console.log('??', geoids, filtered)
         return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
     }
 
