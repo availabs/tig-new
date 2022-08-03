@@ -154,24 +154,16 @@ class ACSCensusLayer extends LayerContainer {
             Component: ({layer}) => {
 
                 return (
-                    <div className="relative border-top">
-                        <div className={'p-1 w-full'}>
-                            {layer.Title}
+                    <div>
+                        <div className="relative border-top">
+                            <div className={'p-1 w-full'}>
+                                {layer.Title}
+                            </div>
                         </div>
-                    </div>
-                )
-            },
-            width: 250
-        },
-        {
-            Component: ({layer}) => {
-                return (
-                    <div className="relative border-top">
-                        <div className={''}>
-                            <label className={'self-center mr-1 text-sm font-light'} htmlFor={'search'}>Tract
-                                Search:</label>
+                        <label className={'self-center mr-1 text-sm font-light'} htmlFor={'search'}>Tract
+                            Search:</label>
                             <TypeAhead
-                                className={'p-1 w-full border'}
+                                className={''}
                                 classNameMenu={'border-b hover:bg-blue-300'}
                                 suggestions={layer.data.map(t => t.area)}
                                 setParentState={e => {
@@ -183,7 +175,6 @@ class ACSCensusLayer extends LayerContainer {
                                 }}
                                 placeholder={'ex: Ulster:9517'}
                             />
-                        </div>
                     </div>
                 )
             },
@@ -240,7 +231,7 @@ class ACSCensusLayer extends LayerContainer {
                     geoJSON.features.push(feat)
                 }
             });
-        console.log('counts', _.uniq(geoJSON.features.map(f => f.geometry.type)), geoJSON.features.filter(f => f.geometry.type === 'Polygon').length, geoJSON.features.filter(f => f.geometry.type === 'MultiPolygon').length)
+        // console.log('counts', _.uniq(geoJSON.features.map(f => f.geometry.type)), geoJSON.features.filter(f => f.geometry.type === 'Polygon').length, geoJSON.features.filter(f => f.geometry.type === 'MultiPolygon').length)
 
 
         return Promise.resolve(shpDownload(

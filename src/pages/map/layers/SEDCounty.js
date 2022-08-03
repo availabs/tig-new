@@ -203,9 +203,12 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                                 step={null}
 
                                 onChange={value => {
-                                        layer.filters.year.onChange()
-                                        layer.onFilterChange('year', value)
-                                        layer.dispatchUpdate(layer, {year: value})
+                                        //console.log('testing', value)
+                                        if(value){
+                                            layer.filters.year.onChange()
+                                            layer.onFilterChange('year', value)
+                                        }
+                                        //layer.dispatchUpdate(layer, {year: value})
                                     }}
                                 defaultValue={Math.min(...layer.filters.year.domain)} 
                             />

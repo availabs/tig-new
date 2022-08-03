@@ -7,7 +7,7 @@ sql.setDialect('postgres');
 const fetch = async () => {
     // change sources below, and server in db.js
     const schema ='sed_taz'
-    const getSourcesSql = `select id from public.sources where type = 'sed_taz'`
+    const getSourcesSql = `select id from public.sources where datasource_type = 'sed_taz'`
     let {rows: sources } = await db.query(getSourcesSql);
     return sources
         //.filter(s => s.id === 5)

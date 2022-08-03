@@ -30,7 +30,7 @@ import 'index.css';
 addComponents(AmsComponents);
 addWrappers(AmsWrappers);
 
-
+console.log('something new')
 
 
 const AuthEnabledApp = enableAuth(App, { AUTH_HOST, PROJECT_NAME, CLIENT_HOST });

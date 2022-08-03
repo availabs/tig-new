@@ -178,29 +178,41 @@ const ppdaf = () => {
 
     },
 
-    select: ({color='white', size = 'compact'}) => {
+    select: (opts = {}) => {
+            const {color = 'white', size = 'compact', wrapStyle = 'no-wrap'} = opts
 
-      let colors = {
-        white: 'white',
-        transparent: 'gray-100'
-      }
+            let colors = {
+                white: 'white',
+                transparent: 'gray-100'
+            }
 
-      let sizes = {
-          compact: 'px-0 py-1',
-          tableMini: 'px-2 py-0',
-          full: 'px-4 py-2'
-      }
-      return {
-          menuWrapper: `bg-${colors[color]} my-1 text-sm `,
-          menuItemActive: `px-2 py-2 cursor-not-allowed bg-${accent}-200 border-1 border-${colors[color]} focus:border-${accent}-300`,
-          menuItem: `px-2 py-2 cursor-pointer hover:bg-blue-100 border-1 border-${colors[color]} focus:border-blue-300`,
-          select: `z-60 bg-${colors[color]} flex-wrap flex flex-row justify-between truncate ${sizes[size]} cursor-pointer 
-          rounded border-2 border-${colors[color]} focus:border-blue-300
-          shadow-inner focus:outline-none focus:ring-1 focus:border-blue-300 focus:shadow-tigShadow focus:shadow-blue-200
-          `,
-          selectIcon: `fa fa-angle-down text-gray-400 pt-2 px-2`
-        }
-    },
+            let sizes = {
+                mini: 'px-0 py-0',
+                compact: 'px-0 py-1 text-sm',
+                full: 'px-4 py-2'
+            }
+
+            let wrapStyles = {
+                'no-wrap': 'overflow-x-hidden',
+                'wrap': 'whitespace-normal'
+            }
+
+            return {
+                menuWrapper: `bg-${colors[color]} my-1 text-sm`,
+                menuItemActive: `px-2 py-2 cursor-not-allowed bg-${accent}-200 border-1 border-${colors[color]} focus:border-${accent}-300`,
+                menuItem: `px-2 py-2 cursor-pointer hover:bg-blue-100 border-1 border-${colors[color]} focus:border-blue-300 flex-wrap`,
+                valueItem: `max-w-full ${wrapStyles[wrapStyle]}`,
+                itemText: 'text-xl',
+                select: `bg-${colors[color]} w-full flex flex-1 flex-row justify-between ${sizes[size]} cursor-pointer border-2 border-${colors[color]} focus:border-blue-300`,
+                selectIcon: `self-center fa fa-angle-down text-gray-400 pt-2 px-2`,
+                vars: {
+                    color: colors,
+                    size: sizes,
+                    wrapStyle: wrapStyles
+                }
+            }
+        },
+    
     table: (opts = {color:'white', size: 'compact'}) => {
           const {color = 'white', size = 'compact'} = opts
           let colors = {

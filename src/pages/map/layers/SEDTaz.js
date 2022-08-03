@@ -64,12 +64,12 @@ class SEDTazLayer extends LayerContainer {
                 if(c.id === area_id && !a.length){
 
                     a.push(
-                        [this.filters.dataset.domain.reduce((a,c) => {
+                        [<div className='text-sm'>{this.filters.dataset.domain.reduce((a,c) => {
                             if(+c.value === +this.filters.dataset.value){
                                 a = c.name + ' (in 000s)'
                             }
                             return a
-                        },'')],
+                        },'')}</div>],
                         ["Year:", this.filters.year.value],
                         ["Taz id:",c.id],["Value:",c.value.toLocaleString()]
                     )
@@ -187,9 +187,10 @@ class SEDTazLayer extends LayerContainer {
                                 step={null}
 
                                 onChange={value => {
-                                        layer.filters.year.onChange()
-                                        layer.onFilterChange('year', value)
-                                        layer.dispatchUpdate(layer, {year: value})
+                                        if(value){
+                                            layer.filters.year.onChange()
+                                            layer.onFilterChange('year', value)
+                                        }
                                     }}
                                 defaultValue={Math.min(...layer.filters.year.domain)} 
                             />
@@ -419,7 +420,13 @@ class SEDTazLayer extends LayerContainer {
                     return falcor.get(['tig','sed_taz','bySource',source_id,'data'])
                         .then(data => {
                             let sourceData = get(data, ['json','tig','sed_taz','bySource',source_id,'data'], {geo: {type:'FeatureCollection', features:[]}, data: {}})
-                            let years = Object.keys(Object.values(Object.values(sourceData.data)[0])[0])
+                            // console.log(sourceData)
+                            let years = []
+                            try {
+                                years = Object.keys(Object.values(Object.values(sourceData.data)[0])[0])
+                            } catch (err) {
+                                console.log('invalid data')
+                            }
                             if(this.filters.year.domain.length === 0) {
                                 this.filters.year.domain = years.map(d => +d)
                                 this.filters.year.value = years[0]
@@ -549,7 +556,7 @@ class SEDTazLayer extends LayerContainer {
         let sourceData = get(falcorCache, ['tig','sed_taz','bySource',source_id,'data','value'], {geo: {type:'FeatureCollection', features:[]}, data: {}})
         get(sourceData,'geo.features', []).forEach(f => f.geometry = this.parseIfSTR(f.geometry))
 
-        console.log('testing', sourceData)
+        // console.log('testing', sourceData)
         // if (this.taz_ids.length) {
         //     map.setFilter("nymtc_taz_2005", ["in", ["get", "area"], ["literal", this.taz_ids]]);
         //     map.setFilter("nymtc_taz_2005-line", ["in", ["get", "area"], ["literal", this.taz_ids]]);
@@ -570,7 +577,7 @@ class SEDTazLayer extends LayerContainer {
         },[])
         this.data = processedData
 
-        console.log('maine', processedData)
+        // console.log('maine', processedData)
         this.updateLegendDomain(processedData)
 
         const colors = processedData.reduce((a,c) =>{

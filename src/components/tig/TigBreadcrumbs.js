@@ -11,6 +11,7 @@ const TigBreadcrumbs = ({children}) => {
     let location = useLocation()
     const history = useHistory();
 
+    
     React.useEffect(() =>{
         async function fetchData() {
             let getLength = await falcor.get(["tig", "datasources", "length"])
@@ -23,8 +24,9 @@ const TigBreadcrumbs = ({children}) => {
                 .map(k => get(dsdata, `${k}.id`, null))
                 .filter(d => d)
 
-            let getDsLengths  = await falcor.get(["tig","datasources","views","sourceId",datasourcesIds,'length'])
+            let getDsLengths = await falcor.get(["tig","datasources","views","sourceId",datasourcesIds,'length'])
 
+            console.log('get lengths',getDsLengths )
             let viewGet = datasourcesIds.map(datasourceId => {
                 let dsLength = +get(getDsLengths,["json","tig","datasources","views","sourceId",datasourceId,'length'],1)
                 let output  = ["tig","datasources","views","sourceId",datasourceId,"byIndex",[{from:0,to:(dsLength-1)}],['id','name', 'source_id']]

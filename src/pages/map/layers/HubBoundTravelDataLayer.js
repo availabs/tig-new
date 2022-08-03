@@ -55,12 +55,11 @@ class HubBoundTravelDataLayer extends LayerContainer {
     setActive = !!this.viewId
     name = 'Hub Bound Travel Data'
     filters = {
-        geography: {...filters.geography},
         year: {
             name: 'Year',
             type: 'dropdown',
-            domain: [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019],
-            value: 2019,
+            domain: [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,2020],
+            value: 2020,
             multi: false
         },
         from: {
@@ -304,21 +303,25 @@ class HubBoundTravelDataLayer extends LayerContainer {
 
     init(map, falcor) {
         let states = ["36", "34", "09", "42"]
+        // map.fitBounds([
+        //     [-70.12161387603946, 45.142811053355814],
+        //     [-78.23968012395866, 39.90735688410206]
+        // ])
+        let coordinates = hub_bound.features[0].geometry.coordinates[0];
+        console.log('coordinates', coordinates)
+        let bounds = coordinates.reduce(function (bounds, coord) {
+            return bounds.extend(coord);
+        }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+        console.log(bounds)
+        map.fitBounds(bounds)
 
-        falcor.get(['tig', 'views', 'byLayer', this.type], ["geo", states, "geoLevels"])
+
+        falcor.get(['tig', 'views', 'byLayer', this.type], )
             .then(res => {
                 this.source = get(res, ['json', 'tig', 'views', 'byLayer', this.type, 0, 'source_name'], '')
-                let geo = get(res, 'json.geo', {})
-                const geographies = flatten(states.map(s => geo[s].geoLevels));
-
-                this.geographies =
-                    geographies.map(geo => ({
-                        name: `${geo.geoname.toUpperCase()} ${geo.geolevel}`,
-                        geolevel: geo.geolevel,
-                        value: geo.geoid,
-                        bounding_box: geo.bounding_box
-                    }));
-                this.zoomToGeography();
+               
+                
+                //this.zoomToGeography();
             })
     }
 
@@ -329,32 +332,33 @@ class HubBoundTravelDataLayer extends LayerContainer {
         return falcor.get(["tig", this.type, "byId", view, 'data_overlay'])
             .then(response => {
 
+                console.log('getting response', response)
                 this.data = get(response, ['json', "tig", this.type, "byId", view, 'data_overlay'], []);
                 this.updateLegendTitle()
 
             })
     }
 
-    onAdd(mapboxMap, falcor) {
-        let coordinates = hub_bound.features[0].geometry.coordinates[0];
-        let bounds = coordinates.reduce(function (bounds, coord) {
-            return bounds.extend(coord);
-        }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
-        mapboxMap.fitBounds(bounds, {
-            padding: 1,
-            maxZoom: 10
-        })
-        return Promise.resolve();
-    }
+    // onAdd(mapboxMap, falcor) {
+    //     let coordinates = hub_bound.features[0].geometry.coordinates[0];
+    //     console.log('coordinates', coordinates)
+    //     let bounds = coordinates.reduce(function (bounds, coord) {
+    //         return bounds.extend(coord);
+    //     }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+    //     console.log(bounds)
+    //     mapboxMap.fitBounds(bounds, {
+    //         padding: 1,
+           
+    //     })
+
+    //     return Promise.resolve();
+    // }
 
     onRemove(mapboxMap) {
 
-        mapboxMap.removeLayer('counties')
-        mapboxMap.removeSource('counties')
-        mapboxMap.fitBounds([
-            [-70.12161387603946, 45.142811053355814],
-            [-78.23968012395866, 39.90735688410206]
-        ])
+        //mapboxMap.removeLayer('counties')
+        //mapboxMap.removeSource('counties')
+       
     }
 
     updateLegendTitle(value) {
@@ -371,11 +375,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
         this.updateLegendTitle(value)
 
         switch (filterName) {
-            case "geography": {
-                this.zoomToGeography(value);
-                this.saveToLocalStorage();
-                break;
-            }
+            
             default: {
                 //do nothing
             }

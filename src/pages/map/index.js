@@ -43,7 +43,7 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
     }, [viewId, falcorCache, layer])
 
     return (
-        
+        <TigLayout >
          <div className='w-full h-full' style={{height: '800px'}}>   
             <AvlMap
                 accessToken={ config.MAPBOX_TOKEN }
@@ -80,6 +80,7 @@ const Map = withAuth(({ mapOptions,layers,views}) => {
             />
            
         </div>
+        </TigLayout>
     )
 })
 
@@ -88,6 +89,7 @@ const MapPage = {
     path: `/views/:viewId/map`,
     mainNav: false,
     name: "TIG Map",
+    layout: 'Simple',
     exact: true,
     // authLevel: 0,
      component: {
