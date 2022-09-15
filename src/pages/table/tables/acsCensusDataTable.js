@@ -1,5 +1,5 @@
 import {useState, useMemo, useEffect} from 'react'
-import {Select, Input, Table, useFalcor} from '@availabs/avl-components'
+import {Select, Input, Table, useFalcor} from 'components/avl-components/src'
 import {filters} from 'pages/map/layers/npmrds/filters.js'
 import get from "lodash.get";
 import {useParams} from "react-router-dom";

@@ -1,5 +1,5 @@
 import React from "react"
-import {ScalableLoading} from "@availabs/avl-components";
+import {ScalableLoading} from "components/avl-components/src";
 
 
 const Download = ({inactiveLayers, activeLayers, MapActions, ...rest}) => {

@@ -1,5 +1,5 @@
 import React from "react"
-import { withAuth, TopNav, /*useTheme*/ } from '@availabs/avl-components'
+import { withAuth, TopNav, /*useTheme*/ } from 'components/avl-components/src'
 // import { Link } from 'react-router-dom'
 
 

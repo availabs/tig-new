@@ -1,5 +1,5 @@
 import {LayerContainer} from "components/avl-map/src"
-import {useTheme} from "@availabs/avl-components";
+import {useTheme} from "components/avl-components/src";
 import {filters} from 'pages/map/layers/npmrds/filters.js'
 import get from "lodash.get";
 import flatten from "lodash.flatten";

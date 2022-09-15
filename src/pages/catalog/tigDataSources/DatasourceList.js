@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {useFalcor} from '@availabs/avl-components'
+import {useFalcor} from 'components/avl-components/src'
 import MenuComponent from "../card-menu/Menu";
 import get from 'lodash.get'
 import {Link} from "react-router-dom";

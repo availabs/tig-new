@@ -1,6 +1,6 @@
 import React from 'react'
 import {LayerContainer} from "components/avl-map/src"
-import { getColorRange } from "@availabs/avl-components"
+import { getColorRange } from "components/avl-components/src"
 import get from "lodash.get"
 import _ from 'lodash'
 import {filters} from 'pages/map/layers/npmrds/filters.js'

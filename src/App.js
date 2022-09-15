@@ -7,7 +7,7 @@ import TigLayout from 'components/tig/TigLayout'
 import {
   DefaultLayout,
   Messages
-} from "@availabs/avl-components"
+} from "components/avl-components/src"
 
 const App = (props) => { 
     return (

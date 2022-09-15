@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useState} from "react"
 import get from 'lodash.get'
-import {useFalcor, withAuth} from '@availabs/avl-components'
+import {useFalcor, withAuth} from 'components/avl-components/src'
 import TigLayout from 'components/tig/TigLayout'
 import {useParams} from "react-router-dom";
 import {tables} from "./tables";

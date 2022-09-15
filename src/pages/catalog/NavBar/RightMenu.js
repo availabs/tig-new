@@ -1,6 +1,6 @@
 import React from "react"
 
-import { NavItem} from '@availabs/avl-components'
+import { NavItem} from 'components/avl-components/src'
 
 export const RightMenu = ()=> {
     return (

@@ -1,4 +1,4 @@
-import {useTheme} from "@availabs/avl-components";
+import {useTheme} from "components/avl-components/src";
 import {LayerContainer} from "components/avl-map/src"
 import {filters} from 'pages/map/layers/npmrds/filters.js'
 import tip_mpos from '../config/tip_mpos.json'

@@ -1,6 +1,6 @@
 import {useState} from 'react'
 import _ from 'lodash'
-import {AvlModal, Button, useFalcor, Select} from '@availabs/avl-components'
+import {AvlModal, Button, useFalcor, Select} from 'components/avl-components/src'
 import { CSVLink, CSVDownload } from "react-csv";
 
 const MoreButton = ({className, data = [], columns, filteredColumns, setFilteredColumns, filename = 'data'}) => {

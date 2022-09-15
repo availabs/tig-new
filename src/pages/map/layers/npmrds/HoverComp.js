@@ -1,7 +1,7 @@
 import React from 'react'
 import get from 'lodash.get'
 // import {Link} from 'react-router-dom'
- import { useFalcor } from '@availabs/avl-components'
+ import { useFalcor } from 'components/avl-components/src'
 
 // const f_system_meta = {
 //   "1": "Interstate",

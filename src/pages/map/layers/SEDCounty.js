@@ -1,6 +1,6 @@
 import {LayerContainer} from "components/avl-map/src"
 import counties from '../config/counties.json'
-import { getColorRange} from "@availabs/avl-components"
+import { getColorRange} from "components/avl-components/src"
 import * as d3scale from "d3-scale"
 import get from "lodash.get"
 import _ from 'lodash'

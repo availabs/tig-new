@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useMemo} from 'react';
 import {useParams, useLocation} from 'react-router-dom'
-import {useFalcor} from '@availabs/avl-components'
+import {useFalcor} from 'components/avl-components/src'
 import get from "lodash.get";
 import MenuComponent from "../card-menu/Menu";
 import {

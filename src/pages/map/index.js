@@ -1,7 +1,7 @@
 import React, {useMemo, useEffect, useState} from "react"
 import { AvlMap } from "../../components/avl-map/src"
 import config from "config.json"
-import { withAuth, useFalcor } from '@availabs/avl-components'
+import { withAuth, useFalcor } from 'components/avl-components/src'
 import {layers} from "./layers";
 import {useParams} from 'react-router-dom'
 import get from 'lodash.get'

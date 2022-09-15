@@ -15,7 +15,7 @@ import {
   falcorGraph,
   addComponents,
   addWrappers
-} from "@availabs/avl-components"
+} from "components/avl-components/src"
 
 import reportWebVitals from './reportWebVitals';
 

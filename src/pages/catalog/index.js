@@ -1,6 +1,6 @@
 import React from 'react';
 import {Redirect} from 'react-router-dom'
-import {withAuth} from '@availabs/avl-components'
+import {withAuth} from 'components/avl-components/src'
 import DataSourceList from "./tigDataSources/DatasourceList";
 import RecentActivity from "./tigDataSources/RecentActivity";
 

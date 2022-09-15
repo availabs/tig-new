@@ -1,5 +1,5 @@
 import React, {useState} from "react"
-import {  TopNav } from '@availabs/avl-components'
+import {  TopNav } from 'components/avl-components/src'
 
 
 const TypeAhead = ({suggestions, value, setParentState, className, classNameMenu, placeholder, dynamicPlaceHolder = false}) => {

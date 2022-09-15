@@ -1,6 +1,6 @@
 import React from "react"
 
-import { BooleanInput, Select } from "@availabs/avl-components"
+import { BooleanInput, Select } from "components/avl-components/src"
 
 import deepequal from "deep-equal"
 import get from "lodash.get"

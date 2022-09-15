@@ -1,7 +1,7 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
 
-import { messages } from "@availabs/avl-components"
+import { messages } from "components/avl-components/src"
 
 import { Reducers } from "@availabs/ams"
 

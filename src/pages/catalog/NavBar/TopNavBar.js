@@ -1,4 +1,4 @@
-import {TopNav} from "@availabs/avl-components";
+import {TopNav} from "components/avl-components/src";
 import {Link} from "react-router-dom";
 import {RightMenu} from "./RightMenu";
 import React from "react";

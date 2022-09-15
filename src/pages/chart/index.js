@@ -1,5 +1,5 @@
 import React from "react"
-import { withAuth } from '@availabs/avl-components'
+import { withAuth } from 'components/avl-components/src'
 
 
 import TigLayout from 'components/tig/TigLayout'

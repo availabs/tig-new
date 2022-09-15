@@ -1,5 +1,5 @@
 import {useState, useMemo, useEffect} from 'react'
-import {Select, Input, Table, useFalcor} from '@availabs/avl-components'
+import {Select, Input, Table, useFalcor, useTheme} from 'components/avl-components/src'
 import get from "lodash.get";
 import {useParams} from "react-router-dom";
 import _ from "lodash";
@@ -81,6 +81,8 @@ const SEDDataTable = ({name, type}) => {
     const [loading, setLoading] = useState(false)
     const [data, setData] = useState({data: [], years: []})
     const [pageSize, setPageSize] = useState(50)
+    const theme = useTheme()
+    console.log('useTheme', theme)
 
     const [geography, setGeography] = useState('All')
     const [lower, setLower] = useState()
@@ -140,15 +142,24 @@ const SEDDataTable = ({name, type}) => {
                 }
                 <label  className={`px-1 text-xs`}>From:</label>
                 <Input 
-                    className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-none focus:border-pink-300 p-1'} 
+                    className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-gray-300   p-1'} 
                     type='text' 
                     id={'lower'} 
                     value={lower} 
                     onChange={setLower} 
+                    large
                     placeholder={''}
                 />
                 <label  className={`px-1 ml-5 text-xs`}>To:</label>
-                <Input className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-gray-300 p-1'} type='text' id={'upper'} value={upper} onChange={setUpper} large placeholder={''}/>
+                <Input 
+                    className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-gray-300 p-1'} 
+                    type='text' 
+                    id={'upper'} 
+                    value={upper} 
+                    onChange={setUpper} 
+                    large
+                    placeholder={''}
+                />
 
                 <label  className={`ml-10 px-1 text-xs`}>Show:</label>
                 <Select

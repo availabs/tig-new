@@ -1,6 +1,6 @@
 import {LayerContainer} from "components/avl-map/src"
 import tracts from '../config/tracts.json'
-import {getColorRange} from "@availabs/avl-components"
+import {getColorRange} from "components/avl-components/src"
 import get from "lodash.get"
 import _ from 'lodash'
 import * as d3scale from "d3-scale"
