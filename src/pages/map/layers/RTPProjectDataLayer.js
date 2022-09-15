@@ -231,7 +231,7 @@ class RTPProjectDataLayer extends LayerContainer {
             const theme = useTheme();
 
             return (
-                <div className={`${theme.bg} rounded relative px-1 break-all`}>
+                <div className={`rounded relative bg-white p-1 break-all`}>
                     <div key={'vit2'} className={`flex`}>
                         <div key={'vit0'}
                              style={{maxWidth: '250px'}}
@@ -239,19 +239,20 @@ class RTPProjectDataLayer extends LayerContainer {
                         </div>
                         <div key={'vit1'}
                              style={{maxWidth: '250px'}}
-                             className={`whitespace-pre-wrap`}>
-                            <Link to={`/views/${this.vid}/table?search=${data[0][1]}`}>view in table</Link>
+                             className={`whitespace-pre-wrap text-blue-500 cursor-pointer`}>
+                            <Link to={`/views/${this.vid}/table?search=${data[0][1]}`} >view in table</Link>
                         </div>
                     </div>
                     {
                         data.map((row, i) =>
-                            <div key={i} className="flex">
+                            <div key={i} className="flex max-w-[350px] flex ">
                                 {
                                     row.map((d, ii) =>
                                         <div key={ii}
-                                             style={{maxWidth: '250px'}}
+                                             
                                              className={`
-                                                    ${ii === 0 ? "flex-1 font-bold" : "whitespace-pre-wrap"}
+                                                    
+                                                    ${ii === 0 ? "w-[90px] font-medium text-xs text-right" : " flex-1 whitespace-pre-wrap text-left text-sm"}
                                                     ${row.length > 1 && ii === 0 ? "mr-4" : ""}
                                                     ${row.length === 1 && ii === 0 ? `border-b-2 text-lg ${i > 0 ? "mt-1" : ""}` : ""}
                                                     `}>
@@ -273,41 +274,36 @@ class RTPProjectDataLayer extends LayerContainer {
             Component: ({layer}) => {
 
                 return (
-                    <div className="relative border-top">
-                        <div className={'p-1 w-full'}>
-                            {layer.Title}
+                    <div>
+                        <div className="relative border-top">
+                            <div className={'p-1 w-full'}>
+                                {layer.Title}
+                            </div>
                         </div>
+                        
+                        <label className={'text-sm'} htmlFor={'search'}>RTP Project Search: </label>
+                       <TypeAhead
+                            className={'p-1 w-full border'}
+                            classNameMenu={'border-b hover:bg-blue-300'}
+                            suggestions={layer.filters.rtp_id.domain}
+                            setParentState={e => {
+                                if (!e.length) {
+                                    e = 'Select All'
+                                }
+                                layer.filters.rtp_id.onChange(e)
+                                layer.onFilterChange('rtp_id', e)
+                                layer.dispatchUpdate(layer, {rtp_id: e})
+                            }}
+                            placeholder={'ex: NSSC662V'}
+                        />
+                  
                     </div>
+                    
                 )
             },
-            width: 250
+            width: 300
         },
-        {
-            Component: ({layer}) => {
-                return (
-                    <div className="relative pt-1">
-                        <div className={'flex mt-5'}>
-                            <label className={'self-center pr-1'} htmlFor={'search'}>RTP Project Search: </label>
-                            <TypeAhead
-                                className={'p-1 w-full border'}
-                                classNameMenu={'border-b hover:bg-blue-300'}
-                                suggestions={layer.filters.rtp_id.domain}
-                                setParentState={e => {
-                                    if (!e.length) {
-                                        e = 'Select All'
-                                    }
-                                    layer.filters.rtp_id.onChange(e)
-                                    layer.onFilterChange('rtp_id', e)
-                                    layer.dispatchUpdate(layer, {rtp_id: e})
-                                }}
-                                placeholder={'ex: NSSC662V'}
-                            />
-                        </div>
-                    </div>
-                )
-            },
-            width: 250
-        }
+       
     ]
 
     download(setLoading) {
@@ -406,7 +402,7 @@ class RTPProjectDataLayer extends LayerContainer {
                 }
                 return a
             }, '')}</div>
-            <div className='text-sm text-italic font-light'>Year: {this.filters.year.value === 'Select All' ? 'All' : this.filters.year.value}</div>
+           {/* <div className='text-sm text-italic font-light'>Year: {this.filters.year.value === 'Select All' ? 'All' : this.filters.year.value}</div>
             <div className='text-sm text-italic font-light'>RTP Id: {this.filters.rtp_id.value === 'Select All' ? 'All' : this.filters.rtp_id.value}</div>
             <div className='text-sm text-italic font-light'>Project Type: {this.filters.project_type.domain.reduce((a, c) => {
                 if (c === this.filters.project_type.value) {
@@ -425,7 +421,7 @@ class RTPProjectDataLayer extends LayerContainer {
                     a = c === 'Select All' ? 'All' : c
                 }
                 return a
-            }, '')}</div>
+            }, '')}</div>*/}
         </div>
     }
 
@@ -518,7 +514,7 @@ class RTPProjectDataLayer extends LayerContainer {
                         value: geo.geoid,
                         bounding_box: geo.bounding_box
                     }));
-                this.zoomToGeography();
+                //this.zoomToGeography();
             })
     }
 
@@ -742,7 +738,7 @@ class RTPProjectDataLayer extends LayerContainer {
                                     'layout': {
                                         'icon-image': symbol,
                                         'icon-allow-overlap': true,
-                                        'icon-size': iconSizes[symbol] || 0.4
+                                        'icon-size': 0.1
                                     },
                                     'filter': ['==', 'icon', symbol]
                                 })

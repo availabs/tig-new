@@ -397,7 +397,7 @@ class SEDTazLayer extends LayerContainer {
                         value: geo.geoid,
                         bounding_box: geo.bounding_box
                     }));
-                this.zoomToGeography();
+                //this.zoomToGeography();
 
             })
     }

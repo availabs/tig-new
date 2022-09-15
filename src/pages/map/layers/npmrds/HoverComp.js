@@ -50,8 +50,7 @@ const TmcComp = ({ data, layer, tmc }) => {
   
   let tmcData = get(layer, `tmcData[${tmc}]`, {})
   
-
-
+  
   React.useEffect(() => {
     if (tmc === null) return;
     // console.log('hover fetch')
@@ -82,7 +81,7 @@ const TmcComp = ({ data, layer, tmc }) => {
   // console.log('TMC Hover',tmc, currentData, tmcData, tmcData.s)
 
   return (
-    <div className="p-1 overflow-hidden">
+    <div className="p-1 overflow-hidden bg-white">
       <div className=" px-2">
         <div className="text-center text-lg">{TmcInfo.roadname}</div>
         <div className="flex  ">

@@ -1,10 +1,9 @@
 import {LayerContainer} from "components/avl-map/src"
 import get from "lodash.get"
-import {filters} from 'pages/map/layers/npmrds/filters.js'
 import hub_bound from '../config/hub_bound.json'
 import mapboxgl from 'mapbox-gl'
 import shpwrite from "../../../utils/shp-write";
-import flatten from "lodash.flatten";
+// import flatten from "lodash.flatten";
 import _ from 'lodash'
 
 const color_scheme = [
@@ -47,6 +46,8 @@ class HubBoundTravelDataLayer extends LayerContainer {
 
         this.vid = props.vid
         this.type = props.type
+
+        console.log('hello props', props)
     }
     attribution = <div className={'text-sm grid grid-col-1 gap-4'}>
         <p id="attribution-MQ66mo">Hub Bound Travel Data - 2007-2019 data © <a href="http://nymtc.org/">NY Metropolitan Transportation Council</a></p>
@@ -107,18 +108,8 @@ class HubBoundTravelDataLayer extends LayerContainer {
         callback: (layerId, features, lngLat) => {
             const ids = _.uniq(features.map(c => get(c, ['id'], '')))
 
-            let data =
-                this.data
-                    .filter(d =>
-                        Object.keys(this.filters)
-                            .filter(f => !['geography'].includes(f))
-                            .reduce((acc, curr) => {
-                                return acc && (
-                                    curr === 'from' ? d.hour >= this.convertTime(this.filters[curr].value) :
-                                        curr === 'to' ? d.hour <= this.convertTime(this.filters[curr].value) :
-                                            this.filters[curr].value.toString() === d[curr].toString())
-                            }, true)
-                    )
+        let data = this.data
+
 
             let c = ids.reduce((acc, id) => {
                     let tmpData = data.filter(d => d.id === id)[0]
@@ -156,6 +147,17 @@ class HubBoundTravelDataLayer extends LayerContainer {
     sources = [
         {
             id: "county_points",
+            source: {
+                type: "geojson",
+                data: {
+                    type: "FeatureCollection",
+                    features: []
+                },
+
+            }
+        },
+        {
+            id: "county",
             source: {
                 type: "geojson",
                 data: {
@@ -241,127 +243,34 @@ class HubBoundTravelDataLayer extends LayerContainer {
         )).then(setLoading(false))
     }
 
-    getBounds() {
-        let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value,
-            filtered = this.geographies.filter(({value}) =>
-                // geoids.includes(value)
-                value === '36005'
-            );
-        //console.log('??', geoids, filtered)
-        return filtered.reduce((a, c) => a.extend(c.bounding_box), new mapboxgl.LngLatBounds())
-    }
-
-    zoomToGeography() {
-        if (!this.mapboxMap) return;
-
-        const bounds = this.getBounds();
-
-        if (bounds.isEmpty()) return;
-
-        const options = {
-            padding: {
-                top: 25,
-                right: 200,
-                bottom: 25,
-                left: 200
-            },
-            bearing: 0,
-            pitch: 0,
-            duration: 2000
-        }
-
-        options.offset = [
-            (options.padding.left - options.padding.right) * 0.5,
-            (options.padding.top - options.padding.bottom) * 0.5
-        ];
-
-        const tr = this.mapboxMap.transform,
-            nw = tr.project(bounds.getNorthWest()),
-            se = tr.project(bounds.getSouthEast()),
-            size = se.sub(nw);
-
-        const scaleX = (tr.width - (options.padding.left + options.padding.right)) / size.x,
-            scaleY = (tr.height - (options.padding.top + options.padding.bottom)) / size.y;
-
-        options.center = tr.unproject(nw.add(se).div(2));
-        options.zoom = 10 //Math.min(tr.scaleZoom(tr.scale * Math.min(scaleX, scaleY)), tr.maxZoom);
-
-        this.defaultZoom = options;
-
-        this.mapboxMap.easeTo(options);
-    }
-
-    saveToLocalStorage(geographies = this.filters.geography.value) {
-        if (window.localStorage) {
-            if (geographies.length) {
-                window.localStorage.setItem("macro-view-geographies", JSON.stringify(geographies));
-            } else {
-                window.localStorage.removeItem("macro-view-geographies")
-            }
-        }
-    }
+   
 
     init(map, falcor) {
-        let states = ["36", "34", "09", "42"]
-        // map.fitBounds([
-        //     [-70.12161387603946, 45.142811053355814],
-        //     [-78.23968012395866, 39.90735688410206]
-        // ])
-        let coordinates = hub_bound.features[0].geometry.coordinates[0];
-        console.log('coordinates', coordinates)
-        let bounds = coordinates.reduce(function (bounds, coord) {
-            return bounds.extend(coord);
-        }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
-        console.log(bounds)
-        map.fitBounds(bounds)
+        falcor.get(['tig', 'views', 'byLayer', "hub_bound_travel_data"])
+        .then(res => {
+            this.source = get(res, ['json', 'tig', 'views', 'byLayer', this.type, 0, 'source_name'], '')
+        })
+        console.log('hello init',this)
+
+        if(this.setActive) {
+            let coordinates = hub_bound.features[0].geometry.coordinates[0];
+            let bounds = coordinates.reduce(function (bounds, coord) {
+                return bounds.extend(coord);
+            }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+            map.fitBounds(bounds)
+        }
 
 
-        falcor.get(['tig', 'views', 'byLayer', this.type], )
-            .then(res => {
-                this.source = get(res, ['json', 'tig', 'views', 'byLayer', this.type, 0, 'source_name'], '')
-               
-                
-                //this.zoomToGeography();
-            })
     }
 
     fetchData(falcor) {
-
+       // this.mapboxMap.fit
         let view = this.vid || 23
-
-        return falcor.get(["tig", this.type, "byId", view, 'data_overlay'])
-            .then(response => {
-
-                console.log('getting response', response)
-                this.data = get(response, ['json', "tig", this.type, "byId", view, 'data_overlay'], []);
-                this.updateLegendTitle()
-
-            })
+        return falcor.get(["tig", "hub_bound_travel_data", "byId", view, 'data_overlay'])
+        
     }
 
-    // onAdd(mapboxMap, falcor) {
-    //     let coordinates = hub_bound.features[0].geometry.coordinates[0];
-    //     console.log('coordinates', coordinates)
-    //     let bounds = coordinates.reduce(function (bounds, coord) {
-    //         return bounds.extend(coord);
-    //     }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
-    //     console.log(bounds)
-    //     mapboxMap.fitBounds(bounds, {
-    //         padding: 1,
-           
-    //     })
-
-    //     return Promise.resolve();
-    // }
-
-    onRemove(mapboxMap) {
-
-        //mapboxMap.removeLayer('counties')
-        //mapboxMap.removeSource('counties')
-       
-    }
-
-    updateLegendTitle(value) {
+    updateLegendTitle() {
         this.Title = <div>
             <div>{this.source}</div>
             <div className='text-sm text-italic font-light'>Mode: {this.filters.mode_name.value}</div>
@@ -372,23 +281,15 @@ class HubBoundTravelDataLayer extends LayerContainer {
     }
 
     onFilterChange(filterName, value, preValue) {
-        this.updateLegendTitle(value)
-
-        switch (filterName) {
-            
-            default: {
-                //do nothing
-            }
-        }
-
+        this.updateLegendTitle()
     }
 
     convertTime(time) {
         let value = 0
         if (time.includes('AM') && time !== '12AM') {
-            value = time.substring(0, time.length - 1)
+            value = time.substring(0, time.length - 2)
         } else if (time.includes('PM') && time !== '12PM') {
-            value = 12 + parseInt(time.substring(0, time.length - 1))
+            value = 12 + parseInt(time.substring(0, time.length - 2))
         } else if (time === '12AM') {
             value = 0
         } else {
@@ -397,39 +298,43 @@ class HubBoundTravelDataLayer extends LayerContainer {
         return value
     }
 
-    render(map) {
+    render(map, falcor) {
+        let falcorCache = falcor.getCache()
+       
 
-        let geojson = {
-            type: "FeatureCollection",
-            features: []
-        }
+        let view = this.vid || 23
+        let data =  get(falcorCache, [ "tig", 'hub_bound_travel_data', "byId", view, 'data_overlay', 'value'], []);
+        this.updateLegendTitle()
 
-        let line_geojson = {
-            type: 'geojson',
-            data: {
-                type: 'Feature',
-                properties: {},
-                geometry: {
-                    type: 'LineString',
-                    coordinates: hub_bound.features[0].geometry.coordinates[0]
-                }
-            }
-        }
-
+        //map.setZoom(12)
+        
+                
         const colors = {}
-        let data = this.data
-            .filter(d =>
-                Object.keys(this.filters)
-                    .filter(f => !['geography'].includes(f))
-                    .reduce((acc, curr) => {
-                        return acc && (
-                            curr === 'from' ? d.hour >= this.convertTime(this.filters[curr].value) :
-                                curr === 'to' ? d.hour <= this.convertTime(this.filters[curr].value) :
-                                    this.filters[curr].value.toString() === d[curr].toString())
-                    }, true)
+        console.log(
+                'from', this.convertTime(this.filters['from'].value),
+                'to', this.convertTime(this.filters['to'].value),
+                'hour', data[0].hour
+        )
+        let output = data
+            .filter(d => d)
+            .filter(d => (
+                    d.hour >=  this.convertTime(this.filters['from'].value) &&
+                    d.hour <= this.convertTime(this.filters['to'].value) && 
+                    d.year === this.filters.year.value && 
+                    d.direction == this.filters.direction.value && 
+                    d.mode_name == this.filters.mode_name.value
+                )
             )
 
-        data
+        let modes = data.reduce((out,curr) => {
+            if(!out.includes(curr.mode_name)){
+                out.push(curr.mode_name)
+            }
+            return out
+        },[])
+       
+
+        output
             .forEach(d => {
                 color_scheme.forEach(item => {
                     if (item.value === d['sector_name']) {
@@ -438,8 +343,11 @@ class HubBoundTravelDataLayer extends LayerContainer {
                 })
             })
 
-        geojson.features =
-            data
+        this.data = output
+
+        let geojson = {
+            type: "FeatureCollection",
+            features: output
                 .map(item => {
 
                     return {
@@ -456,20 +364,8 @@ class HubBoundTravelDataLayer extends LayerContainer {
                         }
                     }
                 })
-
-        if (!map.getSource('counties') && !map.getLayer('counties')) {
-            map.addSource('counties', line_geojson)
-            map.addLayer({
-                id: "counties",
-                source: 'counties',
-                type: 'line',
-                paint: {
-                    'line-color': 'black',
-                    'line-width': 1,
-                    'line-dasharray': [10, 5]
-                }
-            })
         }
+
         if (map.getSource('county_points')) {
             map.getSource('county_points').setData(geojson)
         }
@@ -482,7 +378,34 @@ class HubBoundTravelDataLayer extends LayerContainer {
             )
         }
 
+        if (!map.getSource('counties') && !map.getLayer('counties')) {
+            map.addSource('counties', {
+                type: 'geojson',
+                data: {
+                    type: 'Feature',
+                    properties: {},
+                    geometry: {
+                        type: 'LineString',
+                        coordinates: hub_bound.features[0].geometry.coordinates[0]
+                    }
+                }
+            })
+            map.addLayer({
+                id: "counties",
+                source: 'counties',
+                type: 'line',
+                paint: {
+                    'line-color': 'black',
+                    'line-width': 1,
+                    'line-dasharray': [10, 5]
+                }
+            })
+        }
+
+        
+
     }
+
 
 
 }

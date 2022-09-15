@@ -418,7 +418,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                         value: geo.geoid,
                         bounding_box: geo.bounding_box
                     }));
-                this.zoomToGeography();
+                //this.zoomToGeography();
             })
     }
 

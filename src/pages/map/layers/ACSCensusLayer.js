@@ -323,7 +323,7 @@ class ACSCensusLayer extends LayerContainer {
                         bounding_box: geo.bounding_box
                     }));
 
-                this.zoomToGeography();
+                //this.zoomToGeography();
             })
     }
 

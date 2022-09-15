@@ -212,8 +212,7 @@ const ppdaf = () => {
                 }
             }
         },
-    
-    table: (opts = {color:'white', size: 'compact'}) => {
+      table: (opts = {color:'white', size: 'compact'}) => {
           const {color = 'white', size = 'compact'} = opts
           let colors = {
               white: 'bg-white hover:bg-gray-100',
@@ -235,7 +234,7 @@ const ppdaf = () => {
               inputSmall: 'w-24',
               sortIconDown: 'fas fa-sort-amount-down text-tigGray-300 opacity-75',
               sortIconUp: 'fas fa-sort-amount-up text-tigGray-300 opacity-75',
-              sortIconIdeal: 'fas fa-sort-alt text-tigGray-300 opacity-25',
+              sortIconIdeal: 'fa fa-bars text-tigGray-300 opacity-25',
               vars: {
                   color: colors,
                   size: sizes
@@ -243,6 +242,36 @@ const ppdaf = () => {
           }
          
       },
+    // table: (opts = {color:'white', size: 'compact'}) => {
+    //       const {color = 'white', size = 'compact'} = opts
+    //       let colors = {
+    //           white: 'bg-white hover:bg-gray-100',
+    //           gray: 'bg-gray-100 hover:bg-gray-200',
+    //           transparent: 'gray-100'
+    //       }
+
+    //       let sizes = {
+    //           compact: 'px-4 py-1 text-sm',
+    //           full: 'px-10 py-5'
+    //       }
+    //       return {
+    //           tableHeader:
+    //               `${sizes[size]} pb-1 h-8 border border-b-4 border-gray-200 bg-white text-left font-medium text-gray-700 uppercase first:rounded-tl-md last:rounded-tr-md capitalize`,
+    //           tableInfoBar: "bg-white",
+    //           tableRow: `${colors[color]} transition ease-in-out duration-150 hover:bg-gray-300`,
+    //           tableRowStriped: `bg-white odd:bg-tigGray-25 hover:bg-tigGray-100 bg-opacity-25 transition ease-in-out duration-150`,
+    //           tableCell: `${sizes[size]} whitespace-no-wrap border border-gray-200 pl-1 align-top font-light text-sm`,
+    //           inputSmall: 'w-24',
+    //           sortIconDown: 'fas fa-sort-amount-down text-tigGray-300 opacity-75',
+    //           sortIconUp: 'fas fa-sort-amount-up text-tigGray-300 opacity-75',
+    //           sortIconIdeal: 'fas fa-sort-alt text-tigGray-300 opacity-25',
+    //           vars: {
+    //               color: colors,
+    //               size: sizes
+    //           }
+    //       }
+         
+    //   },
       button: (opts = {}) => {
           const {color = 'white', size = 'base', width = 'block'} = opts
           let colors = {

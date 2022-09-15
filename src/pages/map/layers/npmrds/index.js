@@ -302,12 +302,7 @@ class NPMRDSLayer extends LayerContainer {
             return a;
         }, [])
         return falcor.get(...requests).then(() => this.updateLegendTitle())
-        // .then((data) => {
-        //   //console.log('fetchData gem requests',data)
-        //   console.log('got data', data)
-        //   return data
-        // })
-
+        
     }
 
     async download(setLoading) {
@@ -390,10 +385,13 @@ class NPMRDSLayer extends LayerContainer {
                 return {...out, ...d}
             }, {})
 
+        this.tmcData = data
+
         //console.log('data',data)
 
         let domain = Object.values(data).map(d => get(d, `s[${hour}]`, 0))
         const scale = this.getColorScale(domain.sort((a, b) => a - b));
+        this.scale = scale
         const colors = Object.keys(data).reduce((a, c) => {
             let val = scale(get(data[c], `s[${hour}]`, 0))
             a[c] = val ? val : 'hsla(185, 0%, 27%,0.8)'

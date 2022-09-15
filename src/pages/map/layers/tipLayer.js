@@ -199,7 +199,7 @@ class TestTipLayer extends LayerContainer {
             const theme = useTheme();
 
             return (
-                <div className={`${theme.bg} rounded relative px-1 break-all`}>
+                <div className={`rounded relative bg-white p-1 break-all`}>
                     <div key={'vit2'} className={`flex`}>
                         <div key={'vit0'}
                              style={{maxWidth: '250px'}}
@@ -207,19 +207,20 @@ class TestTipLayer extends LayerContainer {
                         </div>
                         <div key={'vit1'}
                              style={{maxWidth: '250px'}}
-                             className={`whitespace-pre-wrap`}>
-                            <Link to={`/views/${this.vid}/table?search=${data[0][1]}`}>view in table</Link>
+                             className={`whitespace-pre-wrap text-blue-500 cursor-pointer`}>
+                            <Link to={`/views/${this.vid}/table?search=${data[0][1]}`} >view in table</Link>
                         </div>
                     </div>
                     {
                         data.map((row, i) =>
-                            <div key={i} className="flex">
+                            <div key={i} className="flex max-w-[350px] flex ">
                                 {
                                     row.map((d, ii) =>
                                         <div key={ii}
-                                             style={{maxWidth: '250px'}}
+                                             
                                              className={`
-                                                    ${ii === 0 ? "flex-1 font-bold" : "whitespace-pre-wrap"}
+                                                    
+                                                    ${ii === 0 ? "w-[90px] font-medium text-xs text-right" : " flex-1 whitespace-pre-wrap text-left text-sm"}
                                                     ${row.length > 1 && ii === 0 ? "mr-4" : ""}
                                                     ${row.length === 1 && ii === 0 ? `border-b-2 text-lg ${i > 0 ? "mt-1" : ""}` : ""}
                                                     `}>
@@ -262,43 +263,36 @@ class TestTipLayer extends LayerContainer {
             Component: ({layer}) => {
 
                 return (
-                    <div className="relative border-top">
-                        <div className={'p-1 w-full'}>
-                            {layer.Title}
+                    <div>
+                        <div className="relative border-top">
+                            <div className={'p-1 w-full'}>
+                                {layer.Title}
+                            </div>
                         </div>
+                        
+                        <label className={'text-sm'} htmlFor={'search'}>TIP Project Search: </label>
+                        <TypeAhead
+                            className={''}
+                            classNameMenu={'border-b hover:bg-blue-300'}
+                            suggestions={layer.filters.tip_id.domain}
+                            value={layer.filters.tip_id.value}
+                            setParentState={e => {
+                                if (!e.length) {
+                                    e = 'Select All'
+                                }
+                                layer.filters.tip_id.onChange(e)
+                                layer.onFilterChange('tip_id', e)
+                                layer.dispatchUpdate(layer, {tip_id: e})
+                            }}
+                            placeholder={'ex: ST210694'}
+                        />
+                  
                     </div>
                 )
             },
-            width: 250
+            width: 300
         },
-        {
-            Component: ({layer}) => {
-
-                return (
-                    <div className="relative pt-1">
-                        <div className={'flex mt-5'}>
-                            <label className={'self-center pr-1'} htmlFor={'search'}>TIP Project Search: </label>
-                            <TypeAhead
-                                className={'p-1 w-full border'}
-                                classNameMenu={'border-b hover:bg-blue-300'}
-                                suggestions={layer.filters.tip_id.domain}
-                                value={layer.filters.tip_id.value}
-                                setParentState={e => {
-                                    if (!e.length) {
-                                        e = 'Select All'
-                                    }
-                                    layer.filters.tip_id.onChange(e)
-                                    layer.onFilterChange('tip_id', e)
-                                    layer.dispatchUpdate(layer, {tip_id: e})
-                                }}
-                                placeholder={'ex: ST210694'}
-                            />
-                        </div>
-                    </div>
-                )
-            },
-            width: 250
-        }
+        
     ]
 
     download(setLoading) {
@@ -421,8 +415,8 @@ class TestTipLayer extends LayerContainer {
         }
 
         options.offset = [
-            (options.padding.left - options.padding.right) * 0.5,
-            (options.padding.top - options.padding.bottom) * 0.5
+            (options.padding.left - options.padding.right) * 0.1,
+            (options.padding.top - options.padding.bottom) * 0.1
         ];
 
         const tr = this.mapboxMap.transform,
@@ -478,7 +472,7 @@ class TestTipLayer extends LayerContainer {
                         value: geo.geoid,
                         bounding_box: geo.bounding_box
                     }));
-                this.zoomToGeography();
+                //this.zoomToGeography();
 
             })
 
@@ -489,7 +483,7 @@ class TestTipLayer extends LayerContainer {
         this.Title = <div>
             <div>{this.source}</div>
             <div className='text-sm text-italic font-light'>{this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name}</div>
-            <div className='text-sm text-italic font-light'>TIP Id: {this.filters.tip_id.value === 'Select All' ? 'All' : this.filters.tip_id.value}</div>
+           {/* <div className='text-sm text-italic font-light'>TIP Id: {this.filters.tip_id.value === 'Select All' ? 'All' : this.filters.tip_id.value}</div>
             <div className='text-sm text-italic font-light'>Project Type: {this.filters.project_type.domain.reduce((a, c) => {
                 if (c === this.filters.project_type.value) {
                     a = c === 'Select All' ? 'All' : c
@@ -502,12 +496,14 @@ class TestTipLayer extends LayerContainer {
                 }
                 return a
             }, '')}</div>
-            <div className='text-sm text-italic font-light'>Sponsor: {this.filters.sponsor.value === 'Select All' ? 'All' : ''}</div>
+            <div className='text-sm text-italic font-light'>Sponsor: {this.filters.sponsor.value === 'Select All' ? 'All' : ''}</div>*/}
         </div>
     }
 
     fetchData(falcor) {
         let view = this.filters.dataset.value || this.vid
+
+        console.log('view',view)
 
         return falcor.get(["tig", this.type, "byId", view, 'data_overlay'])
             .then(response => {
@@ -684,7 +680,7 @@ class TestTipLayer extends LayerContainer {
                                     'layout': {
                                         'icon-image': symbol,
                                         'icon-allow-overlap': true,
-                                        'icon-size': iconSizes[symbol] || 0.4
+                                        'icon-size':  0.1
                                     },
                                     'filter': ['==', 'icon', symbol]
                                 })

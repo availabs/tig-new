@@ -46,8 +46,8 @@ const filters = {
     name: 'Year',
     type: "select",
     multi: false,
-    domain: [2016, 2017, 2018, 2019,2020, 2021],
-    value: 2019
+    domain: [2016, 2017, 2018, 2019,2020, 2021,2022],
+    value: 2021
   },
   month: {
     name: 'Month',

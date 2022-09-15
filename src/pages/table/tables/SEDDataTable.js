@@ -116,8 +116,7 @@ const SEDDataTable = ({name, type}) => {
                     themeOptions={{
                         size: 'compact'
                     }}
-                    color={'transparent'}
-                    className={'font-light text-sm'}
+                   
                     {...filters.geography}
                     onChange={e => getterSetters.geography.set(e)}
                     value={getterSetters.geography.get}
@@ -140,7 +139,14 @@ const SEDDataTable = ({name, type}) => {
                         </>)
                 }
                 <label  className={`px-1 text-xs`}>From:</label>
-                <Input className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-none focus:border-pink-300 p-1'} type='text' id={'lower'} value={lower} onChange={setLower} placeholder={''}/>
+                <Input 
+                    className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-none focus:border-pink-300 p-1'} 
+                    type='text' 
+                    id={'lower'} 
+                    value={lower} 
+                    onChange={setLower} 
+                    placeholder={''}
+                />
                 <label  className={`px-1 ml-5 text-xs`}>To:</label>
                 <Input className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-gray-300 p-1'} type='text' id={'upper'} value={upper} onChange={setUpper} large placeholder={''}/>
 

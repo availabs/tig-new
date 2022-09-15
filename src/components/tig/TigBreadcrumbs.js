@@ -26,12 +26,16 @@ const TigBreadcrumbs = ({children}) => {
 
             let getDsLengths = await falcor.get(["tig","datasources","views","sourceId",datasourcesIds,'length'])
 
-            console.log('get lengths',getDsLengths )
             let viewGet = datasourcesIds.map(datasourceId => {
                 let dsLength = +get(getDsLengths,["json","tig","datasources","views","sourceId",datasourceId,'length'],1)
                 let output  = ["tig","datasources","views","sourceId",datasourceId,"byIndex",[{from:0,to:(dsLength-1)}],['id','name', 'source_id']]
-                return output
-            })
+                if(dsLength < 1) {
+                    return null
+                } else {
+                    return output
+                }
+            }).filter(d => d)
+            console.log('breadcrumps stuff', ...viewGet)
             return await falcor.get(...viewGet)    
         }
         return fetchData();
