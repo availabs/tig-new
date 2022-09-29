@@ -188,7 +188,7 @@ const ppdaf = () => {
 
             let sizes = {
                 mini: 'px-0 py-0',
-                compact: 'px-0 py-1 text-sm',
+                compact: 'px-0 pt-[2px] pb-[2px] text-sm',
                 full: 'px-4 py-2'
             }
 
@@ -202,7 +202,7 @@ const ppdaf = () => {
                 menuItemActive: `px-2 py-2 cursor-not-allowed bg-${accent}-200 border-1 border-${colors[color]} focus:border-${accent}-300`,
                 menuItem: `px-2 py-2 cursor-pointer hover:bg-blue-100 border-1 border-${colors[color]} focus:border-blue-300 flex-wrap`,
                 valueItem: `max-w-full ${wrapStyles[wrapStyle]}`,
-                itemText: 'text-xl',
+                itemText: `${sizes[size]}`,
                 select: `bg-${colors[color]} w-full flex flex-1 flex-row justify-between ${sizes[size]} cursor-pointer border-2 border-${colors[color]} focus:border-blue-300`,
                 selectIcon: `self-center fa fa-angle-down text-gray-400 pt-2 px-2`,
                 vars: {
@@ -221,6 +221,7 @@ const ppdaf = () => {
           }
 
           let sizes = {
+              small: 'px-4 py-1 text-xs',
               compact: 'px-4 py-1 text-sm',
               full: 'px-10 py-5'
           }
@@ -403,6 +404,7 @@ const ppdaf = () => {
     highlight4: "bg-blue-500",
 
     width: "",
+    sidebarBg: 'bg-white',
 
     transition: "transition ease-in-out duration-150",
     buttonPrimary:
@@ -417,6 +419,7 @@ const ppdaf = () => {
     tableHeader:
       "px-4 py-2 pb-1 border-b-2 border-gray-300 bg-gray-200 text-left font-medium text-gray-700 uppercase first:rounded-tl-md last:rounded-tr-md",
   }
+  
 };
 
 const PPDAF_THEME = ppdaf();
@@ -597,7 +600,7 @@ export default PPDAF_THEME
 //   menuTextActiveHover: "hover:text-cyan-200",
 
 
-//   sidebarBg: 'bg-white',
+     
 //   sidebarBorder: '',
 
 //   headerBg: 'bg-blueGray-900',

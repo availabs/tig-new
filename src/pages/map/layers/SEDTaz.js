@@ -403,10 +403,9 @@ class SEDTazLayer extends LayerContainer {
     }
 
     fetchData(falcor) {
-        let view = this.filters.dataset.value || this.vid,
-            year = this.type.split('_')[2],
-            srcType = 'taz',
-            path = ['tig', 'source', `${year} SED ${srcType} Level Forecast Data`, 'view', view, 'schema', 'sed_taz']
+        let view = this.filters.dataset.value || this.vid;
+          
+            //path = ['tig', 'source', `${year} SED ${srcType} Level Forecast Data`, 'view', view, 'schema', 'sed_taz']
 
         
         return falcor.get(
@@ -431,30 +430,12 @@ class SEDTazLayer extends LayerContainer {
                                 this.filters.year.domain = years.map(d => +d)
                                 this.filters.year.value = years[0]
                             }
+                            console.log('sedData', sourceData)
                             console.timeEnd('get sed taz data')
                         })
                 } else {
                     return []
                 }  
-
-                // let newData =  get(response, ['json', ...path], {});
-                // console.log('new data', newData)
-
-               
-
-                // console.timeEnd('get sed taz data')
-
-                // this.fullData = newData || {};
-                // this.data = newData[this.filters.year.value] || []
-
-                // let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
-
-                // this.taz_ids = _.uniq(this.data.filter(item => geoids.includes(get(counties.filter(c => c.name === item.enclosing_name), [0, 'geoid'])))
-                //     .map(d => d.area)
-                //     .filter(d => d)
-                //     .sort((a, b) => a - b))
-
-                // this.updateLegendDomain()
             })
     }
 

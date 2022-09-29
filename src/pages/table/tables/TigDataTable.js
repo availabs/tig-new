@@ -53,6 +53,7 @@ const RenderTable = (data = [], pageSize, filteredColumns) => useMemo(() =>
                     Cell: d => c === 'cost' ?  `$${d.value} M` : c === 'actions' ? <a href={d.value}>Map</a> : d.value
                 }))
         }
+        themeOptions={{size:'small'}}
         initialPageSize={pageSize}
         pageSize={pageSize}
         striped={true}

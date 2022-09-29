@@ -665,20 +665,22 @@ class TestTipLayer extends LayerContainer {
                 let symbol = feature.properties.icon
                 let layerID = 'tip-' + symbol;
                 if (!this.mapboxMap.getLayer(layerID)) {
-                    this.mapboxMap.loadImage(`mapIcons/${symbol}.png`,
+                    this.mapboxMap.loadImage(`/mapIcons/${symbol}.png`,
                         (error, image) => {
                             if (error) return 0;
-                            if (!this.mapboxMap.hasImage(symbol)) {
-                                this.mapboxMap.addImage(symbol, image);
+                            let offsymbol = symbol === 'ferry' ? 'ferryo' : symbol
+                            if (!this.mapboxMap.hasImage(offsymbol)) {
+                                this.mapboxMap.addImage(offsymbol, image);
                             }
 
                             if (!this.mapboxMap.getLayer(layerID)) {
+                                console.log(symbol)
                                 this.mapboxMap.addLayer({
                                     'id': layerID,
                                     'type': 'symbol',
                                     'source': 'tip_symbols',
                                     'layout': {
-                                        'icon-image': symbol,
+                                        'icon-image': offsymbol,
                                         'icon-allow-overlap': true,
                                         'icon-size':  0.1
                                     },
