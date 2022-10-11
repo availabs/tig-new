@@ -221,6 +221,7 @@ const ppdaf = () => {
           }
 
           let sizes = {
+              small: 'px-4 py-1 text-xs',
               compact: 'px-4 py-1 text-sm',
               full: 'px-10 py-5'
           }
@@ -403,6 +404,7 @@ const ppdaf = () => {
     highlight4: "bg-blue-500",
 
     width: "",
+    sidebarBg: 'bg-white',
 
     transition: "transition ease-in-out duration-150",
     buttonPrimary:
@@ -417,6 +419,7 @@ const ppdaf = () => {
     tableHeader:
       "px-4 py-2 pb-1 border-b-2 border-gray-300 bg-gray-200 text-left font-medium text-gray-700 uppercase first:rounded-tl-md last:rounded-tr-md",
   }
+  
 };
 
 const PPDAF_THEME = ppdaf();
@@ -597,7 +600,7 @@ export default PPDAF_THEME
 //   menuTextActiveHover: "hover:text-cyan-200",
 
 
-//   sidebarBg: 'bg-white',
+     
 //   sidebarBorder: '',
 
 //   headerBg: 'bg-blueGray-900',

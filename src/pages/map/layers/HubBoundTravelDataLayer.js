@@ -47,7 +47,7 @@ class HubBoundTravelDataLayer extends LayerContainer {
         this.vid = props.vid
         this.type = props.type
 
-        console.log('hello props', props)
+        
     }
     attribution = <div className={'text-sm grid grid-col-1 gap-4'}>
         <p id="attribution-MQ66mo">Hub Bound Travel Data - 2007-2019 data © <a href="http://nymtc.org/">NY Metropolitan Transportation Council</a></p>

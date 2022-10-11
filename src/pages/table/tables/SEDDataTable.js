@@ -15,9 +15,31 @@ const fetchData = (falcor, type, view) => {
 
     return falcor.get(path)
         .then(d => get(d, ['json', ...path]))
+
+    /*return falcor.get(
+        ['tig','byViewId', view, 'source_id']
+    )
+    .then((response) => {
+        let source_id = get(response, ['json','tig','byViewId', view, 'source_id'], null)
+        //console.log('source_id', source_id, response)
+        if (source_id) {
+            console.time('get sed taz data')
+            return falcor.get(['tig','sed_taz','bySource',source_id,'data'])
+                .then(data => {
+                    return get(data, ['json','tig','sed_taz','bySource',source_id,'data'], {geo: {type:'FeatureCollection', features:[]}, data: {}})
+                    // console.log(sourceData)
+                   
+                    
+                    console.timeEnd('get sed taz data')
+                })
+        } else {
+            return []
+        }  
+    })*/
 }
 
 const processData = (data= {}, geography = '', lower, upper, type) => {
+    console.log('process data get', data)
     let reformat = {}
     let years = new Set();
     let areaColName = type.split('_')[1].toLowerCase() === 'taz' ? 'enclosing_name' : 'area';
@@ -82,7 +104,7 @@ const SEDDataTable = ({name, type}) => {
     const [data, setData] = useState({data: [], years: []})
     const [pageSize, setPageSize] = useState(50)
     const theme = useTheme()
-    console.log('useTheme', theme)
+    //console.log('useTheme', theme)
 
     const [geography, setGeography] = useState('All')
     const [lower, setLower] = useState()

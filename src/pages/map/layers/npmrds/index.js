@@ -165,12 +165,12 @@ class NPMRDSLayer extends LayerContainer {
 
 
     zoomToGeography() {
-        console.log('called zoomTogeom')
+        //console.log('called zoomTogeom')
         if (!this.mapboxMap) return;
 
         const bounds = this.getBounds();
 
-        console.log('got bounds', bounds)
+        //console.log('got bounds', bounds)
 
         if (bounds.isEmpty()) return;
 
@@ -203,7 +203,7 @@ class NPMRDSLayer extends LayerContainer {
         options.zoom = Math.min(tr.scaleZoom(tr.scale * Math.min(scaleX, scaleY)), tr.maxZoom);
 
         this.defaultZoom = options;
-        console.log('setting zoom', this.defaultZoom)
+        //console.log('setting zoom', this.defaultZoom)
         this.mapboxMap.easeTo(options);
     }
 
@@ -239,7 +239,7 @@ class NPMRDSLayer extends LayerContainer {
             .then((res) => {
                 // const mInfo = get(res, ["json", "pm3", "measureInfo"], {});
                 // console.log('measureInfo', res)
-                console.log('res?', res)
+                // console.log('res?', res)
                 let geo = get(res, 'json.geo', {})
                 const geographies = flatten(states.map(s => geo[s].geoLevels));
 
