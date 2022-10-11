@@ -399,6 +399,8 @@ class NPMRDSLayer extends LayerContainer {
         }, {});
 
         // console.log('colors', colors)
+        let mapYear = year === 2022 ? year : 2021
+
 
         map.setPaintProperty(`tmc-${year}`, "line-color", [
             "case",

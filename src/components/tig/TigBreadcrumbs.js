@@ -35,7 +35,7 @@ const TigBreadcrumbs = ({children}) => {
                     return output
                 }
             }).filter(d => d)
-            console.log('breadcrumps stuff', ...viewGet)
+            //console.log('breadcrumps stuff', ...viewGet)
             return await falcor.get(...viewGet)    
         }
         return fetchData();

@@ -111,6 +111,10 @@ const updateLegend = (filters, legend) => {
 
 const setActiveLayer = (layers, filters, mapboxMap) => {
   // console.log('setLayers ', filters.network.value, filters.year.value)
+  let filterYear = filters.year.value
+  if(filterYear === 2022) {
+    filterYear = 2021
+  }
   return layers
     .map(l => l.id)
     .filter(l => l !== 'traffic_signals_layer')
@@ -118,7 +122,7 @@ const setActiveLayer = (layers, filters, mapboxMap) => {
       let output = null
       let type = l.split('-')[0]
       let year = l.split('-')[1]
-      let checkYear = filters.year.value
+      let checkYear = filterYear
       if(type === 'tmc' && +year === +checkYear) {
         output = l
         mapboxMap.setLayoutProperty(

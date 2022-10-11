@@ -125,66 +125,71 @@ const SEDDataTable = ({name, type}) => {
                 /> <span  className={`self-center px-1 capitalize font-semibold text-xs`}>{type.split('_')[1]} Data</span>
             </div>
 
-            <div className={`flex pb-3 items-center`}>
-                {
-                    Object.keys(config)
-                        .map(f =>
-                        <>
-                            <label  className={`self-center px-1 whitespace-nowrap`}>{config[f].name}:</label>
-                            <Select
-                                id={f}
-                                className={'whitespace-nowrap'}
-                                {...config[f]}
-                                onChange={e => getterSetters[f].set(e)}
-                                value={getterSetters[f].get}
-                            />
-                        </>)
-                }
-                <label  className={`px-1 text-xs`}>From:</label>
-                <Input 
-                    className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-gray-300   p-1'} 
-                    type='text' 
-                    id={'lower'} 
-                    value={lower} 
-                    onChange={setLower} 
-                    large
-                    placeholder={''}
-                />
-                <label  className={`px-1 ml-5 text-xs`}>To:</label>
-                <Input 
-                    className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-gray-300 p-1'} 
-                    type='text' 
-                    id={'upper'} 
-                    value={upper} 
-                    onChange={setUpper} 
-                    large
-                    placeholder={''}
-                />
+            <div className={`flex pb-3 items-center justify-between font-light`}>
+                <div className='flex items-center'>
+                    {
+                        Object.keys(config)
+                            .map(f =>
+                            <>
+                                <label  className={`self-center px-1 whitespace-nowrap`}>{config[f].name}:</label>
+                                <Select
+                                    id={f}
+                                    className={'whitespace-nowrap'}
+                                    {...config[f]}
+                                    onChange={e => getterSetters[f].set(e)}
+                                    value={getterSetters[f].get}
+                                />
+                            </>)
+                    }
+                    <div className={'font-light text-xs'}> {name} </div>
+                    <label  className={`px-1 text-xs`}>From:</label>
+                    <Input 
+                        className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-gray-300   p-1'} 
+                        type='text' 
+                        id={'lower'} 
+                        value={lower} 
+                        onChange={setLower} 
+                        large
+                        placeholder={''}
+                    />
+                    <label  className={`px-1 ml-5 text-xs`}>To:</label>
+                    <Input 
+                        className={'shadow-inner focus:drop-shadow-lg border border-gray-300 focus:border-gray-300 p-1'} 
+                        type='text' 
+                        id={'upper'} 
+                        value={upper} 
+                        onChange={setUpper} 
+                        large
+                        placeholder={''}
+                    />
+                    </div>
+                <div className='flex items-center'>
 
                 <label  className={`ml-10 px-1 text-xs`}>Show:</label>
-                <Select
-                    id={'pageSize'}
-                    themeOptions={{
-                        // color: 'transparent',
-                        size: 'compact'
-                    }}
-                    color={'transparent'}
-                    className={'font-light text-sm'}
-                    domain={[10, 25, 50, 100]}
-                    onChange={e => getterSetters.pageSize.set(e)}
-                    value={pageSize}
-                    multi={false}
-                /><span  className={`px-1 text-xs`}>entries</span>
+                    <Select
+                        id={'pageSize'}
+                        themeOptions={{
+                            // color: 'transparent',
+                            size: 'compact'
+                        }}
+                        color={'transparent'}
+                        className={'font-light text-sm'}
+                        domain={[10, 25, 50, 100]}
+                        onChange={e => getterSetters.pageSize.set(e)}
+                        value={pageSize}
+                        multi={false}
+                    /><span  className={`pl-1 pr-3 text-xs`}>entries</span>
 
-                <MoreButton className={'pl-3 float-right'}
-                            data={data.data}
-                            columns={
-                                    [type.split('_')[1].toLowerCase() === 'taz' ? 'taz' : 'county', ...data.years]
-                                        .sort((a,b) => a === 'county' ? -1 : a-b)
-                                    }
-                            filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}
-                            filename={`${type.split('_').join(' ')}: ${name}`}
-                />
+                    <MoreButton className={'pl-3 float-right'}
+                                data={data.data}
+                                columns={
+                                        [type.split('_')[1].toLowerCase() === 'taz' ? 'taz' : 'county', ...data.years]
+                                            .sort((a,b) => a === 'county' ? -1 : a-b)
+                                        }
+                                filteredColumns={filteredColumns} setFilteredColumns={setFilteredColumns}
+                                filename={`${type.split('_').join(' ')}: ${name}`}
+                    />
+                </div>
             </div>
 
 
