@@ -72,8 +72,8 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 }
                 return a
             },{})
-            return this.data.reduce((a,c) =>{
-                if(c.area === graph['name']){
+            return this.processedData.reduce((a,c) =>{
+                if(c.id === graph['geoid']){
                     a.push(
                         [this.filters.dataset.domain.reduce((a,c) => {
                             if(c.value === this.filters.dataset.value){
@@ -82,7 +82,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                             return a
                         },'')],
                         ["Year:", this.filters.year.value],
-                        ['County:',`${c.area}-${graph['state_code']}`],
+                        ['County:',`${graph.name}-${graph['state_code']}`],
                         ["Value:",c.value.toLocaleString()]
                     )
                 }
@@ -155,7 +155,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
             source: 'county-labels',
             type: 'symbol',
             'layout': {
-                'text-field': ['get', 'area'],
+                'text-field': ['get', 'name'],
                 'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
                 'text-radial-offset': 0.5,
                 'text-justify': 'auto',
@@ -196,21 +196,21 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                         <div className={'p-2 text-sm text-gray-500'}>Year: {layer.filters.year.value}</div>
                             
                         <div className=" pb-6 px-3 ">
-                            <Slider 
+                            <Slider
+                                id={`yearRange-${this.id}`}
                                 min={Math.min(...layer.filters.year.domain)} 
                                 max={Math.max(...layer.filters.year.domain)} 
                                 marks={yearMarks} 
                                 step={null}
 
                                 onChange={value => {
-                                        //console.log('testing', value)
                                         if(value){
                                             layer.filters.year.onChange()
                                             layer.onFilterChange('year', value)
                                         }
-                                        //layer.dispatchUpdate(layer, {year: value})
+                                        layer.dispatchUpdate(layer, {year: value})
                                     }}
-                                defaultValue={Math.min(...layer.filters.year.domain)} 
+                                defaultValue={layer.filters.year.value || Math.min(...layer.filters.year.domain)}
                             />
                         </div>
                             
@@ -226,38 +226,13 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
         const filename = this.filters.dataset.domain.filter(d => d.value === this.filters.dataset.value)[0].name +
             (this.filters.geography.value === 'All' ? '' : ` ${this.filters.geography.value}`);
 
-        let d = this.data.reduce((acc,curr) =>{
-            this.data_counties.forEach(data_tract =>{
-                let values = Object.keys(this.fullData).reduce((acc, year) => {
-                    acc[year] = get(this.fullData[year].filter(data => data.area === data_tract.name), [0, 'value']);
-                    return acc;
-                } , {})
-                if(curr.area === data_tract.name){
-                    acc.push({
-                        geoid: data_tract.geoid,
-                        ...values,
-                        geom: this.parseIfSTR(curr.geom),
-                        area: curr.area,
-                        area_type: curr.type
-                    })
-                }
-            })
-            return acc
-        },[])
-
         let geoJSON = {
             type: 'FeatureCollection',
             features: []
         };
 
-        d
-            .map(t => {
-                return {
-                    type: "Feature",
-                    properties: Object.keys(t).filter(t => t !== 'geom').reduce((acc, curr) => ({...acc, [curr]: t[curr]}) , {}),
-                    geometry: t.geom
-                }
-            })
+        this.geoData.features
+            .filter(feat => this.data_counties.map(dc => dc.name).includes(feat.properties.name))
             .forEach((feat) => {
                 let geom=feat.geometry;
                 let props=feat.properties;
@@ -295,8 +270,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
     }
 
     updateLegendDomain() {
-    let values = _.uniq((this.data || []).map(d => get(d, ['value'], 0)))
-
+    let values = _.uniq((this.processedData || []).map(d => get(d, ['value'], 0)))
         if(values.length){
             this.legend.domain =
                 ckmeans(values, Math.min(values.length, 5)
@@ -425,40 +399,46 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
 
 
     fetchData(falcor) {
-        let view = this.filters.dataset.value || this.vid,
-        year = this.type.split('_')[2],
-            srcType = 'county',
-            path = ['tig', 'source', `${year} SED ${srcType} Level Forecast Data`, 'view', view, 'schema', 'sed_county'];
+        let view = this.filters.dataset.value || this.vid;
 
         console.time('fetch county data')
-        return falcor.get(path)
-            .then(async (response) =>{
-                let newData =  get(response, ['json', ...path], {});
-                console.timeEnd('fetch county data')
-                if(!this.filters.year.domain.length){
-                    this.filters.year.domain = Object.keys(newData);
-                    this.filters.year.value = this.filters.year.domain[0];
+
+        return falcor.get(
+            ['tig','byViewId', view, 'source_id']
+        )
+            .then((response) => {
+                let source_id = get(response, ['json','tig','byViewId', view, 'source_id'], null)
+                if (source_id) {
+                    console.time('get sed county data')
+                    return falcor.get(['tig','sed_county','bySource',source_id,'geom'])
+                        .then(data => {
+                            let sourceData = get(data, ['json','tig','sed_county','bySource',source_id,'geom'], {geo: {type:'FeatureCollection', features:[]}, data: {}})
+
+                            let years = []
+                            try {
+                                years = Object.keys(Object.values(Object.values(sourceData.data)[0])[0])
+                            } catch (err) {
+                                console.log('invalid data')
+                            }
+                            if(this.filters.year.domain.length === 0) {
+                                this.filters.year.domain = years.map(d => +d)
+                                this.filters.year.value = years[0]
+                            }
+
+                            let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
+
+                            this.data_counties = Object.keys(sourceData.data)
+                                .filter(item => geoids.includes(get(counties.find(c => c.name.toLowerCase() === item.toLowerCase()), ['geoid'])))
+                                .map(item => ({
+                                    name : item,
+                                    geoid : get(counties.find(c => c.name.toLowerCase() === item.toLowerCase()), ['geoid'])
+                                }))
+
+                            console.timeEnd('get sed county data')
+                        })
+                } else {
+                    return []
                 }
-
-                this.fullData = newData || {};
-                this.data = newData[this.filters.year.value] || []
-
-                this.updateLegendDomain()
-
-                let geoids = this.filters.geography.domain.filter(d => d.name === this.filters.geography.value)[0].value || []
-
-                this.data_counties = this.data
-                    .filter(item => geoids.includes(get(counties.filter(c => c.name === item.area), [0], {}).geoid))
-                    .map(item =>{
-                    return counties
-                        .reduce((a,c) =>{
-                        if(item.area === c.name){
-                            a['name'] = c.name
-                            a['geoid'] = c.geoid
-                        }
-                        return a
-                    },{})
-                })
             })
     }
 
@@ -472,7 +452,6 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
             case "year" : {
 
                 this.filters.year.value = value;
-                this.data = this.fullData[this.filters.year.value] || []
 
                 if(value && document.getElementById(`yearRange-${this.id}`) && document.getElementById(`yearRange-${this.id}`).value.toString() !== this.filters.year.domain.indexOf(value).toString()){
                     document.getElementById(`yearRange-${this.id}`).value = this.filters.year.domain.indexOf(value).toString()
@@ -491,7 +470,7 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 break;
             }
             case "county": {
-                let geom = this.parseIfSTR(get(this.data.filter(d => d.area.toLowerCase() === value.toLowerCase()), [0, 'geom']) || '{}')
+                let geom = this.parseIfSTR(get(this.geoData.features.filter(d => d.properties.name.toLowerCase() === value.toLowerCase()), [0, 'geometry']) || '{}')
 
                 if (geom && Object.keys(geom).length) {
                     let featId;
@@ -501,7 +480,8 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                         this.featMapping = new Map();
                         this.mapboxMap.queryRenderedFeatures({layers: ['Counties']})
                             .filter(feats => feats.properties.geoid)
-                            .map(feats => this.featMapping.set(this.geoidToNameMapping[feats.properties.geoid], feats.id))
+                            .map(feats => this.featMapping.set(
+                                counties.find(c => c.geoid === feats.properties.geoid).name, feats.id))
 
                         featId = this.featMapping.get(value)
                     }
@@ -552,29 +532,38 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
     }
 
     render(map, falcor) {
-        if (!this.data){
-            return this.fetchData(falcor).then(() => this.data && this.render(map, falcor))
-        }
-        if (this.data_counties && this.data_counties.length) {
-            map.setFilter("Counties", ["in", ["get", "geoid"], ["literal", this.data_counties.map(d => d.geoid)]]);
-            map.setFilter("Counties-line", ["in", ["get", "geoid"], ["literal", this.data_counties.map(d => d.geoid)]]);
+        let year = this.filters.year.value || 2020,
+            view = this.filters.dataset.value || this.vid,
+            falcorCache = falcor.getCache(),
+            source_id = get(falcorCache, ['tig','byViewId', view, 'source_id','value'], null);
+
+        if(!source_id) return
+
+        let sourceData = get(falcorCache, ['tig','sed_county','bySource',source_id,'geom','value'], {geo: {type:'FeatureCollection', features:[]}, data: {}})
+        get(sourceData,'geo.features', []).forEach(f => f.geometry = this.parseIfSTR(f.geometry))
+
+        this.geoData = sourceData.geo;
+
+        this.processedData = Object.keys(sourceData.data)
+            .filter(d => this.data_counties.find(dc => dc.name === d))
+            .reduce((acc,curr) =>{
+            acc.push({
+                id: counties.find(c => c.name.toLowerCase() === curr.toLowerCase()).geoid,
+                value:  sourceData.data[curr][view][year]
+            })
+            return acc
+        },[])
+
+        if (this.processedData && this.processedData.length) {
+            map.setFilter("Counties", ["in", ["get", "geoid"], ["literal", this.processedData.map(d => d.id)]]);
+            map.setFilter("Counties-line", ["in", ["get", "geoid"], ["literal", this.processedData.map(d => d.id)]]);
         }
         else {
             map.setFilter("Counties", false);
             map.setFilter("Counties-line", false);
         }
 
-        this.processedData = this.data.reduce((acc,curr) =>{
-            this.data_counties.forEach(data_county =>{
-                if(curr.area === data_county.name){
-                    acc.push({
-                        id: data_county.geoid,
-                        value: curr.value
-                    })
-                }
-            })
-            return acc
-        },[])
+        this.updateLegendDomain()
 
         const colors = this.processedData.reduce((a,c) =>{
                 if(c.value !== 0){
@@ -582,7 +571,6 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
                 }
                 return a
             },{});
-
 
         map.setPaintProperty("Counties", "fill-color", [
             "case",
@@ -598,32 +586,14 @@ class SED2040CountyLevelForecastLayer extends LayerContainer {
             features: []
         };
         this.geoidToNameMapping = {}
-        this.data.reduce((acc,curr) =>{
-            this.data_counties.forEach(data_tract =>{
-                if(curr.area === data_tract.name){
-                    this.geoidToNameMapping[data_tract.geoid] = curr.area;
-                    acc.push({
-                        geoid: data_tract.geoid,
-                        geom: this.parseIfSTR(curr.geom),
-                        area: curr.area,
-                        area_type: curr.type
-                    })
-                }
-            })
-            return acc
-        },[]).map(t => {
-                return {
-                    type: "Feature",
-                    properties: Object.keys(t).filter(t => t !== 'geom').reduce((acc, curr) => ({...acc, [curr]: t[curr]}) , {}),
-                    geometry: t.geom
-                }
-            })
+        sourceData.geo.features
             .forEach((feat) => {
-                let geom = center(feat.geometry);
-                geom.properties = {...feat.properties}
-                geoJSON.features.push(geom)
+                if(!geoJSON.features.find(f => f.properties.area === feat.properties.area)){
+                    let geom = center(feat.geometry);
+                    geom.properties = {...feat.properties}
+                    geoJSON.features.push(geom)
+                }
             });
-
         map.getSource('county-labels').setData(geoJSON)
     }
 
