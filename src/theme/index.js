@@ -187,7 +187,7 @@ const ppdaf = () => {
             }
 
             let sizes = {
-                mini: 'px-0 py-0',
+                mini: 'px-0 py-0 text-xs',
                 compact: 'px-0 pt-[2px] pb-[2px] text-sm',
                 full: 'px-4 py-2'
             }
@@ -231,7 +231,7 @@ const ppdaf = () => {
               tableInfoBar: "bg-white",
               tableRow: `${colors[color]} transition ease-in-out duration-150 hover:bg-gray-300`,
               tableRowStriped: `bg-white odd:bg-tigGray-25 hover:bg-tigGray-100 bg-opacity-25 transition ease-in-out duration-150`,
-              tableCell: `${sizes[size]} whitespace-no-wrap border border-gray-200 pl-1 align-top font-light text-sm`,
+              tableCell: `${sizes[size]} break-words border border-gray-200 pl-1 align-top font-light text-sm`,
               inputSmall: 'w-24',
               sortIconDown: 'fas fa-sort-amount-down text-tigGray-300 opacity-75',
               sortIconUp: 'fas fa-sort-amount-up text-tigGray-300 opacity-75',

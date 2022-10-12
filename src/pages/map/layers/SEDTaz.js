@@ -416,9 +416,9 @@ class SEDTazLayer extends LayerContainer {
                 //console.log('source_id', source_id, response)
                 if (source_id) {
                     console.time('get sed taz data')
-                    return falcor.get(['tig','sed_taz','bySource',source_id,'data'])
+                    return falcor.get(['tig','sed_taz','bySource',source_id,'geom'])
                         .then(data => {
-                            let sourceData = get(data, ['json','tig','sed_taz','bySource',source_id,'data'], {geo: {type:'FeatureCollection', features:[]}, data: {}})
+                            let sourceData = get(data, ['json','tig','sed_taz','bySource',source_id,'geom'], {geo: {type:'FeatureCollection', features:[]}, data: {}})
                             // console.log(sourceData)
                             let years = []
                             try {
@@ -430,7 +430,7 @@ class SEDTazLayer extends LayerContainer {
                                 this.filters.year.domain = years.map(d => +d)
                                 this.filters.year.value = years[0]
                             }
-                            console.log('sedData', sourceData)
+                            console.log('sedData', sourceData, data.json)
                             console.timeEnd('get sed taz data')
                         })
                 } else {
@@ -534,7 +534,7 @@ class SEDTazLayer extends LayerContainer {
 
         if(!source_id) return
 
-        let sourceData = get(falcorCache, ['tig','sed_taz','bySource',source_id,'data','value'], {geo: {type:'FeatureCollection', features:[]}, data: {}})
+        let sourceData = get(falcorCache, ['tig','sed_taz','bySource',source_id,'geom','value'], {geo: {type:'FeatureCollection', features:[]}, data: {}})
         get(sourceData,'geo.features', []).forEach(f => f.geometry = this.parseIfSTR(f.geometry))
 
         // console.log('testing', sourceData)

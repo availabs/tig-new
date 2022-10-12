@@ -43,9 +43,12 @@ const RenderTable = (data, pageSize, filteredColumns) => useMemo(() =>
                     accessor: c,
                     align: ['estimated cost'].includes(c) ? 'right' : 'left',
                     filter: ['project type', 'plan portion', 'county', 'year'].includes(c) ? 'dropdown' : null,
-                    filterThemeOptions: {size: 'tableMini'},
+                    filterThemeOptions: {size: 'mini'},
                     filterClassName: 'w-full text-sm z-50',
-                    Cell: d => c === 'estimated cost' ? d.value && `$${d.value} M` : d.value
+                    Cell: d => c === 'estimated cost' ? d.value && `$${d.value} M` : d.value,
+                    maxWidth: 170,
+                    minWidth: 170,
+                    width: 170
                 }))
         }
         initialPageSize={pageSize}

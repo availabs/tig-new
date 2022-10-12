@@ -1,6 +1,7 @@
 [submodule "src/components/avl-map"]
 	path = src/components/avl-map
 	url = https://github.com/availabs/avl-map.git
+	branch = tig-map
 [submodule "src/components/avl-components"]
 	path = src/components/avl-components
 	url = git@github.com:availabs/avl-components.git

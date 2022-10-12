@@ -48,12 +48,14 @@ const RenderTable = (data = [], pageSize, filteredColumns) => useMemo(() =>
                     accessor: c,
                     align: c === 'cost' ? 'right' : 'left',
                     filter: ['project type', 'mpo name', 'county', 'agency'].includes(c) ? 'dropdown' : null,
-                    filterThemeOptions: {size: 'tableMini'},
+                    filterThemeOptions: {size: 'mini'},
                     filterClassName: 'w-full text-sm z-50',
-                    Cell: d => c === 'cost' ?  `$${d.value} M` : c === 'actions' ? <a href={d.value}>Map</a> : d.value
+                    Cell: d => c === 'cost' ?  `$${d.value} M` : c === 'actions' ? <a href={d.value}>Map</a> : d.value,
+                    maxWidth: 170,
+                    minWidth: 170,
+                    width: 170
                 }))
         }
-        themeOptions={{size:'small'}}
         initialPageSize={pageSize}
         pageSize={pageSize}
         striped={true}

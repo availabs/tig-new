@@ -8,60 +8,52 @@ import counties from "../../map/config/counties.json";
 import MoreButton from "./components/moreButton";
 
 const fetchData = (falcor, type, view) => {
-    let srcType = type.split('_')[1],
-        year = type.split('_')[2],
-        path =
-            ['tig', 'source', `${year} SED ${srcType} Level Forecast Data`, 'view', view, 'schema', `sed_${srcType}`]
+    // let srcType = type.split('_')[1],
+    //     year = type.split('_')[2],
+    //     path =
+    //         ['tig', 'source', `${year} SED ${srcType} Level Forecast Data`, 'view', view, 'schema', `sed_${srcType}`]
+    //
+    // return falcor.get(path)
+    //     .then(d => get(d, ['json', ...path]))
+    let srcType = type.split('_')[1]
 
-    return falcor.get(path)
-        .then(d => get(d, ['json', ...path]))
-
-    /*return falcor.get(
+    return falcor.get(
         ['tig','byViewId', view, 'source_id']
     )
     .then((response) => {
         let source_id = get(response, ['json','tig','byViewId', view, 'source_id'], null)
-        //console.log('source_id', source_id, response)
         if (source_id) {
-            console.time('get sed taz data')
-            return falcor.get(['tig','sed_taz','bySource',source_id,'data'])
+            return falcor.get(['tig',`sed_${srcType}`,'bySource',source_id,'data'])
                 .then(data => {
-                    return get(data, ['json','tig','sed_taz','bySource',source_id,'data'], {geo: {type:'FeatureCollection', features:[]}, data: {}})
-                    // console.log(sourceData)
-                   
-                    
-                    console.timeEnd('get sed taz data')
+                    return get(data, ['json','tig',`sed_${srcType}`,'bySource',source_id,'data', 'data'], {})
                 })
         } else {
             return []
         }  
-    })*/
+    })
 }
 
-const processData = (data= {}, geography = '', lower, upper, type) => {
+const processData = (data= {}, geography = '', lower, upper, type, viewId) => {
     console.log('process data get', data)
     let reformat = {}
     let years = new Set();
     let areaColName = type.split('_')[1].toLowerCase() === 'taz' ? 'enclosing_name' : 'area';
     let keyCol = type.split('_')[1].toLowerCase() === 'taz' ? 'taz' : 'county';
     let sortFn = (a, b) => type.split('_')[1].toLowerCase() === 'taz' ? +b[keyCol] - +a[keyCol] : b[keyCol].localeCompare(a[keyCol])
-    Object.keys(data)
-        .forEach(year => {
-            years.add(year)
-            data[year]
-                .filter(entry =>
-                    get(filters.geography.domain.filter(geo => geo.name === geography), [0, 'value'], [])
-                        .includes(get(counties.filter(c => c.name === entry[areaColName]), [0, 'geoid']))
-                )
-                .forEach(entry => {
-                    reformat[entry.area] = Object.assign(reformat[entry.area] || {}, {[year]: +entry.value})
-                })
-        });
-
 
     return {
-        data: Object.keys(reformat)
-            .map(tazId => ({[keyCol]: tazId, ...reformat[tazId]}))
+        data: Object.keys(data)
+            .filter(entry =>
+                get(filters.geography.domain.filter(geo => geo.name === geography), [0, 'value'], [])
+                    .includes(get(counties.filter(c => c.name === data[entry].enclosing_name), [0, 'geoid']))
+            )
+            .map(tazId => {
+                Object.keys(data[tazId].value[viewId]).forEach(y => years.add(y))
+               return ({[keyCol]: tazId, ...Object.keys(data[tazId].value[viewId]).reduce((acc, year) => {
+                       acc[year] = data[tazId].value[viewId][year]
+                       return acc;
+                   } , {})})
+            })
             .filter(d => {
                 let values = Object.keys(d).filter(d => !['taz', 'county'].includes(d)).map(k => d[k]);
                 return !(upper || lower) ||
@@ -69,7 +61,6 @@ const processData = (data= {}, geography = '', lower, upper, type) => {
                         (!lower || !!(values.find(l => l >= lower))) &&
                         (!upper || !!(values.find(l => l <= upper)))
                     )
-
             })
             .sort(sortFn),
         years: [...years]
@@ -122,7 +113,7 @@ const SEDDataTable = ({name, type}) => {
         setLoading(true)
         let d = await fetchData(falcor, type, viewId)
         console.log(d)
-        setData(processData(d, geography, lower, upper, type))
+        setData(processData(d, geography, lower, upper, type, viewId))
         setLoading(false)
 
     }, [geography, lower, upper, viewId, name]);

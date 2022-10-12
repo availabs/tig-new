@@ -5,5 +5,6 @@
     <mapping directory="$PROJECT_DIR$/src/components/avl-components" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/components/avl-map" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/components/shp-write" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/submodules" vcs="Git" />
   </component>
 </project>

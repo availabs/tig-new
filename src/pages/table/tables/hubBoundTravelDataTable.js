@@ -24,16 +24,25 @@ const columns = {
     'transit_agency': 'transit agency'
 }
 
-const fetchData = async (falcor, type, viewId) => {
-    return falcor.get(["tig", type, "byId", viewId, 'data_overlay']).then(d => get(d, ['json', "tig", type, "byId", viewId, 'data_overlay']))
+const fetchYears = async (falcor, type, viewId) => {
+    return falcor.get(["tig", type, "byId", viewId, 'years']).then(d => get(d, ['json', "tig", type, "byId", viewId, 'years']))
+}
+const fetchData = async (falcor, type, viewId, year) => {
+    return falcor.get(["tig", type, "byId", viewId, 'byYear', year, 'data_overlay'])
+        .then(d => {
+            return Array.isArray(year) ?
+                year.reduce((acc, y) => [...acc,  ...get(d, ['json', "tig", type, "byId", viewId, 'byYear', y, 'data_overlay'])], []) :
+                get(d, ['json', "tig", type, "byId", viewId, 'byYear', year, 'data_overlay'])
+        })
 }
 
 
 const processData = (data) => {
+    console.log('pd', data)
     data = data.map(row => ({...row, 'hour': `${row.hour}:00 - ${row.hour + 1}:00`} ))
     return data
 }
-const RenderTable = (data = [], pageSize, filteredColumns) => useMemo(() =>
+const RenderTable = (data = [], pageSize, filteredColumns, year, years, setYear) => useMemo(() =>
     <Table
         data={data}
         columns={
@@ -44,19 +53,27 @@ const RenderTable = (data = [], pageSize, filteredColumns) => useMemo(() =>
                     accessor: c,
                     align: ['year', 'count'].includes(c) ? 'right' : c === 'hour' ? 'center' : 'left',
                     filter: ['year', 'var_name', 'route_name', 'mode_name', 'in_station_name', 'direction', 'loc_name', 'sector_name', 'transit_agency'].includes(c) ? 'dropdown' : null,
-                    filterThemeOptions: {size: 'tableMini'},
+                    filterDomain: c === 'year' ? years : null,
+                    customValue: c === 'year' ? year : null,
+                    onFilterChange: c === 'year' ? (p) => setYear(p) : null,
+                    filterThemeOptions: {size: 'mini'},
                     filterClassName: 'w-full text-sm z-50',
+                    maxWidth: 200,
+                    minWidth: 170,
+                    width: 170
             }))
         }
         initialPageSize={pageSize}
         pageSize={pageSize}
         striped={true}
-    />, [data, pageSize, filteredColumns])
+    />, [data, pageSize, filteredColumns, year, years])
 
 const HubBoundTravelDataTable = ({name, type}) => {
     const {falcor, falcorCache} = useFalcor();
     const {viewId} = useParams()
     const [loading, setLoading] = useState(false)
+    const [year, setYear] = useState(2013)
+    const [years, setYears] = useState([year])
     const [data, setData] = useState([])
     const [pageSize, setPageSize] = useState(50)
     const [filteredColumns, setFilteredColumns] = useState([])
@@ -67,10 +84,12 @@ const HubBoundTravelDataTable = ({name, type}) => {
 
     useEffect(async () => {
         setLoading(true)
-        let d = await fetchData(falcor, type, viewId)
+        let years = await fetchYears(falcor, type, viewId)
+        setYears(years)
+        let d = await fetchData(falcor, type, viewId, year || years)
         setLoading(false)
         setData(processData(d || []))
-    }, [viewId]);
+    }, [viewId, year, years]);
 
     return (
         <div className='w-full'>
@@ -98,7 +117,7 @@ const HubBoundTravelDataTable = ({name, type}) => {
             </div>
             {loading ? <div>Processing...</div> : ''}
             <div className='w-full overflow-x-scroll scrollbar'>
-                {RenderTable(data, pageSize, filteredColumns)}
+                {RenderTable(data, pageSize, filteredColumns, year, years, setYear)}
             </div>
         </div>
     )
