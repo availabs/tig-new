@@ -85,8 +85,7 @@ class NPMRDSLayer extends LayerContainer {
                 </div>
             ),
             show: false
-        },
-
+        }
     ]
     toolbar = []
     filters = filters

@@ -4,7 +4,7 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
-    "@availabs/ams": "^1.0.14",
+    "@availabs/ams": "^1.0.17",
     "@availabs/avl-components": "^1.1.17",
     "@headlessui/react": "^1.6.1",
     "@heroicons/react": "^1.0.6",

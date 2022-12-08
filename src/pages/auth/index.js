@@ -1,4 +1,5 @@
 import Login from "./components/login"
+import Signup from "./components/signup"
 
 const AuthConfig = {
   type: "ams-manager",
@@ -22,7 +23,8 @@ const AuthConfig = {
     // props: { redirectTo: "/" }
     },
 
-    { type: "ams-signup",
+    { type: Signup,
+      wrappers: ["ams-signup"],
     // @props.addToGroup
     // Optional prop. Defaults to false.
     // Adds user to group (must have auth level 0 in all projects) instead of creating a request that must be accepted by admin.

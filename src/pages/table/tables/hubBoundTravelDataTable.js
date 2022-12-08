@@ -84,6 +84,7 @@ const HubBoundTravelDataTable = ({name, type}) => {
 
     useEffect(async () => {
         setLoading(true)
+        setData([])
         let years = await fetchYears(falcor, type, viewId)
         setYears(years)
         let d = await fetchData(falcor, type, viewId, year || years)
