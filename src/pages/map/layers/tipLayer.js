@@ -15,14 +15,19 @@ var parse = require('wellknown');
 
 const symbology = [
     {
-        "color": "#38A800",
+        "color": "#267300",
         "value": "Bike",
         "label": "Bike"
     },
     {
-        "color": "#0070FF",
+        "color": "#C19A6B",
         "value": "Bus",
         "label": "Bus"
+    },
+    {
+        "color": "#C19A6B",
+        "value": "Transit",
+        "label": "Transit"
     },
     {
         "color": "#D79E9E",
@@ -30,17 +35,17 @@ const symbology = [
         "label": "Ferry"
     },
     {
-        "color": "#FFF",
+        "color": "#A80000",
         "value": "Highway",
         "label": "Highway"
     },
     {
-        "color": "#FF00C5",
+        "color": "#FC921F",
         "value": "ITS",
         "label": "ITS"
     },
     {
-        "color": "#B1FF00",
+        "color": "#70A800",
         "value": "Pedestrian",
         "label": "Pedestrian"
     },
@@ -50,19 +55,19 @@ const symbology = [
         "label": "Rail"
     },
     {
-        "color": "#FFAA00",
+        "color": "#004C73",
         "value": "Study",
         "label": "Study"
     },
     {
-        "color": "#00C5FF",
-        "value": "Transit",
-        "label": "Transit"
-    },
-    {
-        "color": "#000",
+        "color": "#149ECE",
         "value": "Truck",
         "label": "Truck"
+    },
+     {
+        "color": "#149ECE",
+        "value": "Freight",
+        "label": "Freight"
     }
 ]
 
@@ -211,26 +216,28 @@ class TestTipLayer extends LayerContainer {
                             <Link to={`/views/${this.vid}/table?search=${data[0][1]}`} >view in table</Link>
                         </div>
                     </div>
-                    {
-                        data.map((row, i) =>
-                            <div key={i} className="flex max-w-[350px] flex ">
-                                {
-                                    row.map((d, ii) =>
-                                        <div key={ii}
-                                             
-                                             className={`
-                                                    
-                                                    ${ii === 0 ? "w-[90px] font-medium text-xs text-right" : " flex-1 whitespace-pre-wrap text-left text-sm"}
-                                                    ${row.length > 1 && ii === 0 ? "mr-4" : ""}
-                                                    ${row.length === 1 && ii === 0 ? `border-b-2 text-lg ${i > 0 ? "mt-1" : ""}` : ""}
-                                                    `}>
-                                            {d}
-                                        </div>
-                                    )
-                                }
-                            </div>
-                        )
-                    }
+                    <div className='-mt-5'>
+                        {
+                            data.map((row, i) =>
+                                <div key={i} className="flex max-w-[350px] flex ">
+                                    {
+                                        row.map((d, ii) =>
+                                            <div key={ii}
+                                                 
+                                                 className={`
+                                                        
+                                                        ${ii === 0 ? "w-[90px] font-medium text-xs text-right" : " flex-1 whitespace-pre-wrap text-left text-sm"}
+                                                        ${row.length > 1 && ii === 0 ? "mr-4" : ""}
+                                                        ${row.length === 1 && ii === 0 ? `border-b-2 text-lg ${i > 0 ? "mt-1" : ""}` : ""}
+                                                        `}>
+                                                {d}
+                                            </div>
+                                        )
+                                    }
+                                </div>
+                            )
+                        }
+                    </div>
                 </div>
             )
         },
