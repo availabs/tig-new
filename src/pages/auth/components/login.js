@@ -4,14 +4,13 @@ import { Link } from 'react-router-dom'
 const LoginComp = ({ email, password, update, canSubmit, handleSubmit }) => {
   return (
     <div className="h-full  flex flex-col justify-center sm:px-6 lg:px-8 ">
-      
-      <div className=" sm:mx-auto sm:w-full md:w-3/4 ">
-        <div className="bg-tigGray-50 py-8 px-10 md:px-32 border-t-4 border-[#679d89]">
+      <form className="space-y-6" onSubmit={handleSubmit} >
+      <div className=" sm:mx-auto sm:w-full md:w-3/4 px-4 -mt-2">
+        <div className="bg-tigGray-50 py-8 px-10 md:px-32 border-t-4 border-[#679d89]  rounded-t">
           <div className="sm:mx-auto sm:w-full sm:max-w-md border-b border-gray-200">
             <h2 className="text-4xl font-medium text-gray-900 w-full text-center">Sign In</h2>
-            
           </div>
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          
             <div className='pt-4'>
               <label htmlFor="email" className="block text-sm  text-gray-900">
                 Email
@@ -68,20 +67,18 @@ const LoginComp = ({ email, password, update, canSubmit, handleSubmit }) => {
                   Forgot your password?
                 </Link>
               </div>
-            </div>
-
-            
-          </form>
-      </div>
-      <div>
-              <button
-                type="submit"
-                className="my-4 flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium text-gray-800 bg-[#d2d2d2] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Sign in
-              </button>
-            </div>
-    </div>
+            </div>      
+          </div>
+          <div>
+            <button
+              type="submit"
+              className="my-4 flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium text-gray-800 bg-[#d2d2d2] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Sign in
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   )
 }
