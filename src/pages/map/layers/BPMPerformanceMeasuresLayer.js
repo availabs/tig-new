@@ -10,6 +10,7 @@ import shpwrite from "../../../utils/shp-write";
 import mapboxgl from "mapbox-gl";
 import flatten from "lodash.flatten";
 import center from "@turf/center";
+import {ckmeans} from 'simple-statistics'
 
 const color_scheme = {
     "start_color": "yellow",
@@ -106,6 +107,7 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
 
     onHover = {
         layers: ["Counties"],
+        pinnable: false,
         callback: (layerId, features, lngLat) => {
             const geoid = features.reduce((a,c) => {
                 a = get(c,['properties','geoid'],'')
@@ -356,7 +358,22 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
     }
 
     updateLegendDomain() {
-        const domains = {
+
+        //console.log('updateLegendDomain', this.data)
+        if(this.data) {
+            let values = this.data.map(d => d[this.filters.column.value]).sort((a,b) => a-b)
+            this.legend.domain = ckmeans(values, Math.min(values.length, 5)
+                ).reduce((acc, d, dI) => {
+                    if(dI === 0){
+                        acc.push(d[0], d[d.length - 1])
+                    }else{
+                        acc.push(d[d.length - 1])
+                    }
+                    return acc
+                } , [])
+            //console.log('values', values)
+        }
+       /* const domains = {
             58: {
                 'vehicle_miles_traveled': [2900, 6375, 9069, 13740, 20958, 38322],
                 'vehicle_hours_traveled': [74, 223, 313, 503, 789],
@@ -367,8 +384,11 @@ class BPMPerformanceMeasuresLayer extends LayerContainer {
                 'vehicle_hours_traveled': [101, 324, 398, 646, 856, 1594],
                 'avg_speed': [15.31, 22.24, 28.49, 31.74, 34.66, 37.45]
             }
+
+
         }
         this.legend.domain = get(domains, [this.filters.dataset.value, this.filters.column.value]) || domains["58"]['vehicle_miles_traveled']
+    */
     }
 
     getColorScale(value) {
