@@ -168,7 +168,11 @@ const TigBreadcrumbs = ({children}) => {
                    <Listbox value={activeAction} onChange={(e) => {
                         let url = `/views/${viewId}/${e.path}`
                         console.log('url', url)
-                        history.push(url)
+                        if(url.includes('chart') || url.includes('metadata')) {
+                            window.location.assign(url)
+                        } else {
+                            history.push(url)
+                        }
                     }}>
                         <div className="relative">
                             <Listbox.Button className="py-1.5 px-2 relative w-full text-left cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-opacity-75 focus-visible:ring-white focus-visible:ring-offset-orange-300 focus-visible:ring-offset-2 focus-visible:border-indigo-500 sm:text-xs">
