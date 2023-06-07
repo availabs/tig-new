@@ -1,8 +1,7 @@
 import React, {Fragment}  from "react"
-import { withAuth, TopNav, /*useTheme*/ } from 'components/avl-components/src'
+// import { TopNav } from 'components/avl-components/src'
 import { Listbox, Transition } from '@headlessui/react'
-import { Link, useHistory } from 'react-router-dom'
-// import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 const TigDropDown = ({buttonText, items}) => {
     return (
@@ -107,7 +106,7 @@ const TigUserMenu = ({user}) => {
             {adminMenu}
             {contributorMenu}
             {librarianMenu}
-            <a href={'/auth/logout'} className='p-4 h-full hover:bg-tigGray-50 hover:text-yellow-500 hover:cursor-pointer bg-tigGray-200 text-[13px] font-light md:mr-2'>Logout</a>
+            <a href={'/logout'} className='p-4 h-full hover:bg-tigGray-50 hover:text-yellow-500 hover:cursor-pointer bg-tigGray-200 text-[13px] font-light md:mr-2'>Logout</a>
         </div> 
     )
 }

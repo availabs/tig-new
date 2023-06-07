@@ -69,38 +69,7 @@ const fetch = async () => {
         let res = await db.query(sql);
         res = res.rows || [];
 
-        //console.log(res[0].value)
-
-        // let tableName = 'datatable_' + s.toLowerCase().split(' ').join('_');
-        // console.log('creating table', tableName)
-        // let createSql = `
-        //     CREATE TABLE IF NOT EXISTS ${schema}.${tableName}
-        //     (
-        //         ${res.map(r => `"${r.view_id}" json`).join(', ')}
-        //     )
-        // `;
-        // console.log('create table', createSql);
-        // await db.query(createSql);
-
-        // let insertSql = (viewId, data) => `
-        //     INSERT INTO ${schema}.${tableName}("${viewId}")
-        //     VALUES (${`'${JSON.stringify(data)}'::json`})
-        // `;
-
-        // let updateSql = (viewId, data) => `
-        //     UPDATE ${schema}.${tableName}
-        //     SET "${viewId}" = ${`'${JSON.stringify(data)}'::json`}
-        // `;
-
-        // return res.reduce((acc, r, i) => {
-        //     return acc.then(() => {
-        //         if (i === 0) {
-        //             return db.query(insertSql(r.view_id, r.data))
-        //         } else {
-        //             return db.query(updateSql(r.view_id, r.data))
-        //         }
-        //     })
-        // }, Promise.resolve())
+        
     }), Promise.resolve())
 }
 
